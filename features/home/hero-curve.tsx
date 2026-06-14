@@ -1,9 +1,7 @@
 export default function HeroCurve() {
   return (
     <svg
-      width="700"
-      height="620"
-      className="absolute"
+      className="pointer-events-none absolute left-0 top-0 h-auto w-screen max-w-none sm:w-[80vw] lg:w-[50vw]"
       viewBox="0 0 900 820"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
