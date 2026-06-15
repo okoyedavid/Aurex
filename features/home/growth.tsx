@@ -73,7 +73,7 @@ export default function Growth() {
           transaction organized from one secure platform.
         </p>
       </div>
-      <section className="bg-muted relative z-2 max-w-7xl mx-auto px-6 py-20">
+      <section className="relative z-2 max-w-7xl mx-auto px-6 py-20">
         <div className="mx-auto max-w-6xl">
           <motion.div
             variants={cardsContainer}

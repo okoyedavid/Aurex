@@ -15,8 +15,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Aurex",
-  description: "Product Growth Solution in Single Platform.",
+  title: {
+    default: "Aurex | Business Payments Platform",
+    template: "%s | Aurex",
+  },
+  description:
+    "Manage business payments, invoices, settlements, reconciliation, and cash flow in one secure workspace.",
 };
 
 export default function RootLayout({
@@ -29,7 +33,7 @@ export default function RootLayout({
       lang="en"
       className={`${manrope.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="flex min-h-full min-w-0 flex-col overflow-x-hidden">
         <NavBar />
         {children}
         <Footer />

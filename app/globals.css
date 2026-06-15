@@ -6,6 +6,8 @@
   --background: 0 0% 100%;
   --foreground: 222 47% 11%;
 
+  --soft-section: #f5f8ff;
+
   --card: 0 0% 100%;
   --card-foreground: 222 47% 11%;
 
@@ -41,6 +43,7 @@
   --card: 222 47% 13%;
   --card-foreground: 210 40% 98%;
 
+  --soft-section: #0b0924; /* #0F172A */
   --popover: 222 47% 13%;
   --popover-foreground: 210 40% 98%;
 
@@ -67,6 +70,8 @@
 @theme inline {
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
+
+  --color-soft: var(--soft-section);
 
   --color-card: hsl(var(--card));
   --color-card-foreground: hsl(var(--card-foreground));

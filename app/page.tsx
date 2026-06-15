@@ -8,7 +8,7 @@ import Testimonials from "@/features/home/testimonial";
 
 export default function Home() {
   return (
-    <section>
+    <section className="bg-background text-foreground">
       <Hero />
       <Marquee />
       <Process />
