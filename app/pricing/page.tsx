@@ -19,7 +19,7 @@ const plans = [
     description: "For small teams organizing their first payment workflows.",
     features: ["Payment overview", "Invoice tracking", "Basic reconciliation", "Up to 3 team members"],
     action: "Start Free",
-    href: "/signup",
+    href: "/register",
   },
   {
     name: "Growth",
@@ -27,7 +27,7 @@ const plans = [
     description: "For growing teams that need stronger controls and visibility.",
     features: ["Everything in Starter", "Settlement management", "Advanced reconciliation", "Audit logs", "Up to 15 team members"],
     action: "Choose Growth",
-    href: "/signup",
+    href: "/register",
     featured: true,
   },
   {

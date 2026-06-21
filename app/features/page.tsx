@@ -36,7 +36,7 @@ export default function FeaturesPage() {
         eyebrow="Platform features"
         title="One system for the work behind every payment."
         description="Aurex gives finance and operations teams the visibility and controls they need to move from fragmented processes to a dependable payment workflow."
-        primaryAction={{ label: "Start Free", href: "/signup" }}
+        primaryAction={{ label: "Start Free", href: "/register" }}
         secondaryAction={{ label: "View Pricing", href: "/pricing" }}
       />
 

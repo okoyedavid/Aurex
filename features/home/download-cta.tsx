@@ -68,7 +68,7 @@ export default function SignupCta() {
 
         <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
           <Link
-            href="/signup"
+            href="/register"
             className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-primary px-7 text-sm font-semibold text-primary-foreground shadow-sm transition hover:opacity-90"
           >
             Start Free Trial

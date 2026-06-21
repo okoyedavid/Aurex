@@ -66,10 +66,10 @@ export default function NavBar() {
 
         <div className="hidden items-center gap-1 lg:flex">
           <Button asChild size="lg" variant="ghost">
-            <Link href="/signin">Sign In</Link>
+            <Link href="/login">Sign In</Link>
           </Button>
           <Button asChild size="lg" className="rounded-full px-5">
-            <Link href="/signup">Start Free</Link>
+            <Link href="/register">Start Free</Link>
           </Button>
         </div>
 
@@ -108,13 +108,13 @@ export default function NavBar() {
           </ul>
           <div className="mx-auto mt-4 grid max-w-6xl grid-cols-2 gap-3">
             <Button asChild variant="outline" className="h-11">
-              <Link href="/signin" onClick={() => setIsOpen(false)}>
+              <Link href="/login" onClick={() => setIsOpen(false)}>
                 Sign In
               </Link>
             </Button>
             <Button asChild className="h-11">
               <Link
-                href="/signup"
+                href="/register"
                 className="text-white"
                 onClick={() => setIsOpen(false)}
               >

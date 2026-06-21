@@ -5,11 +5,11 @@ import { AuthShell } from "@/components/public/auth-shell";
 import { LoginForm } from "@/features/auth/login-form";
 
 export const metadata: Metadata = {
-  title: "Sign In",
+  title: "Login",
   description: "Sign in to your Aurex workspace.",
 };
 
-export default function SignInPage() {
+export default function LoginPage() {
   return (
     <AuthShell
       eyebrow="Welcome back"

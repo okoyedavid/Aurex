@@ -16,7 +16,7 @@ export function PublicCta({
   title,
   description,
   actionLabel = "Start Free",
-  actionHref = "/signup",
+  actionHref = "/register",
 }: PublicCtaProps) {
   return (
     <section className="bg-background px-6 py-20">

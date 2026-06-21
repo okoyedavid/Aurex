@@ -3,6 +3,8 @@ import { Manrope, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import NavBar from "@/components/navbar";
 import Footer from "@/components/footer";
+import { QueryProvider } from "@/components/query-provider";
+import { Toaster } from "@/components/ui/sonner";
 
 const manrope = Manrope({
   variable: "--font-manrope",
@@ -34,9 +36,12 @@ export default function RootLayout({
       className={`${manrope.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full min-w-0 flex-col overflow-x-hidden">
-        <NavBar />
-        {children}
-        <Footer />
+        <QueryProvider>
+          <NavBar />
+          {children}
+          <Footer />
+          <Toaster />
+        </QueryProvider>
       </body>
     </html>
   );

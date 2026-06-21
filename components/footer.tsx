@@ -15,7 +15,7 @@ const companyLinks = [
 const resourceLinks = [
   { label: "Security", href: "/security" },
   { label: "Contact", href: "/contact" },
-  { label: "Sign In", href: "/signin" },
+  { label: "Sign In", href: "/login" },
 ];
 
 export default function Footer() {

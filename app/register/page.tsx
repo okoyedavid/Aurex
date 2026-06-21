@@ -5,11 +5,11 @@ import { AuthShell } from "@/components/public/auth-shell";
 import { RegisterForm } from "@/features/auth/register-form";
 
 export const metadata: Metadata = {
-  title: "Create Account",
+  title: "Register",
   description: "Create an Aurex business payments account.",
 };
 
-export default function SignUpPage() {
+export default function RegisterPage() {
   return (
     <AuthShell
       eyebrow="Get started"
