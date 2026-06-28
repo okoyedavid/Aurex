@@ -29,7 +29,8 @@ export default function NavBar() {
     return () => window.removeEventListener("scroll", updateNavbar);
   }, []);
 
-  if (pathname.startsWith("/dashboard")) return null;
+  if (pathname.startsWith("/dashboard") || pathname.startsWith("/business"))
+    return null;
 
   return (
     <header

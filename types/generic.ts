@@ -5,28 +5,22 @@ export type UserStatus = "active" | "inactive";
 export type BusinessStatus = "active" | "suspended";
 export type BusinessMemberStatus = "active" | "suspended" | "removed";
 export type BusinessInviteStatus =
-  | "pending"
-  | "accepted"
-  | "revoked"
-  | "expired";
+  "pending" | "accepted" | "revoked" | "expired";
 export type RoleType = "system" | "custom";
 export type VerificationPurpose =
-  | "verify_email"
-  | "reset_password"
-  | "change_email";
+  "verify_email" | "reset_password" | "change_email";
 export type NotificationSeverity = "info" | "warning" | "error" | "critical";
 export type AuditEventCategory =
-  | "authentication"
-  | "account"
-  | "session"
-  | "security";
+  "authentication" | "account" | "session" | "security";
 export type AuditEventOutcome = "success" | "failure" | "blocked";
 
 export type Permission =
   | "business:update"
   | "members:invite"
+  | "members:view"
   | "members:remove"
   | "members:update_role"
+  | "members:update_status"
   | "payments:create"
   | "payments:view"
   | "payments:view_own"
@@ -38,7 +32,17 @@ export type Permission =
   | "invoices:create"
   | "invoices:view"
   | "reports:view"
-  | "audit_logs:view";
+  | "audit_logs:view"
+  | "roles:view"
+  | "employee_lists:create"
+  | "employee_lists:view"
+  | "employee_lists:update"
+  | "employee_lists:archive"
+  | "employees:create"
+  | "employees:view"
+  | "employees:update"
+  | "employees:archive"
+  | "employees:verify";
 
 export type RequestMetadata = {
   requestId: string | null;
@@ -62,6 +66,9 @@ export type User = {
   email: string;
   emailVerifiedAt: ISODateString | null;
   status: UserStatus;
+  preferences: {
+    twoFactorEnabled: boolean;
+  };
   createdAt: ISODateString;
   updatedAt: ISODateString;
 };
@@ -70,6 +77,7 @@ export type Business = {
   id: Id;
   name: string;
   ownerUserId: Id;
+  profile_img?: string | null;
   industry: string;
   defaultCurrency: string;
   status: BusinessStatus;
@@ -292,6 +300,54 @@ export type ApiErrorResponse = {
   code?: string;
   errors?: unknown;
   requestId?: string | null;
+  details?: {
+    formErrors?: string[];
+    fieldErrors?: Record<string, string[] | undefined>;
+  };
+  stack?: string;
+};
+
+export type ForgotPasswordBody = {
+  email: string;
+};
+
+export type ForgotPasswordResponse = {
+  message: "Password reset code sent successfully";
+};
+
+export type ResetPasswordBody = {
+  email: string;
+  otp: string;
+  newPassword: string;
+};
+
+export type ResetPasswordResponse = {
+  message: "Password reset successfully";
+};
+
+export type UpdateAvatarBody = {
+  avatar: string;
+};
+
+export type UpdateAvatarResponse = {
+  message: "Avatar updated successfully";
+  user: User;
+};
+
+export type DeleteAvatarResponse = {
+  message: "Avatar deleted successfully";
+  user: User;
+};
+
+export type UpdatePreferencesBody = {
+  preferences: {
+    twoFactorEnabled?: boolean;
+  };
+};
+
+export type UpdatePreferencesResponse = {
+  message: "Preferences updated successfully";
+  user: User;
 };
 
 export type ApiSuccessResponse<T> = {

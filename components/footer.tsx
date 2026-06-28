@@ -21,7 +21,8 @@ const resourceLinks = [
 export default function Footer() {
   const pathname = usePathname();
 
-  if (pathname.startsWith("/dashboard")) return null;
+  if (pathname.startsWith("/dashboard") || pathname.startsWith("/business"))
+    return null;
 
   return (
     <footer className="bg-background px-6 py-16">
@@ -32,7 +33,8 @@ export default function Footer() {
               Aurex
             </Link>
             <p className="mt-4 max-w-xs text-sm leading-6 text-muted-foreground">
-              Secure business payments, invoice tracking, and cash-flow management for modern teams.
+              Secure business payments, invoice tracking, and cash-flow
+              management for modern teams.
             </p>
           </div>
 
@@ -40,7 +42,9 @@ export default function Footer() {
           <FooterLinks title="Resources" links={resourceLinks} />
 
           <div>
-            <h2 className="text-sm font-bold text-foreground">Join Our Newsletter</h2>
+            <h2 className="text-sm font-bold text-foreground">
+              Join Our Newsletter
+            </h2>
             <form className="mt-5 flex max-w-md gap-2">
               <Input
                 type="email"
@@ -60,10 +64,16 @@ export default function Footer() {
         </div>
 
         <div className="mt-14 flex flex-col gap-4 border-t border-border pt-8 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-          <p>Copyright © Aurex {new Date().getFullYear()}. All rights reserved.</p>
+          <p>
+            Copyright © Aurex {new Date().getFullYear()}. All rights reserved.
+          </p>
           <div className="flex gap-5">
-            <Link href="/privacy" className="transition hover:text-primary">Privacy</Link>
-            <Link href="/terms" className="transition hover:text-primary">Terms</Link>
+            <Link href="/privacy" className="transition hover:text-primary">
+              Privacy
+            </Link>
+            <Link href="/terms" className="transition hover:text-primary">
+              Terms
+            </Link>
           </div>
         </div>
       </div>

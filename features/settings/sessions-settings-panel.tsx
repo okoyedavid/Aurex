@@ -7,7 +7,6 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { setApiAccessToken } from "@/lib/api";
 import { SessionApiError } from "@/lib/session-api";
 import {
   useMySessionsQuery,
@@ -66,7 +65,6 @@ function getDeviceIcon(session: SessionListItem) {
 }
 
 function clearAuthQueries(queryClient: ReturnType<typeof useQueryClient>) {
-  setApiAccessToken(undefined);
   queryClient.removeQueries({
     predicate: (query) => {
       const [scope] = query.queryKey;

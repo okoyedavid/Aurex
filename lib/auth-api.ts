@@ -18,11 +18,7 @@ type AuthRequestConfig = AxiosRequestConfig & {
   _skipAuthRefresh: boolean;
 };
 
-const authBasePath = process.env.NEXT_PUBLIC_BACKEND_URL?.replace(/\/+$/, "").endsWith(
-  "/api",
-)
-  ? "/auth"
-  : "/api/auth";
+const authBasePath = "/auth";
 
 function toAuthRouteError(error: unknown): AuthRouteError {
   if (error instanceof AxiosError && error.response) {

@@ -4,16 +4,17 @@ import {
   BellRing,
   Building2,
   KeyRound,
+  Mail,
   MonitorSmartphone,
   UserRound,
   UsersRound,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
-const settingsNavigation = [
+const personalSettingsNavigation = [
   { label: "Profile", id: "profile", href: "#profile", icon: UserRound },
-  { label: "Business", id: "business", href: "#business", icon: Building2 },
-  { label: "Security", id: "security", href: "#security", icon: KeyRound },
+  { label: "Email", id: "email", href: "#email", icon: Mail },
+  { label: "Password", id: "password", href: "#password", icon: KeyRound },
   {
     label: "Sessions",
     id: "sessions",
@@ -26,10 +27,24 @@ const settingsNavigation = [
     href: "#preferences",
     icon: BellRing,
   },
+];
+const businessSettingsNavigation = [
+  { label: "Business", id: "business", href: "#business", icon: Building2 },
   { label: "Team access", id: "team", href: "#team", icon: UsersRound },
 ];
-export default function SettingsNavigation() {
-  const [activeSection, setActiveSection] = useState("profile");
+
+export default function SettingsNavigation({
+  scope,
+}: {
+  scope: "personal" | "business";
+}) {
+  const settingsNavigation =
+    scope === "business"
+      ? businessSettingsNavigation
+      : personalSettingsNavigation;
+  const [activeSection, setActiveSection] = useState(
+    settingsNavigation[0].id,
+  );
 
   useEffect(() => {
     const sections = settingsNavigation
@@ -58,11 +73,10 @@ export default function SettingsNavigation() {
     sections.forEach((section) => observer.observe(section));
 
     return () => observer.disconnect();
-  }, []);
+  }, [settingsNavigation]);
 
   return (
-    <div className="mt-7 grid min-w-0 gap-6 xl:grid-cols-[220px_minmax(0,1fr)]">
-      <nav
+    <nav
         aria-label="Settings sections"
         className="flex gap-2 overflow-x-auto pb-2 xl:sticky xl:top-24 xl:block xl:self-start xl:overflow-visible xl:pb-0"
       >
@@ -88,7 +102,6 @@ export default function SettingsNavigation() {
             </a>
           );
         })}
-      </nav>
-    </div>
+    </nav>
   );
 }

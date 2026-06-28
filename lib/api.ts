@@ -1,7 +1,6 @@
 import axios, {
   AxiosError,
   type AxiosRequestConfig,
-  type AxiosResponse,
   type InternalAxiosRequestConfig,
 } from "axios";
 
@@ -11,11 +10,6 @@ const REFRESH_BLOCK_MS = 1000;
 type RefreshableRequestConfig = InternalAxiosRequestConfig & {
   _hasRetriedAfterRefresh?: boolean;
   _skipAuthRefresh?: boolean;
-};
-
-type RefreshResponse = {
-  accessToken?: string;
-  token?: string;
 };
 
 export const api = axios.create({
@@ -28,20 +22,14 @@ const refreshClient = axios.create({
   withCredentials: true,
 });
 
-let refreshPromise: Promise<AxiosResponse<RefreshResponse>> | null = null;
+const refreshPath = "/auth/refresh";
+
+let refreshPromise: Promise<void> | null = null;
 let refreshBlockedUntil = 0;
 
 function isRefreshRequest(config?: AxiosRequestConfig) {
-  return config?.url?.replace(/^\/+/, "") === "refresh";
-}
-
-function setAccessToken(token?: string) {
-  if (!token) {
-    delete api.defaults.headers.common.Authorization;
-    return;
-  }
-
-  api.defaults.headers.common.Authorization = `Bearer ${token}`;
+  const normalizedUrl = config?.url?.replace(/^\/+/, "");
+  return normalizedUrl === "auth/refresh";
 }
 
 async function refreshSession() {
@@ -55,14 +43,13 @@ async function refreshSession() {
   }
 
   refreshBlockedUntil = now + REFRESH_BLOCK_MS;
-  refreshPromise = (async () => {
+  refreshPromise = (async (): Promise<void> => {
     let lastError: unknown;
 
     for (let attempt = 1; attempt <= MAX_REFRESH_ATTEMPTS; attempt += 1) {
       try {
-        const response = await refreshClient.post<RefreshResponse>("/refresh");
-        setAccessToken(response.data.accessToken ?? response.data.token);
-        return response;
+        await refreshClient.post(refreshPath);
+        return;
       } catch (error) {
         lastError = error;
       }
@@ -101,7 +88,3 @@ api.interceptors.response.use(
     return api(config);
   },
 );
-
-export function setApiAccessToken(token?: string) {
-  setAccessToken(token);
-}

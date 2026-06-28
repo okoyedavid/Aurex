@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 
-import { DashboardContent } from "@/features/dashboard/dashboard-content";
+import { PersonalDashboard } from "@/features/dashboard/personal-dashboard";
 
 export const metadata: Metadata = {
   title: "Dashboard",
-  description: "Aurex business payments dashboard.",
+  description: "Aurex personal dashboard.",
 };
 
 export default function DashboardPage() {
-  return <DashboardContent />;
+  return <PersonalDashboard />;
 }

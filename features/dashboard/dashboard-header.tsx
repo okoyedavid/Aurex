@@ -1,19 +1,40 @@
 "use client";
 
 import { Bell, Menu, PanelLeftClose, PanelLeftOpen, Search } from "lucide-react";
+import Image from "next/image";
 
 import { Input } from "@/components/ui/input";
-import { AurexMark } from "@/features/dashboard/aurex-mark";
+import { useMeQuery } from "@/features/auth/use-me-query";
+
+function getInitials(name?: string | null, email?: string | null) {
+  const source = name?.trim() || email?.trim() || "User";
+  const parts = source.split(/\s+/).filter(Boolean);
+
+  if (parts.length === 1) {
+    return parts[0].slice(0, 2).toUpperCase();
+  }
+
+  return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+}
 
 export function DashboardHeader({
+  mode,
+  businessName,
   sidebarCollapsed,
   onMenuOpen,
   onSidebarToggle,
 }: {
+  mode: "personal" | "business";
+  businessName?: string;
   sidebarCollapsed: boolean;
   onMenuOpen: () => void;
   onSidebarToggle: () => void;
 }) {
+  const { data: user } = useMeQuery();
+  const displayName = user?.name || user?.username || "Account user";
+  const displayDetail = user?.email || "Signed in";
+  const initials = getInitials(user?.name ?? user?.username, user?.email);
+
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-background/95 px-4 py-3 backdrop-blur sm:px-6 lg:px-8">
       <div className="flex items-center justify-between gap-3">
@@ -27,8 +48,17 @@ export function DashboardHeader({
             <Menu className="h-4 w-4" />
           </button>
           <div className="hidden items-center gap-2 sm:flex">
-            <AurexMark />
-            <span className="font-bold">Aurex</span>
+            <Image
+              src="/icon.png"
+              alt=""
+              width={36}
+              height={36}
+              className="h-9 w-9 rounded-md object-cover"
+              priority
+            />
+            <span className="font-bold">
+              {mode === "business" ? businessName ?? "Business" : "Aurex"}
+            </span>
           </div>
         </div>
 
@@ -50,7 +80,11 @@ export function DashboardHeader({
             <span className="sr-only">Search dashboard</span>
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Search payments, invoices, settlements"
+              placeholder={
+                mode === "business"
+                  ? "Search payments, invoices, members"
+                  : "Search businesses, invites, activity"
+              }
               className="h-10 rounded-md bg-muted pl-9"
             />
           </label>
@@ -73,12 +107,24 @@ export function DashboardHeader({
             <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-primary ring-2 ring-background" />
           </button>
           <div className="flex items-center gap-3 border-l border-border pl-2 sm:pl-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
-              AO
-            </div>
+            {user?.avatar ? (
+              <span
+                aria-hidden="true"
+                className="h-9 w-9 rounded-full bg-cover bg-center"
+                style={{ backgroundImage: `url("${user.avatar}")` }}
+              />
+            ) : (
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
+                {initials}
+              </div>
+            )}
             <div className="hidden sm:block">
-              <p className="text-sm font-semibold">Amara Okoye</p>
-              <p className="text-xs text-muted-foreground">Finance admin</p>
+              <p className="max-w-36 truncate text-sm font-semibold">
+                {displayName}
+              </p>
+              <p className="max-w-40 truncate text-xs text-muted-foreground">
+                {displayDetail}
+              </p>
             </div>
           </div>
         </div>

@@ -34,6 +34,7 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${manrope.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
       <body className="flex min-h-full min-w-0 flex-col overflow-x-hidden">
         <QueryProvider>

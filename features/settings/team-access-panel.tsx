@@ -1,22 +1,23 @@
 "use client";
 
 import { UserPlus, UsersRound } from "lucide-react";
+import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
-import { useSettings } from "@/features/settings/hooks";
+import { useBusinessAccess } from "@/features/business/business-access-context";
+import { useBusinessMembersQuery } from "@/features/business/business-member-hooks";
+import {
+  MemberAvatar,
+  MemberStatusBadge,
+} from "@/features/business/business-member-ui";
 import { SettingsSection } from "@/features/settings/settings-section";
-import type { UserRole } from "@/features/settings/types";
-import { cn } from "@/lib/utils";
-
-const roleStyles: Record<UserRole, string> = {
-  Owner: "bg-primary/10 text-primary",
-  Admin: "bg-secondary text-secondary-foreground",
-  Finance: "bg-accent text-accent-foreground",
-  Viewer: "bg-muted text-muted-foreground",
-};
 
 export function TeamAccessPanel() {
-  const { data } = useSettings();
+  const { business, effectivePermissions } = useBusinessAccess();
+  const canInvite = canInviteBusinessMembers(effectivePermissions);
+  const canView = effectivePermissions.has("members:view");
+  const membersQuery = useBusinessMembersQuery(business.id, 1, 20, canView);
+  const members = membersQuery.data?.items ?? [];
 
   return (
     <SettingsSection
@@ -28,54 +29,71 @@ export function TeamAccessPanel() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-sm font-bold text-foreground">
-            {data.teamMembers.length} workspace members
+            {membersQuery.data?.pagination.total ?? 0} workspace members
           </p>
           <p className="mt-1 text-xs leading-5 text-muted-foreground">
-            Full invitations, role changes, and permission controls will be
-            connected to your team-management backend later.
+            Review the people who can access this business and their roles.
           </p>
         </div>
-        <Button type="button" className="h-10 shrink-0 rounded-md">
-          <UserPlus className="h-4 w-4" />
-          Invite member
-        </Button>
+        {canInvite ? (
+          <Button type="button" className="h-10 shrink-0 rounded-md">
+            <UserPlus className="h-4 w-4" />
+            Invite member
+          </Button>
+        ) : null}
       </div>
 
-      <div className="mt-6 divide-y divide-border border-y border-border">
-        {data.teamMembers.map((member) => (
-          <article
-            key={member.id}
-            className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between"
-          >
-            <div className="flex min-w-0 items-center gap-3">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
-                {member.initials}
-              </span>
-              <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-foreground">
-                  {member.name}
-                </p>
-                <p className="mt-1 truncate text-xs text-muted-foreground">
-                  {member.email}
-                </p>
+      {!canView ? (
+        <p className="mt-6 rounded-md border border-border bg-muted/40 p-4 text-sm text-muted-foreground">
+          You do not have permission to view business members.
+        </p>
+      ) : membersQuery.isLoading ? (
+        <div className="mt-6 h-24 animate-pulse rounded-md bg-muted" />
+      ) : membersQuery.isError ? (
+        <p className="mt-6 rounded-md border border-destructive/20 bg-destructive/5 p-4 text-sm text-destructive">
+          Unable to load business members.
+        </p>
+      ) : members.length === 0 ? (
+        <p className="mt-6 rounded-md border border-border bg-muted/40 p-4 text-sm text-muted-foreground">
+          No business members were returned.
+        </p>
+      ) : (
+        <div className="mt-6 divide-y divide-border border-y border-border">
+          {members.map((member) => (
+            <article
+              key={member.id}
+              className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between"
+            >
+              <div className="flex min-w-0 items-center gap-3">
+                <MemberAvatar user={member.userId} />
+                <div className="min-w-0">
+                  <Link
+                    href={`/business/${business.id}/members/${member.id}`}
+                    className="truncate text-sm font-semibold text-primary hover:underline"
+                  >
+                    {member.userId.name}
+                  </Link>
+                  <p className="mt-1 truncate text-xs text-muted-foreground">
+                    {member.userId.email}
+                  </p>
+                </div>
               </div>
-            </div>
-            <div className="flex items-center gap-2 pl-[52px] sm:pl-0">
-              <span
-                className={cn(
-                  "rounded-full px-2.5 py-1 text-xs font-medium",
-                  roleStyles[member.role],
-                )}
-              >
-                {member.role}
-              </span>
-              <span className="text-xs text-muted-foreground">
-                {member.status}
-              </span>
-            </div>
-          </article>
-        ))}
-      </div>
+              <div className="flex items-center gap-2 pl-[52px] sm:pl-0">
+                <span className="rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground">
+                  {member.roleId.name}
+                </span>
+                <MemberStatusBadge status={member.status} />
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
     </SettingsSection>
   );
+}
+
+export function canInviteBusinessMembers(
+  permissions: ReadonlySet<import("@/types/generic").Permission>,
+) {
+  return permissions.has("members:invite");
 }

@@ -1,9 +1,8 @@
-import { BusinessSettingsForm } from "@/features/settings/business-settings-form";
+import { EmailSettingsPanel } from "@/features/settings/email-settings-panel";
 import { PreferencesSettingsPanel } from "@/features/settings/preferences-settings-panel";
 import { ProfileSettingsForm } from "@/features/settings/profile-settings-form";
 import { SecuritySettingsPanel } from "@/features/settings/security-settings-panel";
 import { SessionsSettingsPanel } from "@/features/settings/sessions-settings-panel";
-import { TeamAccessPanel } from "@/features/settings/team-access-panel";
 import SettingsNavigation from "./settings-navigation";
 
 export function SettingsPageContent() {
@@ -18,21 +17,20 @@ export function SettingsPageContent() {
             Settings
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-            Manage your personal account, business profile, security controls,
-            active sessions, notifications, and team access.
+            Manage your personal account, security controls, active sessions,
+            and preferences.
           </p>
         </div>
 
         <div className="mt-7 grid min-w-0 gap-6 xl:grid-cols-[220px_minmax(0,1fr)]">
-          <SettingsNavigation />
+          <SettingsNavigation scope="personal" />
 
           <div className="min-w-0 space-y-6">
             <ProfileSettingsForm />
-            <BusinessSettingsForm />
+            <EmailSettingsPanel />
             <SecuritySettingsPanel />
             <SessionsSettingsPanel />
             <PreferencesSettingsPanel />
-            <TeamAccessPanel />
           </div>
         </div>
       </div>

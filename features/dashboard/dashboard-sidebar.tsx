@@ -1,31 +1,39 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
+import { ArrowLeft, LifeBuoy, X } from "lucide-react";
 import { usePathname } from "next/navigation";
-import {
-  LifeBuoy,
-  Settings,
-  ShieldCheck,
-  X,
-} from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { AurexMark } from "@/features/dashboard/aurex-mark";
-import { dashboardNavigation } from "@/features/dashboard/data";
+import {
+  type BusinessNavigationItem,
+  isNavigationItemActive,
+  personalNavigation,
+  personalSecondaryActions,
+} from "@/features/dashboard/data";
 
 type DashboardSidebarProps = {
   collapsed: boolean;
   mobileOpen: boolean;
+  mode: "personal" | "business";
+  businessId?: string;
+  businessName?: string;
+  businessNavigation?: BusinessNavigationItem[];
   onMobileClose: () => void;
 };
 
 export function DashboardSidebar({
   collapsed,
   mobileOpen,
+  mode,
+  businessId,
+  businessName,
+  businessNavigation,
   onMobileClose,
 }: DashboardSidebarProps) {
   const pathname = usePathname();
+  const navigation = mode === "business" ? businessNavigation ?? [] : personalNavigation;
 
   return (
     <>
@@ -52,16 +60,29 @@ export function DashboardSidebar({
       >
         <div className="flex items-center justify-between gap-2 px-1">
           <Link
-            href="/"
+            href={
+              mode === "business" ? `/business/${businessId}` : "/dashboard"
+            }
             className="flex min-w-0 items-center gap-3"
-            aria-label="Aurex home"
+            aria-label="Aurex dashboard"
             onClick={onMobileClose}
           >
-            <AurexMark />
+            <Image
+              src="/icon.png"
+              alt=""
+              width={40}
+              height={40}
+              className="h-10 w-10 shrink-0 rounded-md object-cover"
+              priority
+            />
             <div className={cn("min-w-0", collapsed && "lg:hidden")}>
-              <p className="text-lg font-bold tracking-tight">Aurex</p>
+              <p className="truncate text-lg font-bold tracking-tight">
+                {mode === "business" ? (businessName ?? "Business") : "Aurex"}
+              </p>
               <p className="truncate text-xs text-muted-foreground">
-                Business payments
+                {mode === "business"
+                  ? "Business workspace"
+                  : "Personal dashboard"}
               </p>
             </div>
           </Link>
@@ -75,58 +96,26 @@ export function DashboardSidebar({
           </button>
         </div>
 
+        {mode === "business" ? (
+          <Link
+            href="/dashboard"
+            onClick={onMobileClose}
+            className={cn(
+              "mt-5 flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground",
+              collapsed && "lg:justify-center lg:px-0",
+            )}
+            title={collapsed ? "Dashboard" : undefined}
+          >
+            <ArrowLeft className="h-4 w-4 shrink-0" />
+            <span className={cn(collapsed && "lg:hidden")}>Dashboard</span>
+          </Link>
+        ) : null}
+
         <nav className="mt-8 space-y-1" aria-label="Dashboard navigation">
-          {dashboardNavigation.map((item) => {
+          {navigation.map((item) => {
             const Icon = item.icon;
-            const isActive = item.href ? pathname === item.href : false;
-            const itemClassName = cn(
-              "flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-left text-sm font-medium transition",
-              collapsed && "lg:justify-center lg:gap-0 lg:px-0",
-              isActive
-                ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:bg-muted hover:text-foreground",
-            );
-            const content = (
-              <>
-                <Icon className="h-4 w-4 shrink-0" />
-                <span className={cn(collapsed && "lg:hidden")}>{item.name}</span>
-              </>
-            );
+            const isActive = isNavigationItemActive(pathname, item);
 
-            return item.href ? (
-              <Link
-                key={item.name}
-                href={item.href}
-                title={collapsed ? item.name : undefined}
-                onClick={onMobileClose}
-                className={itemClassName}
-              >
-                {content}
-              </Link>
-            ) : (
-              <button
-                key={item.name}
-                type="button"
-                title={collapsed ? item.name : undefined}
-                className={itemClassName}
-              >
-                {content}
-              </button>
-            );
-          })}
-        </nav>
-
-        <div className="mt-8 border-t border-border pt-5">
-          {[
-            {
-              name: "Settings",
-              icon: Settings,
-              href: "/dashboard/settings",
-            },
-            { name: "Help center", icon: LifeBuoy, href: "/contact" },
-          ].map((item) => {
-            const Icon = item.icon;
-            const isActive = pathname.startsWith(item.href);
             return (
               <Link
                 key={item.name}
@@ -134,56 +123,59 @@ export function DashboardSidebar({
                 title={collapsed ? item.name : undefined}
                 onClick={onMobileClose}
                 className={cn(
-                  "flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground",
+                  "flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-left text-sm font-medium transition",
                   collapsed && "lg:justify-center lg:gap-0 lg:px-0",
-                  isActive && "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground",
+                  isActive
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
                 )}
               >
                 <Icon className="h-4 w-4 shrink-0" />
-                <span className={cn(collapsed && "lg:hidden")}>{item.name}</span>
+                <span className={cn(collapsed && "lg:hidden")}>
+                  {item.name}
+                </span>
               </Link>
             );
           })}
-        </div>
+        </nav>
 
-        <div
-          className={cn(
-            "mt-auto bg-secondary text-secondary-foreground",
-            collapsed
-              ? "p-4 lg:flex lg:justify-center lg:p-3"
-              : "p-4",
-          )}
-        >
-          {collapsed ? (
-            <>
-              <ShieldCheck className="hidden h-5 w-5 text-primary lg:block" />
-              <div className="lg:hidden">
-                <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary/10 text-primary">
-                  <ShieldCheck className="h-5 w-5" />
-                </div>
-                <p className="mt-4 text-sm font-bold">Security center</p>
-                <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                  Review access, sessions, and recent account activity.
-                </p>
-              </div>
-            </>
-          ) : (
-            <div>
-              <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary/10 text-primary">
-                <ShieldCheck className="h-5 w-5" />
-              </div>
-              <p className="mt-4 text-sm font-bold">Security center</p>
-              <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                Review access, sessions, and recent account activity.
-              </p>
-              <Button
-                variant="outline"
-                className="mt-4 h-9 w-full rounded-md bg-background"
-              >
-                Review security
-              </Button>
-            </div>
-          )}
+        {mode === "personal" ? (
+          <div className="mt-8 border-t border-border pt-5">
+            {personalSecondaryActions.map((item) => {
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  title={collapsed ? item.name : undefined}
+                  onClick={onMobileClose}
+                  className={cn(
+                    "flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground",
+                    collapsed && "lg:justify-center lg:gap-0 lg:px-0",
+                  )}
+                >
+                  <Icon className="h-4 w-4 shrink-0" />
+                  <span className={cn(collapsed && "lg:hidden")}>
+                    {item.name}
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+        ) : null}
+
+        <div className="mt-auto border-t border-border pt-5">
+          <Link
+            href="/contact"
+            onClick={onMobileClose}
+            className={cn(
+              "flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground",
+              collapsed && "lg:justify-center lg:gap-0 lg:px-0",
+            )}
+          >
+            <LifeBuoy className="h-4 w-4 shrink-0" />
+            <span className={cn(collapsed && "lg:hidden")}>Help center</span>
+          </Link>
         </div>
       </aside>
     </>

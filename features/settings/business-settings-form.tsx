@@ -6,12 +6,18 @@ import { Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useCurrentBusiness } from "@/features/settings/hooks";
 import { SettingsSection } from "@/features/settings/settings-section";
+import type { Business } from "@/types/generic";
 
-export function BusinessSettingsForm() {
-  const { data: business } = useCurrentBusiness();
-  const [form, setForm] = useState(business);
+export function BusinessSettingsForm({ business }: { business: Business }) {
+  const [form, setForm] = useState({
+    name: business.name,
+    email: "",
+    industry: business.industry,
+    country: "Nigeria",
+    defaultCurrency: business.defaultCurrency,
+    address: "",
+  });
 
   function updateField(field: keyof typeof form, value: string) {
     setForm((current) => ({ ...current, [field]: value }));

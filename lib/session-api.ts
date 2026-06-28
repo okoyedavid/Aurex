@@ -1,4 +1,4 @@
-import { AxiosError, type AxiosRequestConfig } from "axios";
+import { AxiosError } from "axios";
 
 import { api } from "@/lib/api";
 import type {
@@ -7,10 +7,6 @@ import type {
   RevokeSessionResponse,
   SessionRouteErrorResponse,
 } from "@/types/generic";
-
-type SessionRequestConfig = AxiosRequestConfig & {
-  _skipAuthRefresh: boolean;
-};
 
 export class SessionApiError extends Error {
   status: number;
@@ -24,16 +20,7 @@ export class SessionApiError extends Error {
   }
 }
 
-const sessionBasePath = process.env.NEXT_PUBLIC_BACKEND_URL?.replace(
-  /\/+$/,
-  "",
-).endsWith("/api")
-  ? "/me/sessions"
-  : "/api/me/sessions";
-
-const sessionRequestConfig: SessionRequestConfig = {
-  _skipAuthRefresh: true,
-};
+const sessionBasePath = "/me/sessions";
 
 function friendlySessionMessage(status: number) {
   if (status === 401) {
@@ -71,10 +58,7 @@ function toSessionApiError(error: unknown): SessionApiError {
 
 export async function getMySessions(): Promise<GetMySessionsResponse> {
   try {
-    const response = await api.get<GetMySessionsResponse>(
-      sessionBasePath,
-      sessionRequestConfig,
-    );
+    const response = await api.get<GetMySessionsResponse>(sessionBasePath);
 
     return response.data;
   } catch (error) {
@@ -88,7 +72,6 @@ export async function revokeSession(
   try {
     const response = await api.delete<RevokeSessionResponse>(
       `${sessionBasePath}/${encodeURIComponent(userSessionId)}`,
-      sessionRequestConfig,
     );
 
     return response.data;
@@ -99,10 +82,7 @@ export async function revokeSession(
 
 export async function revokeOtherSessions(): Promise<RevokeOtherSessionsResponse> {
   try {
-    const response = await api.delete<RevokeOtherSessionsResponse>(
-      sessionBasePath,
-      sessionRequestConfig,
-    );
+    const response = await api.delete<RevokeOtherSessionsResponse>(sessionBasePath);
 
     return response.data;
   } catch (error) {
