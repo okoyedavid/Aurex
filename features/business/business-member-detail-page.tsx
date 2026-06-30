@@ -1,27 +1,28 @@
 "use client";
 
-import { ArrowLeft, Loader2, Shield, UserCog } from "lucide-react";
+import { ArrowLeft, Loader2, Shield, Trash2, UserCog } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import {
-  ChangeMemberRoleDialog,
-  ChangeMemberStatusDialog,
-} from "./components/member-management-dialogs";
+import { ChangeMemberRoleDialog } from "./components/member-management-dialogs";
+import { ChangeMemberStatusDialog } from "./components/change-member-status-dialog";
+import { RemoveMemberDialog } from "./components/change-member-status-dialog";
 import { useBusinessAccess } from "./business-access-context";
 import { useBusinessMemberQuery } from "./business-member-hooks";
-import {
-  MemberAvatar,
-  MembersPageFrame,
-  MembersState,
-  MemberStatusBadge,
-} from "./business-member-ui";
+import { MemberAvatar } from "./member-avatar";
+import { MembersPageFrame } from "./members-page-frame";
+import { MembersState } from "./members-state";
+import { MemberStatusBadge } from "./member-status-badge";
 import { BusinessApiError } from "@/lib/business-api";
 import {
   canUpdateMemberRole,
   canUpdateMemberStatus,
 } from "./member-role-options";
+import { MemberDetailItem } from "./member-detail-item";
+import { useMeQuery } from "@/features/auth/use-me-query";
+import { PermissionList } from "@/features/access/shared";
+import { formatDate } from "@/features/dashboard/format";
 
 export function BusinessMemberDetailPage({
   businessId,
@@ -31,12 +32,15 @@ export function BusinessMemberDetailPage({
   memberId: string;
 }) {
   const access = useBusinessAccess();
+  const me = useMeQuery();
   const canView = access.effectivePermissions.has("members:view");
   const canUpdateRole = canUpdateMemberRole(access.effectivePermissions);
   const canUpdateStatus = canUpdateMemberStatus(access.effectivePermissions);
+  const canRemove = access.effectivePermissions.has("members:remove");
   const query = useBusinessMemberQuery(businessId, memberId, canView);
   const [roleOpen, setRoleOpen] = useState(false);
   const [statusOpen, setStatusOpen] = useState(false);
+  const [removeOpen, setRemoveOpen] = useState(false);
 
   if (query.isLoading) {
     return (
@@ -83,6 +87,10 @@ export function BusinessMemberDetailPage({
   }
 
   const member = query.data;
+  const protectedMember =
+    member.status === "removed" ||
+    member.roleId.key === "owner" ||
+    me.data?.id === member.userId.id;
   return (
     <MembersPageFrame>
       <Link
@@ -105,23 +113,29 @@ export function BusinessMemberDetailPage({
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <MemberStatusBadge status={member.status} />
-            {canUpdateRole && member.roleId.key !== "owner" ? (
+            {canUpdateRole && !protectedMember ? (
               <Button variant="outline" onClick={() => setRoleOpen(true)}>
                 <UserCog className="h-4 w-4" /> Change role
               </Button>
             ) : null}
-            {canUpdateStatus ? (
+            {canUpdateStatus && !protectedMember ? (
               <Button variant="outline" onClick={() => setStatusOpen(true)}>
-                <Shield className="h-4 w-4" /> Change status
+                <Shield className="h-4 w-4" />
+                {member.status === "active" ? "Suspend" : "Reactivate"}
+              </Button>
+            ) : null}
+            {canRemove && !protectedMember ? (
+              <Button variant="destructive" onClick={() => setRemoveOpen(true)}>
+                <Trash2 className="h-4 w-4" /> Remove
               </Button>
             ) : null}
           </div>
         </div>
 
         <dl className="mt-7 grid gap-5 border-t border-border pt-6 sm:grid-cols-2 lg:grid-cols-3">
-          <Detail label="Role" value={member.roleId.name} />
-          <Detail label="Role type" value={member.roleId.type} />
-          <Detail
+          <MemberDetailItem label="Role" value={member.roleId.name} />
+          <MemberDetailItem label="Role type" value={member.roleId.type} />
+          <MemberDetailItem
             label="Invited by"
             value={
               member.invitedByUserId
@@ -129,10 +143,43 @@ export function BusinessMemberDetailPage({
                 : "Not recorded"
             }
           />
-          <Detail label="Member since" value={formatDate(member.createdAt)} />
-          <Detail label="Last updated" value={formatDate(member.updatedAt)} />
-          <Detail label="Membership ID" value={member.id} />
+          <MemberDetailItem
+            label="Member since"
+            value={formatDate(member.createdAt)}
+          />
+          <MemberDetailItem
+            label="Last updated"
+            value={formatDate(member.updatedAt)}
+          />
+          <MemberDetailItem label="Membership ID" value={member.id} />
+          {member.roleUpdatedByUserId && member.roleUpdatedAt ? (
+            <MemberDetailItem
+              label="Role last updated"
+              value={`${member.roleUpdatedByUserId.name} · ${formatDate(member.roleUpdatedAt)}`}
+            />
+          ) : null}
+          {member.statusUpdatedByUserId && member.statusUpdatedAt ? (
+            <MemberDetailItem
+              label="Status last updated"
+              value={`${member.statusUpdatedByUserId.name} · ${formatDate(member.statusUpdatedAt)}`}
+            />
+          ) : null}
+          {member.removedByUserId && member.removedAt ? (
+            <MemberDetailItem
+              label="Removed"
+              value={`${member.removedByUserId.name} · ${formatDate(member.removedAt)}`}
+            />
+          ) : null}
         </dl>
+        <div className="mt-6 border-t border-border pt-6">
+          <h2 className="font-semibold">Current role access</h2>
+          <div className="mt-4 rounded-lg bg-muted/30 p-4">
+            <PermissionList
+              permissions={member.roleId.permissions}
+              denied={member.roleId.deniedPermissions}
+            />
+          </div>
+        </div>
       </section>
       {roleOpen ? (
         <ChangeMemberRoleDialog
@@ -148,21 +195,9 @@ export function BusinessMemberDetailPage({
           onOpenChange={setStatusOpen}
         />
       ) : null}
+      {removeOpen ? (
+        <RemoveMemberDialog member={member} open onOpenChange={setRemoveOpen} />
+      ) : null}
     </MembersPageFrame>
   );
-}
-
-function Detail({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <dt className="text-xs text-muted-foreground">{label}</dt>
-      <dd className="mt-1 break-words text-sm font-semibold capitalize">
-        {value}
-      </dd>
-    </div>
-  );
-}
-
-function formatDate(value: string) {
-  return new Date(value).toLocaleString();
 }

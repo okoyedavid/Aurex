@@ -3,10 +3,10 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import { AlertCircle, Loader2, Plus } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { CreateListDialog } from "./components/employee-list-dialogs";
+import { CreateListDialog } from "./components/create-list-dialog";
 import { useBusinessAccess } from "./business-access-context";
 import { employeeListKeys, useEmployeeListsQuery } from "./employee-list-hooks";
 import {
@@ -15,6 +15,11 @@ import {
 } from "./employee-list-display";
 import { getEmployeeLists } from "@/lib/employee-lists-api";
 import { BusinessApiError } from "@/lib/business-api";
+import { EmployeeListsPageFrame as PageFrame } from "./employee-lists-page-frame";
+import { EmployeeListsState as State } from "./employee-lists-state";
+import { Pagination } from "./pagination";
+import { StatusBadge as Badge } from "./status-badge";
+import { TableHeading as Th } from "./table-heading";
 
 export function EmployeeListsPage({ businessId }: { businessId: string }) {
   const search = useSearchParams();
@@ -69,13 +74,11 @@ export function EmployeeListsPage({ businessId }: { businessId: string }) {
       <PageFrame>
         <div className="flex items-center gap-2 text-muted-foreground">
           <Loader2 className="animate-spin" />
-          Loading employee lists…
+          Loading employee lists
         </div>
       </PageFrame>
     );
-  if (
-    query.error instanceof BusinessApiError && query.error.status === 403
-  )
+  if (query.error instanceof BusinessApiError && query.error.status === 403)
     return (
       <PageFrame>
         <State
@@ -150,7 +153,7 @@ export function EmployeeListsPage({ businessId }: { businessId: string }) {
                     </p>
                   </td>
                   <td className="p-4">
-                    {item.currency} · {labelFrequency(item.defaultPayFrequency)}
+                    {item.currency}·{labelFrequency(item.defaultPayFrequency)}
                   </td>
                   <td className="p-4">
                     {item.totalEmployeeCount} total
@@ -193,99 +196,6 @@ export function EmployeeListsPage({ businessId }: { businessId: string }) {
     </PageFrame>
   );
 }
-function PageFrame({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="px-4 py-6 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-[1280px]">{children}</div>
-    </div>
-  );
-}
-function State({
-  title,
-  detail,
-  retry,
-}: {
-  title: string;
-  detail: string;
-  retry?: () => void;
-}) {
-  return (
-    <div className="rounded-xl border border-border bg-card p-8 text-center">
-      <AlertCircle className="mx-auto text-muted-foreground" />
-      <h1 className="mt-3 font-semibold">{title}</h1>
-      <p className="mt-2 text-sm text-muted-foreground">{detail}</p>
-      {retry && (
-        <Button className="mt-4" variant="outline" onClick={retry}>
-          Try again
-        </Button>
-      )}
-    </div>
-  );
-}
-function Th({ children }: { children: React.ReactNode }) {
-  return <th className="p-4 font-medium">{children}</th>;
-}
-export function Badge({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="inline-flex rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
-      {children}
-    </span>
-  );
-}
 export function labelFrequency(value: string) {
   return value.replace("_", " ").replace(/^./, (c) => c.toUpperCase());
-}
-export function Pagination({
-  page,
-  totalPages,
-  total,
-  limit,
-  fetching,
-  onPage,
-  onLimit,
-}: {
-  page: number;
-  totalPages: number;
-  total: number;
-  limit: number;
-  fetching: boolean;
-  onPage: (page: number) => void;
-  onLimit: (limit: number) => void;
-}) {
-  return (
-    <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm">
-      <div className="text-muted-foreground">
-        Page {page} of {Math.max(1, totalPages)} · {total} items{" "}
-        {fetching && <span className="ml-2">Updating…</span>}
-      </div>
-      <div className="flex items-center gap-2">
-        <label>
-          Rows{" "}
-          <select
-            className="h-8 rounded-md border border-input bg-background px-2"
-            value={limit}
-            onChange={(e) => onLimit(Number(e.target.value))}
-          >
-            <option>20</option>
-            <option>50</option>
-            <option>100</option>
-          </select>
-        </label>
-        <Button
-          variant="outline"
-          disabled={page <= 1}
-          onClick={() => onPage(page - 1)}
-        >
-          Previous
-        </Button>
-        <Button
-          variant="outline"
-          disabled={page >= totalPages || fetching}
-          onClick={() => onPage(page + 1)}
-        >
-          Next
-        </Button>
-      </div>
-    </div>
-  );
 }

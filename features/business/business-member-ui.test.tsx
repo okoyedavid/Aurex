@@ -1,7 +1,7 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
-import { MembersState } from "./business-member-ui";
+import { MembersState } from "./members-state";
 
 describe("members request states", () => {
   it.each([

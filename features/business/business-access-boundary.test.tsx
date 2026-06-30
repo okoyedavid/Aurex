@@ -1,11 +1,9 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
-import {
-  BusinessLayoutSkeleton,
-  BusinessForbiddenState,
-  resolveBusinessAccessLayoutState,
-} from "./business-access-boundary";
+import { resolveBusinessAccessLayoutState } from "./business-access-boundary";
+import { BusinessForbiddenState } from "./business-forbidden-state";
+import { BusinessLayoutSkeleton } from "./business-layout-skeleton";
 
 describe("business access layout states", () => {
   it("renders a workspace skeleton during initial loading", () => {

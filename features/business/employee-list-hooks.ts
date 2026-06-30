@@ -52,11 +52,12 @@ export function useEmployeeListsQuery(
   businessId: string,
   page: number,
   limit: number,
+  enabled = true,
 ) {
   return useQuery({
     queryKey: employeeListKeys.collection(businessId, page, limit),
     queryFn: () => service.getEmployeeLists(businessId, page, limit),
-    enabled: Boolean(businessId),
+    enabled: Boolean(businessId) && enabled,
     placeholderData: keepPreviousData,
   });
 }

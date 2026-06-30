@@ -32,13 +32,14 @@ export const personalNavigation = [
   { name: "Overview", icon: LayoutDashboard, href: "/dashboard", exact: true },
   { name: "Businesses", icon: Building2, href: "/dashboard/business" },
   { name: "Invites", icon: UserPlus, href: "/dashboard/invites" },
+  { name: "Notifications", icon: Bell, href: "/dashboard/notifications" },
   { name: "Activity", icon: Activity, href: "/dashboard/activity" },
   { name: "Settings", icon: Settings, href: "/dashboard/settings" },
 ];
 
 export const personalSecondaryActions = [
   { name: "Create Business", icon: Building2, href: "/dashboard/business" },
-  { name: "Notifications", icon: Bell, href: "/dashboard/activity" },
+  { name: "Notifications", icon: Bell, href: "/dashboard/notifications" },
 ];
 
 export function getEffectivePermissions(role: BusinessRole) {

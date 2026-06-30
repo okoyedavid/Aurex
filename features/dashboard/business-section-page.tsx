@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { BusinessSectionMetric as Metric } from "./business-section-metric";
 
 import { formatDate } from "@/features/dashboard/format";
 import {
@@ -10,12 +11,14 @@ import {
 } from "@/features/dashboard/mock-data";
 
 const sectionDescriptions: Record<string, string> = {
-  payments: "Review pending, approved, failed, and cancelled payment workflows.",
+  payments:
+    "Review pending, approved, failed, and cancelled payment workflows.",
   invoices: "Track draft, sent, overdue, and paid invoices for this business.",
   providers: "Manage payout providers and operational vendor records.",
   members: "Review workspace members, status, and business access.",
   roles: "Inspect system and custom roles mapped to business permissions.",
-  invites: "Track pending, accepted, expired, and revoked business invitations.",
+  invites:
+    "Track pending, accepted, expired, and revoked business invitations.",
   "audit-logs": "Review business audit events and security-sensitive changes.",
 };
 
@@ -50,7 +53,10 @@ export function BusinessSectionPage({
               <Metric label="Pending" value={summary.payments.pending} />
               <Metric label="Approved" value={summary.payments.approved} />
               <Metric label="Failed" value={summary.payments.failed} />
-              <Metric label="Total value" value={`NGN ${summary.payments.totalValue.toLocaleString("en-NG")}`} />
+              <Metric
+                label="Total value"
+                value={`NGN ${summary.payments.totalValue.toLocaleString("en-NG")}`}
+              />
             </div>
           ) : null}
           {section === "invoices" ? (
@@ -62,8 +68,14 @@ export function BusinessSectionPage({
           ) : null}
           {section === "providers" ? (
             <div className="grid gap-4 sm:grid-cols-2">
-              <Metric label="Active providers" value={summary.providers.active} />
-              <Metric label="Pending providers" value={summary.providers.pending} />
+              <Metric
+                label="Active providers"
+                value={summary.providers.active}
+              />
+              <Metric
+                label="Pending providers"
+                value={summary.providers.pending}
+              />
             </div>
           ) : null}
           {section === "members" ? (
@@ -75,7 +87,10 @@ export function BusinessSectionPage({
           {section === "roles" ? (
             <div className="grid gap-4 md:grid-cols-2">
               {roles.map((role) => (
-                <div key={role.id} className="rounded-md border border-border bg-background p-4">
+                <div
+                  key={role.id}
+                  className="rounded-md border border-border bg-background p-4"
+                >
                   <p className="font-semibold">{role.name}</p>
                   <p className="mt-1 text-xs text-muted-foreground">
                     {role.permissions.length} permissions - {role.type}
@@ -92,9 +107,13 @@ export function BusinessSectionPage({
                   <div key={invite.id} className="py-4">
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="font-semibold">{invite.email}</p>
-                      <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">{invite.status}</span>
+                      <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+                        {invite.status}
+                      </span>
                     </div>
-                    <p className="mt-1 text-sm text-muted-foreground">Expires {formatDate(invite.expiresAt)}</p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      Expires {formatDate(invite.expiresAt)}
+                    </p>
                   </div>
                 ))}
             </div>
@@ -102,12 +121,19 @@ export function BusinessSectionPage({
           {section === "audit-logs" ? (
             <div className="space-y-3">
               {summary.recentActivity.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No audit events available for this business.</p>
+                <p className="text-sm text-muted-foreground">
+                  No audit events available for this business.
+                </p>
               ) : (
                 summary.recentActivity.map((event) => (
-                  <div key={event.id} className="rounded-md border border-border bg-background p-4">
+                  <div
+                    key={event.id}
+                    className="rounded-md border border-border bg-background p-4"
+                  >
                     <p className="font-semibold">{event.eventType}</p>
-                    <p className="mt-1 text-xs text-muted-foreground">{event.outcome} - {formatDate(event.createdAt)}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {event.outcome} - {formatDate(event.createdAt)}
+                    </p>
                   </div>
                 ))
               )}
@@ -115,19 +141,13 @@ export function BusinessSectionPage({
           ) : null}
         </div>
 
-        <Link href={`/business/${business.id}`} className="mt-5 inline-block text-sm font-semibold text-primary hover:underline">
+        <Link
+          href={`/business/${business.id}`}
+          className="mt-5 inline-block text-sm font-semibold text-primary hover:underline"
+        >
           Back to business overview
         </Link>
       </div>
-    </div>
-  );
-}
-
-function Metric({ label, value }: { label: string; value: string | number }) {
-  return (
-    <div className="rounded-md border border-border bg-background p-4">
-      <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="mt-2 text-2xl font-bold">{value}</p>
     </div>
   );
 }

@@ -1,10 +1,11 @@
 "use client";
 
-import { Bell, Menu, PanelLeftClose, PanelLeftOpen, Search } from "lucide-react";
+import { Menu, PanelLeftClose, PanelLeftOpen, Search } from "lucide-react";
 import Image from "next/image";
 
 import { Input } from "@/components/ui/input";
 import { useMeQuery } from "@/features/auth/use-me-query";
+import { NotificationBell } from "@/features/access/notification-bell";
 
 function getInitials(name?: string | null, email?: string | null) {
   const source = name?.trim() || email?.trim() || "User";
@@ -98,14 +99,7 @@ export function DashboardHeader({
           >
             <Search className="h-4 w-4" />
           </button>
-          <button
-            type="button"
-            aria-label="Notifications"
-            className="relative flex h-10 w-10 items-center justify-center rounded-md border border-border bg-background text-muted-foreground transition hover:bg-muted hover:text-foreground"
-          >
-            <Bell className="h-4 w-4" />
-            <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-primary ring-2 ring-background" />
-          </button>
+          <NotificationBell />
           <div className="flex items-center gap-3 border-l border-border pl-2 sm:pl-3">
             {user?.avatar ? (
               <span

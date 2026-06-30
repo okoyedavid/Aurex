@@ -1,6 +1,6 @@
-import { BusinessSectionPage } from "@/features/dashboard/business-section-page";
+import { BusinessRolesPage as Roles } from "@/features/access/business-roles-page";
 
 export default async function BusinessRolesPage({ params }: { params: Promise<{ businessId: string }> }) {
   const { businessId } = await params;
-  return <BusinessSectionPage businessId={businessId} section="roles" />;
+  return <Roles businessId={businessId} />;
 }

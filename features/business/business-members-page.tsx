@@ -1,21 +1,30 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
+import { Loader2, MoreHorizontal, Shield, Trash2, UserCog } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { useBusinessAccess } from "./business-access-context";
 import { useBusinessMembersQuery } from "./business-member-hooks";
-import {
-  MemberAvatar,
-  MembersPageFrame,
-  MembersState,
-  MemberStatusBadge,
-} from "./business-member-ui";
+import { MemberAvatar } from "./member-avatar";
+import { MembersPageFrame } from "./members-page-frame";
+import { MembersState } from "./members-state";
+import { MemberStatusBadge } from "./member-status-badge";
 import { normalizePagination } from "./employee-list-display";
-import { Pagination } from "./employee-lists-page";
+import { Pagination } from "./pagination";
 import { BusinessApiError } from "@/lib/business-api";
+import type { BusinessMember } from "@/lib/business-members-api";
+import { useMeQuery } from "@/features/auth/use-me-query";
+import {
+  canUpdateMemberRole,
+  canUpdateMemberStatus,
+} from "./member-role-options";
+import { ChangeMemberRoleDialog } from "./components/member-management-dialogs";
+import {
+  ChangeMemberStatusDialog,
+  RemoveMemberDialog,
+} from "./components/change-member-status-dialog";
 
 export function BusinessMembersPage({ businessId }: { businessId: string }) {
   const access = useBusinessAccess();
@@ -117,6 +126,7 @@ export function BusinessMembersPage({ businessId }: { businessId: string }) {
                 <th className="p-4 font-medium">Status</th>
                 <th className="p-4 font-medium">Invited by</th>
                 <th className="p-4 font-medium">Joined</th>
+                <th className="p-4 text-right font-medium">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -148,6 +158,9 @@ export function BusinessMembersPage({ businessId }: { businessId: string }) {
                   <td className="p-4 text-muted-foreground">
                     {new Date(member.createdAt).toLocaleDateString()}
                   </td>
+                  <td className="p-4 text-right">
+                    <MemberRowActions member={member} />
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -165,5 +178,79 @@ export function BusinessMembersPage({ businessId }: { businessId: string }) {
         onLimit={(value) => navigate(1, value)}
       />
     </MembersPageFrame>
+  );
+}
+
+function MemberRowActions({ member }: { member: BusinessMember }) {
+  const { effectivePermissions } = useBusinessAccess();
+  const me = useMeQuery();
+  const [roleOpen, setRoleOpen] = useState(false);
+  const [statusOpen, setStatusOpen] = useState(false);
+  const [removeOpen, setRemoveOpen] = useState(false);
+  const protectedMember =
+    member.status === "removed" ||
+    member.roleId.key === "owner" ||
+    me.data?.id === member.userId.id;
+  const role = !protectedMember && canUpdateMemberRole(effectivePermissions);
+  const status =
+    !protectedMember && canUpdateMemberStatus(effectivePermissions);
+  const remove = !protectedMember && effectivePermissions.has("members:remove");
+  if (!role && !status && !remove)
+    return <span className="text-xs text-muted-foreground">—</span>;
+  return (
+    <>
+      <details className="relative inline-block text-left">
+        <summary
+          className="flex h-8 w-8 cursor-pointer list-none items-center justify-center rounded-md border border-border hover:bg-muted"
+          aria-label={`Actions for ${member.userId.name}`}
+        >
+          <MoreHorizontal className="h-4 w-4" />
+        </summary>
+        <div className="absolute right-0 z-20 mt-2 w-44 overflow-hidden rounded-lg border border-border bg-popover p-1 shadow-lg">
+          {role ? (
+            <button
+              className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm hover:bg-muted"
+              onClick={() => setRoleOpen(true)}
+            >
+              <UserCog className="h-4 w-4" /> Change role
+            </button>
+          ) : null}
+          {status ? (
+            <button
+              className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm hover:bg-muted"
+              onClick={() => setStatusOpen(true)}
+            >
+              <Shield className="h-4 w-4" />{" "}
+              {member.status === "active" ? "Suspend" : "Reactivate"}
+            </button>
+          ) : null}
+          {remove ? (
+            <button
+              className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-destructive hover:bg-destructive/10"
+              onClick={() => setRemoveOpen(true)}
+            >
+              <Trash2 className="h-4 w-4" /> Remove
+            </button>
+          ) : null}
+        </div>
+      </details>
+      {roleOpen ? (
+        <ChangeMemberRoleDialog
+          member={member}
+          open
+          onOpenChange={setRoleOpen}
+        />
+      ) : null}
+      {statusOpen ? (
+        <ChangeMemberStatusDialog
+          member={member}
+          open
+          onOpenChange={setStatusOpen}
+        />
+      ) : null}
+      {removeOpen ? (
+        <RemoveMemberDialog member={member} open onOpenChange={setRemoveOpen} />
+      ) : null}
+    </>
   );
 }

@@ -20,6 +20,10 @@ export const permissionLabels: Record<Permission, string> = {
   "reports:view": "Allow this person to view reports",
   "audit_logs:view": "Allow this person to view audit logs",
   "roles:view": "Allow this person to view roles",
+  "roles:create": "Allow this person to create roles",
+  "roles:update": "Allow this person to update roles",
+  "roles:delete": "Allow this person to archive roles",
+  "roles:assign": "Allow this person to approve privileged role assignments",
   "employee_lists:create": "Allow this person to create employee lists",
   "employee_lists:view": "Allow this person to view employee lists",
   "employee_lists:update": "Allow this person to update employee lists",
@@ -114,9 +118,26 @@ export const customRolePermissions = Object.keys(permissionLabels).filter(
 ) as Permission[];
 
 export function canUpdateMemberRole(permissions: ReadonlySet<Permission>) {
-  return permissions.has("members:update_role");
+  return (
+    permissions.has("members:update_role") &&
+    permissions.has("roles:assign") &&
+    permissions.has("roles:view")
+  );
 }
 
 export function canUpdateMemberStatus(permissions: ReadonlySet<Permission>) {
   return permissions.has("members:update_status");
+}
+
+export function getMemberMutationActions(
+  permissions: ReadonlySet<Permission>,
+  member: { isOwner: boolean; isCurrentUser: boolean; isRemoved: boolean },
+) {
+  const protectedMember =
+    member.isOwner || member.isCurrentUser || member.isRemoved;
+  return {
+    role: !protectedMember && canUpdateMemberRole(permissions),
+    status: !protectedMember && canUpdateMemberStatus(permissions),
+    remove: !protectedMember && permissions.has("members:remove"),
+  };
 }

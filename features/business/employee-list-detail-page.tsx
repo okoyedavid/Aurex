@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import { AlertCircle, ArrowLeft, Loader2, Plus, Pencil } from "lucide-react";
+import { ArrowLeft, Loader2, Plus, Pencil } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { BusinessApiError } from "@/lib/business-api";
@@ -23,11 +23,15 @@ import {
   useEmployeesQuery,
   useVerificationStatusQuery,
 } from "./employee-list-hooks";
-import { Badge, labelFrequency, Pagination } from "./employee-lists-page";
-import {
-  EditListDialog,
-  EmployeeDialog,
-} from "./components/employee-list-dialogs";
+import { labelFrequency } from "./employee-lists-page";
+import { Pagination } from "./pagination";
+import { StatusBadge as Badge } from "./status-badge";
+import { EmployeeListDetailFrame as Frame } from "./employee-list-detail-frame";
+import { EmployeeListDetailState as State } from "./employee-list-detail-state";
+import { EmployeeListMetric as Metric } from "./employee-list-metric";
+import { TableHeading as Th } from "./table-heading";
+import { EditListDialog } from "./components/edit-list-dialog";
+import { EmployeeDialog } from "./components/employee-dialog";
 
 export function EmployeeListDetailPage({
   businessId,
@@ -222,9 +226,7 @@ export function EmployeeListDetailPage({
                   <td className="p-4">
                     {employee.bankName}
                     {employee.accountName && (
-                      <p className="mt-1 font-medium">
-                        {employee.accountName}
-                      </p>
+                      <p className="mt-1 font-medium">{employee.accountName}</p>
                     )}
                     <p className="text-xs text-muted-foreground">
                       {maskAccountNumber(employee.accountNumber)}
@@ -294,44 +296,4 @@ export function EmployeeListDetailPage({
       )}
     </Frame>
   );
-}
-function Frame({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="px-4 py-6 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-[1280px]">{children}</div>
-    </div>
-  );
-}
-function State({
-  title,
-  detail,
-  retry,
-}: {
-  title: string;
-  detail: string;
-  retry?: () => void;
-}) {
-  return (
-    <div className="rounded-xl border border-border bg-card p-8 text-center">
-      <AlertCircle className="mx-auto" />
-      <h1 className="mt-3 font-semibold">{title}</h1>
-      <p className="mt-2 text-sm text-muted-foreground">{detail}</p>
-      {retry && (
-        <Button className="mt-4" onClick={retry}>
-          Try again
-        </Button>
-      )}
-    </div>
-  );
-}
-function Metric({ label, value }: { label: string; value: React.ReactNode }) {
-  return (
-    <div className="rounded-xl border border-border bg-card p-4">
-      <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="mt-2 text-lg font-bold">{value}</p>
-    </div>
-  );
-}
-function Th({ children }: { children?: React.ReactNode }) {
-  return <th className="p-4 font-medium">{children}</th>;
 }

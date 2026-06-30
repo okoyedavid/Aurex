@@ -2,7 +2,7 @@ import { AxiosError } from "axios";
 
 import { api } from "@/lib/api";
 import { BusinessApiError, type BusinessResponse } from "@/lib/business-api";
-import type { ApiErrorResponse } from "@/types/generic";
+import type { ApiErrorResponse, Permission } from "@/types/generic";
 
 export type BusinessMemberStatus = "active" | "suspended" | "removed";
 
@@ -15,11 +15,15 @@ export type MemberUser = {
 
 export type MemberRole = {
   id: string;
+  businessId: string | null;
   name: string;
   key: string;
   type: "system" | "custom";
-  permissions: string[];
-  deniedPermissions: string[];
+  status: "active" | "archived";
+  permissions: Permission[];
+  deniedPermissions: Permission[];
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type MemberBusiness = {
@@ -36,6 +40,12 @@ export type BusinessMember = {
   roleId: MemberRole;
   invitedByUserId: MemberUser | null;
   status: BusinessMemberStatus;
+  roleUpdatedByUserId: MemberUser | null;
+  roleUpdatedAt: string | null;
+  statusUpdatedByUserId: MemberUser | null;
+  statusUpdatedAt: string | null;
+  removedByUserId: MemberUser | null;
+  removedAt: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -93,6 +103,52 @@ export async function getBusinessMember(
 ): Promise<BusinessMember> {
   try {
     const response = await api.get<BusinessResponse<BusinessMember>>(
+      `${membersPath(businessId)}/${memberId}`,
+    );
+    return response.data.data;
+  } catch (error) {
+    throw toBusinessMembersError(error);
+  }
+}
+
+export async function updateBusinessMemberRole(
+  businessId: string,
+  memberId: string,
+  roleId: string,
+): Promise<BusinessMember> {
+  try {
+    const response = await api.patch<BusinessResponse<BusinessMember>>(
+      `${membersPath(businessId)}/${memberId}/role`,
+      { roleId },
+    );
+    return response.data.data;
+  } catch (error) {
+    throw toBusinessMembersError(error);
+  }
+}
+
+export async function updateBusinessMemberStatus(
+  businessId: string,
+  memberId: string,
+  status: "active" | "suspended",
+): Promise<BusinessMember> {
+  try {
+    const response = await api.patch<BusinessResponse<BusinessMember>>(
+      `${membersPath(businessId)}/${memberId}/status`,
+      { status },
+    );
+    return response.data.data;
+  } catch (error) {
+    throw toBusinessMembersError(error);
+  }
+}
+
+export async function removeBusinessMember(
+  businessId: string,
+  memberId: string,
+): Promise<BusinessMember> {
+  try {
+    const response = await api.delete<BusinessResponse<BusinessMember>>(
       `${membersPath(businessId)}/${memberId}`,
     );
     return response.data.data;

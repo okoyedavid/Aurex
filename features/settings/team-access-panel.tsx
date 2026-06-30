@@ -6,10 +6,8 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useBusinessAccess } from "@/features/business/business-access-context";
 import { useBusinessMembersQuery } from "@/features/business/business-member-hooks";
-import {
-  MemberAvatar,
-  MemberStatusBadge,
-} from "@/features/business/business-member-ui";
+import { MemberAvatar } from "@/features/business/member-avatar";
+import { MemberStatusBadge } from "@/features/business/member-status-badge";
 import { SettingsSection } from "@/features/settings/settings-section";
 
 export function TeamAccessPanel() {
