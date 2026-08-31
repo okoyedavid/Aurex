@@ -1,4 +1,9 @@
 const CLOUDINARY_MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+const CLOUDINARY_IMAGE_TYPES = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+]);
 
 type CloudinaryUploadResponse = {
   secure_url?: string;
@@ -14,8 +19,8 @@ export type CloudinaryUpload = {
 };
 
 export function validateAvatarFile(file: File) {
-  if (!file.type.startsWith("image/")) {
-    throw new Error("Choose an image file.");
+  if (!CLOUDINARY_IMAGE_TYPES.has(file.type)) {
+    throw new Error("Choose a JPEG, PNG, or WebP image.");
   }
 
   if (file.size > CLOUDINARY_MAX_IMAGE_SIZE) {
@@ -23,7 +28,9 @@ export function validateAvatarFile(file: File) {
   }
 }
 
-export async function uploadAvatarWithRollback(file: File): Promise<CloudinaryUpload> {
+export async function uploadAvatarWithRollback(
+  file: File,
+): Promise<CloudinaryUpload> {
   validateAvatarFile(file);
 
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;

@@ -1,9 +1,16 @@
 "use client";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import HeroCurve from "./hero-curve";
 import HeroDash from "./hero-dash";
 import { motion } from "motion/react";
+import { useAuthHandoff } from "@/components/auth-handoff-provider";
 
 export default function Hero() {
+  const router = useRouter();
+  const { stage } = useAuthHandoff();
+  const [email, setEmail] = useState("");
+
   return (
     <section className="relative min-h-screen bg-background overflow-hidden">
       <HeroCurve />
@@ -27,7 +34,15 @@ export default function Hero() {
             Automate invoices, manage payments, and track your business cash
             flow from one platform.
           </p>
-          <div className="w-full max-w-lg py-6">
+          <form
+            method="post"
+            className="w-full max-w-lg py-6"
+            onSubmit={(event) => {
+              event.preventDefault();
+              stage({ email });
+              router.push("/login");
+            }}
+          >
             <label
               htmlFor="email"
               className="mb-2 block text-sm font-medium text-muted-foreground"
@@ -44,7 +59,10 @@ export default function Hero() {
                 type="email"
                 name="email"
                 autoComplete="email"
+                required
                 placeholder="Aurex@gmail.com"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
                 className="min-w-0 flex-1 bg-transparent text-foreground px-4 text-base outline-none placeholder:text-muted-foreground"
               />
 
@@ -56,7 +74,7 @@ export default function Hero() {
                 Submit
               </button>
             </div>
-          </div>
+          </form>
         </motion.div>
         <motion.div
           initial={{ opacity: 0, y: 24, scale: 0.98 }}

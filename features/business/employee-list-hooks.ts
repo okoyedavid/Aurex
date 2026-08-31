@@ -42,7 +42,7 @@ export const employeeListKeys = {
       "verification-status",
     ] as const,
 };
-export function verificationPollInterval(pendingVerificationCount?: number) {
+function verificationPollInterval(pendingVerificationCount?: number) {
   return pendingVerificationCount && pendingVerificationCount > 0
     ? 3000
     : false;

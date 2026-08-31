@@ -1,4 +1,4 @@
-export type User = {
+type User = {
   id: string;
   name?: string | null;
   email: string;
@@ -12,7 +12,7 @@ export type LoginBody = {
   password: string;
 };
 
-export type LoginResponse = {
+type LoginResponse = {
   message: "Login successful";
   user: User;
 };
@@ -23,7 +23,7 @@ export type RegisterBody = {
   password: string;
 };
 
-export type RegisterResponse = {
+type RegisterResponse = {
   message: "User registered successfully. Check your email for the OTP.";
   user: User;
 };
@@ -33,7 +33,7 @@ export type VerifyEmailBody = {
   otp: string;
 };
 
-export type VerifyEmailResponse = {
+type VerifyEmailResponse = {
   message: "Email verified successfully";
   user: User;
 };
@@ -42,7 +42,7 @@ export type ResendEmailBody = {
   email: string;
 };
 
-export type ResendEmailResponse = {
+type ResendEmailResponse = {
   message: "Email sent successfully!";
 };
 

@@ -4,7 +4,7 @@ import { api } from "@/lib/api";
 import type { ApiErrorResponse, Business, Permission } from "@/types/generic";
 import type { EmployeeListPayload } from "@/features/business/employee-list-form";
 
-export type BusinessListRole = {
+type BusinessListRole = {
   id?: string;
   businessId?: string | null;
   name: string;
@@ -34,7 +34,7 @@ export type BusinessAccessResponse = {
   } | null;
 };
 
-export type BusinessMembership = {
+type BusinessMembership = {
   id: string;
   status: "active" | "suspended" | "removed";
   role: BusinessListRole | null;
@@ -50,15 +50,6 @@ export type CreateBusinessBody = {
   industry: string;
   profile_img?: string;
   employeeLists?: EmployeeListPayload[];
-};
-
-export type UpdateBusinessProfileImageBody = {
-  businessId: string;
-  profile_img: string;
-};
-
-export type DeleteBusinessProfileImageBody = {
-  businessId: string;
 };
 
 export type BusinessResponse<T> = {
@@ -78,7 +69,6 @@ export class BusinessApiError extends Error {
     this.response = response;
   }
 }
-
 export const businessKeys = {
   all: ["businesses"] as const,
   detail: (businessId: string) => [...businessKeys.all, businessId] as const,
@@ -97,7 +87,6 @@ function friendlyMessage(status: number) {
 
   return "Unable to load businesses. Please try again.";
 }
-
 export function businessErrorMessage(
   error: unknown,
   fallback = "Something went wrong. Please try again.",
@@ -112,7 +101,6 @@ export function businessErrorMessage(
 
   return fallback;
 }
-
 function toBusinessApiError(error: unknown): BusinessApiError {
   if (error instanceof AxiosError && error.response) {
     const status = error.response.status;
@@ -137,7 +125,7 @@ export async function getBusinesses(): Promise<BusinessListItem[]> {
   return getBusinessList();
 }
 
-export async function getBusinessList(options?: {
+async function getBusinessList(options?: {
   ownerOnly?: boolean;
 }): Promise<BusinessListItem[]> {
   try {
@@ -183,38 +171,6 @@ export async function createBusiness(
           : {}),
       },
     );
-    return response.data.data;
-  } catch (error) {
-    throw toBusinessApiError(error);
-  }
-}
-
-export async function updateBusinessProfileImage(
-  body: UpdateBusinessProfileImageBody,
-): Promise<BusinessListItem> {
-  try {
-    const response = await api.patch<BusinessResponse<BusinessListItem>>(
-      `${businessesBasePath}/profile-image`,
-      body,
-    );
-
-    return response.data.data;
-  } catch (error) {
-    throw toBusinessApiError(error);
-  }
-}
-
-export async function deleteBusinessProfileImage(
-  body: DeleteBusinessProfileImageBody,
-): Promise<BusinessListItem> {
-  try {
-    const response = await api.delete<BusinessResponse<BusinessListItem>>(
-      `${businessesBasePath}/profile-image`,
-      {
-        data: body,
-      },
-    );
-
     return response.data.data;
   } catch (error) {
     throw toBusinessApiError(error);

@@ -34,7 +34,9 @@ function formatDate(value: string | null) {
 }
 
 function formatLocation(session: SessionListItem) {
-  const location = [session.city, session.region, session.country].filter(Boolean);
+  const location = [session.city, session.region, session.country].filter(
+    Boolean,
+  );
   return location.length > 0 ? location.join(", ") : "Unknown location";
 }
 
@@ -55,7 +57,8 @@ function sessionErrorMessage(error: unknown) {
 }
 
 function getDeviceIcon(session: SessionListItem) {
-  const device = `${session.deviceName ?? ""} ${session.userAgent ?? ""}`.toLowerCase();
+  const device =
+    `${session.deviceName ?? ""} ${session.userAgent ?? ""}`.toLowerCase();
 
   if (device.includes("iphone") || device.includes("android")) {
     return Smartphone;
@@ -79,11 +82,17 @@ export function SessionsSettingsPanel() {
   const sessionsQuery = useMySessionsQuery();
   const revokeSessionMutation = useRevokeSessionMutation();
   const revokeOtherSessionsMutation = useRevokeOtherSessionsMutation();
-  const [confirmingSessionId, setConfirmingSessionId] = React.useState<string | null>(null);
-  const [confirmingOtherSessions, setConfirmingOtherSessions] = React.useState(false);
+  const [confirmingSessionId, setConfirmingSessionId] = React.useState<
+    string | null
+  >(null);
+  const [confirmingOtherSessions, setConfirmingOtherSessions] =
+    React.useState(false);
 
-  const sessions = sessionsQuery.data?.sessions ?? sessionsQuery.data?.data ?? [];
-  const hasOtherSessions = sessions.some((session) => !session.isCurrentSession && !session.revokedAt);
+  const sessions =
+    sessionsQuery.data?.sessions ?? sessionsQuery.data?.data ?? [];
+  const hasOtherSessions = sessions.some(
+    (session) => !session.isCurrentSession && !session.revokedAt,
+  );
   const pendingSessionId = revokeSessionMutation.variables;
 
   React.useEffect(() => {
@@ -103,7 +112,7 @@ export function SessionsSettingsPanel() {
 
         if (result.revokedCurrentSession) {
           clearAuthQueries(queryClient);
-          router.push("/dashboard");
+          router.replace("/login");
         }
       },
       onError: (error) => {
@@ -150,7 +159,10 @@ export function SessionsSettingsPanel() {
       {sessionsQuery.isLoading ? (
         <div className="space-y-3 border-y border-border py-5">
           {Array.from({ length: 3 }).map((_, index) => (
-            <div key={index} className="h-20 animate-pulse rounded-md bg-muted" />
+            <div
+              key={index}
+              className="h-20 animate-pulse rounded-md bg-muted"
+            />
           ))}
         </div>
       ) : sessionsQuery.isError ? (
@@ -217,7 +229,8 @@ export function SessionsSettingsPanel() {
                       {formatLocation(session)}
                     </p>
                     <p className="mt-1 text-xs text-muted-foreground">
-                      IP {session.ipAddress ?? "Unknown"} - Last seen {formatDate(session.lastSeenAt)}
+                      IP {session.ipAddress ?? "Unknown"} - Last seen{" "}
+                      {formatDate(session.lastSeenAt)}
                     </p>
                     <p className="mt-1 text-xs text-muted-foreground">
                       Created {formatDate(session.createdAt)}
@@ -264,7 +277,9 @@ export function SessionsSettingsPanel() {
                         revokeSessionMutation.isPending ||
                         revokeOtherSessionsMutation.isPending
                       }
-                      onClick={() => setConfirmingSessionId(session.userSessionId)}
+                      onClick={() =>
+                        setConfirmingSessionId(session.userSessionId)
+                      }
                     >
                       Revoke
                     </Button>

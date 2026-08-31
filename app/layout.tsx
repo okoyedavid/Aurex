@@ -5,6 +5,7 @@ import NavBar from "@/components/navbar";
 import Footer from "@/components/footer";
 import { QueryProvider } from "@/components/query-provider";
 import { Toaster } from "@/components/ui/sonner";
+import { AuthHandoffProvider } from "@/components/auth-handoff-provider";
 
 const manrope = Manrope({
   variable: "--font-manrope",
@@ -38,10 +39,12 @@ export default function RootLayout({
     >
       <body className="flex min-h-full min-w-0 flex-col overflow-x-hidden">
         <QueryProvider>
-          <NavBar />
-          {children}
-          <Footer />
-          <Toaster />
+          <AuthHandoffProvider>
+            <NavBar />
+            {children}
+            <Footer />
+            <Toaster />
+          </AuthHandoffProvider>
         </QueryProvider>
       </body>
     </html>

@@ -31,6 +31,7 @@ export const permissionLabels: Record<Permission, string> = {
   "employees:create": "Allow this person to create employees",
   "employees:view": "Allow this person to view employees",
   "employees:update": "Allow this person to update employees",
+  "employees:view_own": "Allow user to view his employee details",
   "employees:archive": "Allow this person to archive employees",
   "employees:verify": "Allow this person to verify employees",
 };
@@ -111,6 +112,8 @@ export const assignableSystemRoles = [
       "reports:view",
     ],
   },
+
+  { key: "employee", name: "Employee", permissions: ["employees:view_own"] },
 ] satisfies Array<{ key: string; name: string; permissions: Permission[] }>;
 
 export const customRolePermissions = Object.keys(permissionLabels).filter(

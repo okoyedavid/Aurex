@@ -4,7 +4,6 @@ import axios, {
   type InternalAxiosRequestConfig,
 } from "axios";
 
-const MAX_REFRESH_ATTEMPTS = 3;
 const REFRESH_BLOCK_MS = 1000;
 
 type RefreshableRequestConfig = InternalAxiosRequestConfig & {
@@ -44,18 +43,7 @@ async function refreshSession() {
 
   refreshBlockedUntil = now + REFRESH_BLOCK_MS;
   refreshPromise = (async (): Promise<void> => {
-    let lastError: unknown;
-
-    for (let attempt = 1; attempt <= MAX_REFRESH_ATTEMPTS; attempt += 1) {
-      try {
-        await refreshClient.post(refreshPath);
-        return;
-      } catch (error) {
-        lastError = error;
-      }
-    }
-
-    throw lastError;
+    await refreshClient.post(refreshPath);
   })().finally(() => {
     refreshPromise = null;
   });

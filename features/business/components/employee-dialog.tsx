@@ -14,10 +14,17 @@ import {
 import type { Employee } from "@/lib/employee-lists-api";
 import { businessErrorMessage } from "@/lib/business-api";
 import { EmployeeDraftRow } from "./employee-draft-row";
+import { EmployeeClassificationFields } from "./employee-classification-fields";
 import { newEmployee } from "../business-draft-factory";
 import type { EmployeeDraft, PayFrequency } from "../business-draft-types";
-import { buildEmployeePayload } from "../employee-list-form";
+import {
+  buildEmployeePayload,
+  buildEmployeeUpdatePayload,
+} from "../employee-list-form";
 import { usePaystackBanksQuery } from "../business-hooks";
+import { useBusinessAccess } from "../business-access-context";
+import { useCreateOrResolveEmployeeTypeMutation } from "../employee-classification-hooks";
+import { resolveSelectedEmployeeType } from "../employee-classification-options";
 import {
   useCreateEmployeeMutation,
   useUpdateEmployeeMutation,
@@ -51,24 +58,30 @@ export function EmployeeDialog({
           amount: employee.amount,
           currency: employee.currency,
           payFrequency: employee.payFrequency as PayFrequency,
+          employeeTypeId: employee.employeeTypeId ?? null,
+          groupIds: employee.groupIds ?? [],
+          employmentStartDate: employee.employmentStartDate ?? "",
+          state: employee.state ?? "",
         }
       : newEmployee();
   const [draft, setDraft] = useState<EmployeeDraft>(toDraft);
   const banks = usePaystackBanksQuery();
+  const { effectivePermissions } = useBusinessAccess();
   const create = useCreateEmployeeMutation(businessId, listId);
+  const resolveType = useCreateOrResolveEmployeeTypeMutation(businessId);
   const update = useUpdateEmployeeMutation(
     businessId,
     listId,
     employee?.id ?? "",
   );
-  const pending = create.isPending || update.isPending;
+  const pending = create.isPending || update.isPending || resolveType.isPending;
   const close = () => onOpenChange(false);
   return (
     <Dialog
       open={open}
       onOpenChange={(value) => !pending && onOpenChange(value)}
     >
-      <DialogContent className="sm:max-w-3xl">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle>
             {employee ? "Edit employee" : "Add employee"}
@@ -79,19 +92,36 @@ export function EmployeeDialog({
           </DialogDescription>
         </DialogHeader>
         <form
-          onSubmit={(event) => {
+          onSubmit={async (event) => {
             event.preventDefault();
             try {
-              const action = employee ? update : create;
-              action.mutate(buildEmployeePayload(draft), {
+              const employeeTypeId = await resolveSelectedEmployeeType(
+                draft,
+                resolveType.mutateAsync,
+              );
+              const submission = {
+                ...draft,
+                employeeTypeId,
+                employeeTypeTemplateKey: undefined,
+              };
+              const mutationOptions = {
                 onSuccess: () => {
                   toast.success(
                     employee ? "Employee updated." : "Employee added.",
                   );
                   close();
                 },
-                onError: (error) => toast.error(businessErrorMessage(error)),
-              });
+                onError: (error: unknown) =>
+                  toast.error(businessErrorMessage(error)),
+              };
+              if (employee) {
+                update.mutate(
+                  buildEmployeeUpdatePayload(submission),
+                  mutationOptions,
+                );
+              } else {
+                create.mutate(buildEmployeePayload(submission), mutationOptions);
+              }
             } catch (error) {
               toast.error(
                 error instanceof Error
@@ -111,6 +141,16 @@ export function EmployeeDialog({
               setDraft((current) => ({ ...current, ...patch }))
             }
             onRemove={() => {}}
+          />
+          <EmployeeClassificationFields
+            businessId={businessId}
+            employee={draft}
+            permissions={effectivePermissions}
+            showGroups={Boolean(employee)}
+            disabled={pending}
+            onUpdate={(patch) =>
+              setDraft((current) => ({ ...current, ...patch }))
+            }
           />
           <DialogFooter className="mt-5">
             <Button

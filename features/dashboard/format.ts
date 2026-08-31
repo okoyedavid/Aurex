@@ -4,11 +4,3 @@ export function formatDate(value: string) {
     timeStyle: "short",
   }).format(new Date(value));
 }
-
-export function formatNaira(value: number) {
-  return new Intl.NumberFormat("en-NG", {
-    style: "currency",
-    currency: "NGN",
-    maximumFractionDigits: 0,
-  }).format(value);
-}

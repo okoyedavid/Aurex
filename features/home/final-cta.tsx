@@ -1,8 +1,11 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion, type Variants } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useAuthHandoff } from "@/components/auth-handoff-provider";
 
 const smoothEase = [0.22, 1, 0.36, 1] as const;
 
@@ -33,6 +36,11 @@ const fadeUp: Variants = {
 };
 
 export default function FinalSignupCta() {
+  const router = useRouter();
+  const { stage } = useAuthHandoff();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
   return (
     <section className="relative overflow-hidden bg-[#0B0924] px-6 py-16 text-white md:py-20">
       <motion.div
@@ -58,19 +66,34 @@ export default function FinalSignupCta() {
         </motion.div>
 
         <motion.form
+          method="post"
           variants={fadeUp}
           className="mx-auto w-full max-w-sm space-y-4 md:ml-auto"
-          onSubmit={(event) => event.preventDefault()}
+          onSubmit={(event) => {
+            event.preventDefault();
+            stage({ email, password });
+            router.push("/login");
+          }}
         >
           <Input
             type="email"
+            name="email"
+            autoComplete="email"
+            required
             placeholder="Email Address"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
             className="h-12 rounded-sm border-0 bg-white/20 text-white placeholder:text-white/40 focus-visible:ring-2 focus-visible:ring-primary"
           />
 
           <Input
             type="password"
+            name="password"
+            autoComplete="current-password"
+            required
             placeholder="Password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
             className="h-12 rounded-sm border-0 bg-white/20 text-white placeholder:text-white/40 focus-visible:ring-2 focus-visible:ring-primary"
           />
 

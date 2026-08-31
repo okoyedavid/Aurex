@@ -18,6 +18,7 @@ export function EmployeeDraftRow({
   disabled,
   onUpdate,
   onRemove,
+  showRemove = true,
 }: {
   employee: EmployeeDraft;
   banks: Bank[];
@@ -26,6 +27,7 @@ export function EmployeeDraftRow({
   disabled: boolean;
   onUpdate: (patch: Partial<EmployeeDraft>) => void;
   onRemove: () => void;
+  showRemove?: boolean;
 }) {
   const [bankSearch, setBankSearch] = useState(employee.bankName ?? "");
   const debouncedBankSearch = useDebouncedValue(bankSearch, 300);
@@ -147,6 +149,7 @@ export function EmployeeDraftRow({
             >
               <option value="monthly">Monthly</option>
               <option value="weekly">Weekly</option>
+              <option value="bi-weekly">Bi-weekly</option>
               <option value="one_time">One time</option>
             </select>
           </label>
@@ -257,7 +260,7 @@ export function EmployeeDraftRow({
           ) : null}
         </label>
       </div>
-      <div className="mt-3 flex justify-end">
+      {showRemove ? <div className="mt-3 flex justify-end">
         <Button
           type="button"
           variant="ghost"
@@ -268,7 +271,7 @@ export function EmployeeDraftRow({
           <Trash2 className="h-4 w-4" />
           Remove employee
         </Button>
-      </div>
+      </div> : null}
     </div>
   );
 }

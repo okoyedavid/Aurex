@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { newEmployee, newEmployeeList } from "./business-draft-factory";
 import {
+  buildEmployeePayload,
   buildEmployeeListPayload,
+  buildEmployeeUpdatePayload,
   MAX_EMPLOYEES_PER_LIST,
 } from "./employee-list-form";
 
@@ -50,5 +52,52 @@ describe("employee list payloads", () => {
     list.name = "Payroll";
     list.employees = [];
     expect(buildEmployeeListPayload(list)).not.toHaveProperty("employees");
+  });
+
+  it("creates an employee with type, state, and start date but never groups", () => {
+    const employee = {
+      ...newEmployee(),
+      fullName: " Ada ",
+      bankCode: "058",
+      bankName: "GTBank",
+      accountNumber: "5801017089",
+      amount: 250000,
+      employeeTypeId: "business-type-id",
+      groupIds: ["business-group-id"],
+      employmentStartDate: "2026-08-31",
+      state: " Lagos ",
+    };
+    const payload = buildEmployeePayload(employee);
+    expect(payload).toMatchObject({
+      employeeTypeId: "business-type-id",
+      employmentStartDate: "2026-08-31",
+      state: "Lagos",
+    });
+    expect(payload).not.toHaveProperty("groupIds");
+  });
+
+  it("updates business-owned groups and sends explicit clears", () => {
+    const employee = {
+      ...newEmployee(),
+      fullName: "Ada",
+      bankCode: "058",
+      bankName: "GTBank",
+      accountNumber: "5801017089",
+      amount: 250000,
+      employeeTypeId: null,
+      groupIds: [],
+    };
+    expect(buildEmployeeUpdatePayload(employee)).toMatchObject({
+      employeeTypeId: null,
+      groupIds: [],
+      employmentStartDate: null,
+      state: null,
+    });
+    expect(
+      buildEmployeeUpdatePayload({
+        ...employee,
+        groupIds: ["business-group-1", "business-group-2"],
+      }).groupIds,
+    ).toEqual(["business-group-1", "business-group-2"]);
   });
 });

@@ -1,48 +1,73 @@
 # Aurex
 
-Aurex is a responsive business payments SaaS frontend built with Next.js. It provides a consistent public marketing site, authentication screens, legal pages, and a payments operations dashboard.
+Aurex is a responsive business operations frontend built with Next.js. It
+combines a public product site with authenticated workspaces for managing
+business access, employees, invitations, notifications, and payment-related
+operations.
 
-The product concept focuses on helping businesses manage payments, invoices, settlements, reconciliation, cash flow, team access, and secure financial operations from one workspace.
+The frontend consumes a separate Aurex backend configured through
+`NEXT_PUBLIC_BACKEND_URL`.
 
-## Features
+## Implemented Features
 
-- Responsive SaaS landing page
-- About, features, pricing, security, and contact pages
-- Sign in, sign up, and password recovery screens
-- Privacy policy and terms of service layouts
-- Business payments dashboard
-- Semantic light and dark theme tokens
-- Reusable public-page, form, card, button, and CTA components
-- Subtle animations powered by Motion
-- Accessible labels, headings, navigation, and form controls
+- Responsive marketing, product, pricing, security, legal, and contact pages
+- Registration, login, email verification, password recovery, and session
+  management
+- Homepage and CTA email handoff into the authentication flow
+- Business creation, switching, profile-image uploads, and permission-aware
+  navigation
+- Business members with role and status management
+- Searchable, type-filtered, collapsible system and custom role management
+- Member and employee invitations, received invitations, approval workflows,
+  membership outcomes, and notifications
+- Employee lists, employee creation and editing, bank-account verification,
+  and verification status tracking
+- Business-owned employee types and groups, including backend-provided system
+  templates, custom classifications, archived historical labels, and
+  permission-aware assignment
+- Consistent loading, error, empty, pagination, dialog, and toast states
+- Semantic light and dark themes with responsive, accessible controls
 
-## Routes
+Payments, invoices, providers, and business audit logs currently retain their
+integration-ready screens while their remaining backend contracts are added.
+
+## Main Routes
 
 | Route | Description |
 | --- | --- |
 | `/` | Marketing landing page |
 | `/about` | Company mission and values |
 | `/features` | Product capabilities |
-| `/pricing` | Starter, Growth, and Enterprise plans |
+| `/pricing` | Product plans |
 | `/security` | Security and operational controls |
 | `/contact` | Sales and support contact form |
-| `/signin` | Sign-in screen |
-| `/signup` | Account creation screen |
-| `/forgot-password` | Password recovery screen |
-| `/privacy` | Privacy policy |
-| `/terms` | Terms of service |
-| `/dashboard` | Payments operations dashboard |
+| `/login` | Account login |
+| `/register` | Account registration |
+| `/verify-email` | Email verification |
+| `/forgot-password` | Password recovery |
+| `/reset-password` | Password reset |
+| `/dashboard` | Authenticated dashboard |
+| `/dashboard/invites` | Received invitations |
+| `/dashboard/notifications` | User notifications |
+| `/dashboard/settings` | Account and session settings |
+| `/business/:businessId` | Business workspace |
+| `/business/:businessId/members` | Member management |
+| `/business/:businessId/roles` | Role management |
+| `/business/:businessId/invites` | Sent invitations and approvals |
+| `/business/:businessId/employee-lists` | Employee lists and employees |
 
 ## Technology
 
-- [Next.js 16](https://nextjs.org/) with the App Router
+- [Next.js 16](https://nextjs.org/) App Router
 - [React 19](https://react.dev/)
 - [TypeScript](https://www.typescriptlang.org/)
+- [TanStack Query](https://tanstack.com/query/latest) for server state
+- [Axios](https://axios-http.com/) for API requests
 - [Tailwind CSS 4](https://tailwindcss.com/)
-- [Motion](https://motion.dev/) for animations
 - [Radix UI](https://www.radix-ui.com/)
+- [Motion](https://motion.dev/)
 - [Lucide React](https://lucide.dev/) and React Icons
-- Class Variance Authority for component variants
+- [Vitest](https://vitest.dev/)
 
 ## Getting Started
 
@@ -50,6 +75,7 @@ The product concept focuses on helping businesses manage payments, invoices, set
 
 - Node.js 20 or later
 - npm
+- A running Aurex backend
 
 ### Installation
 
@@ -59,8 +85,16 @@ cd aurex
 npm install
 ```
 
-The current frontend does not require environment variables to run. Add local
-values to `.env.local` if backend integrations are introduced later.
+Copy `.env.example` to `.env.local` and configure the backend URL:
+
+```bash
+NEXT_PUBLIC_BACKEND_URL=https://api.example.com
+```
+
+Business profile-image uploads also require the Cloudinary cloud name and an
+unsigned upload preset listed in `.env.example`. Restrict the preset to JPEG,
+PNG, and WebP files, enforce a 5 MB maximum, and constrain its destination
+folder and allowed origins.
 
 Start the development server:
 
@@ -70,48 +104,41 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
-## Scripts
+## Validation
 
 ```bash
-npm run dev     # Start the development server
-npm run lint    # Run ESLint
-npm run build   # Create a production build
-npm run start   # Run the production server
-```
-
-Run TypeScript validation directly with:
-
-```bash
-npx tsc --noEmit
+npm run lint       # ESLint
+npm test           # Vitest suite
+npx tsc --noEmit   # TypeScript validation
+npm run build      # Production build
 ```
 
 ## Project Structure
 
 ```text
 app/                  Route pages, layouts, and global styles
-components/public/    Shared marketing, authentication, and legal layouts
-components/ui/        Reusable UI primitives
+components/           Shared product and UI components
+features/access/      Roles, invitations, approvals, and notifications
+features/auth/        Authentication flows
+features/business/    Businesses, members, employee lists, and classifications
+features/dashboard/   Authenticated workspace shell and section views
 features/home/        Landing-page sections
-features/motion/      Motion experiments and examples
-public/               Static images and media
-lib/                  Shared utilities
+lib/                  API clients and shared utilities
+public/               Product assets used by the application
+types/                Shared frontend types
 ```
 
-## Styling
+## API and Security Notes
 
-The interface uses semantic theme classes defined in `app/globals.css`, including:
+Permission checks in the interface improve the user experience, while backend
+authorization remains authoritative. Employee classification templates are
+resolved through the backend before employee records receive business-owned
+type or group IDs.
 
-- `bg-background` and `text-foreground`
-- `bg-card` and `text-card-foreground`
-- `bg-muted` and `text-muted-foreground`
-- `border-border`
-- `bg-primary` and `text-primary-foreground`
-- `bg-secondary` and `text-secondary-foreground`
+The public contact and newsletter forms post to `/contact` and
+`/newsletter/subscribe` on `NEXT_PUBLIC_BACKEND_URL`.
 
-Prefer these tokens over hardcoded UI colors. Hardcoded colors should be limited to brand artwork, logos, or deliberate decorative illustrations.
-
-## Current Scope
-
-This repository currently implements the frontend experience. Authentication, form submission, payments, dashboard records, and account actions use static UI data and are not connected to a backend.
-
-Before production use, add server-side validation, authentication, authorization, persistent storage, payment-provider integration, monitoring, and reviewed legal policies.
+Before production use, verify server-side validation, authentication,
+authorization, CSRF protections, cookie attributes, persistent storage,
+payment-provider integration, monitoring, and reviewed legal policies in the
+backend deployment.

@@ -1,4 +1,6 @@
-export type PayFrequency = "monthly" | "weekly" | "one_time";
+import type { DefaultEmployeeTypeKey } from "@/lib/employee-classifications-api";
+
+export type PayFrequency = "monthly" | "weekly" | "bi-weekly" | "one_time";
 
 export type EmployeeDraft = {
   tempId: string;
@@ -13,6 +15,11 @@ export type EmployeeDraft = {
   accountName?: string;
   accountVerified?: boolean;
   accountVerifiedAt?: string;
+  employeeTypeId?: string | null;
+  employeeTypeTemplateKey?: DefaultEmployeeTypeKey;
+  groupIds?: string[];
+  employmentStartDate?: string;
+  state?: string;
 };
 
 export type EmployeeListDraft = {

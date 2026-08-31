@@ -13,7 +13,7 @@ export type MemberUser = {
   avatar?: string | null;
 };
 
-export type MemberRole = {
+type MemberRole = {
   id: string;
   businessId: string | null;
   name: string;
@@ -26,7 +26,7 @@ export type MemberRole = {
   updatedAt: string;
 };
 
-export type MemberBusiness = {
+type MemberBusiness = {
   id: string;
   name: string;
   industry: string;
@@ -50,7 +50,7 @@ export type BusinessMember = {
   updatedAt: string;
 };
 
-export type MemberPagination = {
+type MemberPagination = {
   page: number;
   limit: number;
   total: number;

@@ -5,10 +5,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   businessKeys,
   createBusiness,
-  deleteBusinessProfileImage,
   getBusiness,
   getBusinesses,
-  updateBusinessProfileImage,
 } from "@/lib/business-api";
 import {
   getBanks,
@@ -24,7 +22,6 @@ export function useBusinessesQuery() {
     queryFn: getBusinesses,
   });
 }
-
 export function useBusinessQuery(businessId: string) {
   return useQuery({
     queryKey: businessKeys.detail(businessId),
@@ -32,7 +29,6 @@ export function useBusinessQuery(businessId: string) {
     enabled: Boolean(businessId),
   });
 }
-
 export function useCreateBusinessMutation() {
   const queryClient = useQueryClient();
 
@@ -43,13 +39,13 @@ export function useCreateBusinessMutation() {
     },
   });
 }
-
-export function usePaystackBanksQuery() {
+export function usePaystackBanksQuery(enabled = true) {
   return useQuery({
     queryKey: ["paystack-banks"] as const,
     queryFn: getBanks,
     staleTime: ONE_DAY_MS,
     gcTime: ONE_DAY_MS,
+    enabled,
   });
 }
 
@@ -62,37 +58,5 @@ export function useResolveBankAccountQuery({
     queryFn: () => resolveBankAccount({ bankCode, accountNumber }),
     enabled: Boolean(bankCode && accountNumber.length === 10),
     retry: false,
-  });
-}
-
-export function useUpdateBusinessProfileImageMutation() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: updateBusinessProfileImage,
-    onSuccess: async (item) => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: businessKeys.all }),
-        queryClient.invalidateQueries({
-          queryKey: businessKeys.detail(item.business.id),
-        }),
-      ]);
-    },
-  });
-}
-
-export function useDeleteBusinessProfileImageMutation() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: deleteBusinessProfileImage,
-    onSuccess: async (item) => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: businessKeys.all }),
-        queryClient.invalidateQueries({
-          queryKey: businessKeys.detail(item.business.id),
-        }),
-      ]);
-    },
   });
 }

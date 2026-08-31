@@ -1,5 +1,5 @@
 "use client";
-import { AlertTriangle, LoaderCircle } from "lucide-react";
+import { AlertTriangle, Ban, Check, LoaderCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BusinessApiError } from "@/lib/business-api";
 import { permissionLabels } from "@/features/business/member-role-options";
@@ -8,7 +8,7 @@ import { formatDate } from "@/features/dashboard/format";
 
 export const formatDateTime = (value?: string | null) =>
   value ? formatDate(value) : "—";
-export const errorStatus = (error: unknown) =>
+const errorStatus = (error: unknown) =>
   error instanceof BusinessApiError ? error.status : undefined;
 export function ErrorState({
   error,
@@ -82,16 +82,29 @@ export function PermissionList({
   const deniedSet = new Set(denied);
   const effective = permissions.filter((p) => !deniedSet.has(p));
   return (
-    <div className="grid gap-3 sm:grid-cols-2">
+    <div className="grid gap-5 sm:grid-cols-2">
       <div>
         <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           Effective access
         </p>
-        <ul className="mt-2 space-y-1 text-sm">
+        <ul className="mt-2.5 flex flex-wrap gap-2 text-sm">
           {effective.length ? (
-            effective.map((p) => <li key={p}>• {permissionLabels[p]}</li>)
+            effective.map((permission) => (
+              <li
+                key={permission}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-500/10 px-2.5 py-1.5 text-xs font-medium text-emerald-700 dark:text-emerald-300"
+              >
+                <Check className="size-3" />
+                {permissionLabels[permission].replace(
+                  /^Allow this person to /,
+                  "",
+                )}
+              </li>
+            ))
           ) : (
-            <li className="text-muted-foreground">No effective permissions</li>
+            <li className="rounded-lg bg-muted px-2.5 py-1.5 text-xs text-muted-foreground">
+              No effective permissions
+            </li>
           )}
         </ul>
       </div>
@@ -100,9 +113,18 @@ export function PermissionList({
           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             Explicit denials
           </p>
-          <ul className="mt-2 space-y-1 text-sm text-destructive">
-            {denied.map((p) => (
-              <li key={p}>• {permissionLabels[p]}</li>
+          <ul className="mt-2.5 flex flex-wrap gap-2 text-sm text-destructive">
+            {denied.map((permission) => (
+              <li
+                key={permission}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-destructive/10 px-2.5 py-1.5 text-xs font-medium"
+              >
+                <Ban className="size-3" />
+                {permissionLabels[permission].replace(
+                  /^Allow this person to /,
+                  "",
+                )}
+              </li>
             ))}
           </ul>
         </div>

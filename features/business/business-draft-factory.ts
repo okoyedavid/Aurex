@@ -21,6 +21,10 @@ export function newEmployee(): EmployeeDraft {
     accountName: "",
     accountVerified: false,
     accountVerifiedAt: undefined,
+    employeeTypeId: null,
+    groupIds: [],
+    employmentStartDate: "",
+    state: "",
   };
 }
 

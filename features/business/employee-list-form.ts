@@ -15,6 +15,22 @@ export type EmployeePayload = {
   amount: number;
   currency: string;
   payFrequency: PayFrequency;
+  employeeTypeId?: string | null;
+  employmentStartDate?: string | null;
+  state?: string | null;
+};
+export type EmployeeUpdatePayload = Omit<
+  EmployeePayload,
+  | "jobTitle"
+  | "employeeTypeId"
+  | "employmentStartDate"
+  | "state"
+> & {
+  jobTitle: string | null;
+  employeeTypeId: string | null;
+  groupIds: string[];
+  employmentStartDate: string | null;
+  state: string | null;
 };
 export type EmployeeListPayload = {
   name: string;
@@ -56,6 +72,28 @@ export function buildEmployeePayload(
     amount: employee.amount,
     currency: employee.currency || fallbackCurrency,
     payFrequency: employee.payFrequency || fallbackFrequency,
+    ...(employee.employeeTypeId
+      ? { employeeTypeId: employee.employeeTypeId }
+      : {}),
+    ...(employee.employmentStartDate?.trim()
+      ? { employmentStartDate: employee.employmentStartDate.trim() }
+      : {}),
+    ...(employee.state?.trim() ? { state: employee.state.trim() } : {}),
+  };
+}
+
+export function buildEmployeeUpdatePayload(
+  employee: EmployeeDraft,
+  fallbackCurrency = "NGN",
+  fallbackFrequency: PayFrequency = "monthly",
+): EmployeeUpdatePayload {
+  return {
+    ...buildEmployeePayload(employee, fallbackCurrency, fallbackFrequency),
+    jobTitle: employee.jobTitle?.trim() || null,
+    employeeTypeId: employee.employeeTypeId ?? null,
+    groupIds: employee.groupIds ?? [],
+    employmentStartDate: employee.employmentStartDate?.trim() || null,
+    state: employee.state?.trim() || null,
   };
 }
 

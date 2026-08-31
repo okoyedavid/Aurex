@@ -5,27 +5,28 @@ import { BusinessApiError, type BusinessResponse } from "@/lib/business-api";
 import type {
   EmployeeListPayload,
   EmployeePayload,
+  EmployeeUpdatePayload,
 } from "@/features/business/employee-list-form";
 
-export type Pagination = {
+type Pagination = {
   page: number;
   limit: number;
   total: number;
   totalPages: number;
 };
 export type PaginatedData<T> = { items: T[]; pagination: Pagination };
-export type VerificationStatus =
+type VerificationStatus =
   | "not_started"
   | "pending"
   | "processing"
   | "completed"
   | "completed_with_errors";
-export type AccountVerificationStatus =
+type AccountVerificationStatus =
   | "pending"
   | "verified"
   | "failed"
   | "stale";
-export type VerificationJobStatus =
+type VerificationJobStatus =
   "pending" | "processing" | "retrying" | "exhausted" | "completed";
 
 export type EmployeeList = {
@@ -53,6 +54,11 @@ export type Employee = {
   id: string;
   businessId: string;
   employeeListId: string;
+  businessMemberId?: string | null;
+  employeeTypeId?: string | null;
+  groupIds?: string[];
+  employmentStartDate?: string | null;
+  state?: string | null;
   fullName: string;
   jobTitle: string | null;
   bankCode: string;
@@ -91,7 +97,7 @@ export type UpdateEmployeeListBody = Partial<
     "name" | "description" | "currency" | "payFrequency"
   >
 >;
-export type UpdateEmployeeBody = Partial<EmployeePayload>;
+export type UpdateEmployeeBody = EmployeeUpdatePayload;
 
 const root = "/businesses";
 const path = (businessId: string, listId?: string) =>
@@ -163,16 +169,6 @@ export const getEmployees = (
     api.get<BusinessResponse<PaginatedData<Employee>>>(
       `${path(businessId, listId)}/employees`,
       { params: { page, limit } },
-    ),
-  );
-export const getEmployee = (
-  businessId: string,
-  listId: string,
-  employeeId: string,
-) =>
-  request(() =>
-    api.get<BusinessResponse<Employee>>(
-      `${path(businessId, listId)}/employees/${employeeId}`,
     ),
   );
 export const createEmployee = (

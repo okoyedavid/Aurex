@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   deleteCloudinaryUpload,
   uploadAvatarWithRollback,
+  validateAvatarFile,
 } from "./cloudinary-upload";
 
 describe("Cloudinary upload rollback", () => {
@@ -51,5 +52,11 @@ describe("Cloudinary upload rollback", () => {
         body: JSON.stringify({ token: "short-lived-token" }),
       }),
     );
+  });
+
+  it("rejects active-content image formats before upload", () => {
+    expect(() =>
+      validateAvatarFile({ type: "image/svg+xml", size: 100 } as File),
+    ).toThrow("Choose a JPEG, PNG, or WebP image.");
   });
 });

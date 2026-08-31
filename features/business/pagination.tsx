@@ -7,6 +7,7 @@ export function Pagination({
   fetching,
   onPage,
   onLimit,
+  showLimit = true,
 }: {
   page: number;
   totalPages: number;
@@ -15,6 +16,7 @@ export function Pagination({
   fetching: boolean;
   onPage: (page: number) => void;
   onLimit: (limit: number) => void;
+  showLimit?: boolean;
 }) {
   return (
     <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm">
@@ -23,7 +25,7 @@ export function Pagination({
         {fetching && <span className="ml-2">Updating…</span>}
       </div>
       <div className="flex items-center gap-2">
-        <label>
+        {showLimit ? <label>
           Rows{" "}
           <select
             className="h-8 rounded-md border border-input bg-background px-2"
@@ -34,7 +36,7 @@ export function Pagination({
             <option>50</option>
             <option>100</option>
           </select>
-        </label>
+        </label> : null}
         <Button
           variant="outline"
           disabled={page <= 1}

@@ -83,7 +83,7 @@ export function BusinessAccessBoundary({
   if (state === "unauthenticated")
     return (
       <BusinessAccessRedirect
-        href={`/signin?next=${encodeURIComponent(pathname)}`}
+        href={`/login?next=${encodeURIComponent(pathname)}`}
         message="Please sign in to continue."
       />
     );

@@ -1,10 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { subscribeNewsletter } from "@/lib/public-api";
 
 const companyLinks = [
   { label: "About", href: "/about" },
@@ -20,6 +23,8 @@ const resourceLinks = [
 
 export default function Footer() {
   const pathname = usePathname();
+  const [newsletterEmail, setNewsletterEmail] = useState("");
+  const [isSubscribing, setIsSubscribing] = useState(false);
 
   if (pathname.startsWith("/dashboard") || pathname.startsWith("/business"))
     return null;
@@ -45,16 +50,42 @@ export default function Footer() {
             <h2 className="text-sm font-bold text-foreground">
               Join Our Newsletter
             </h2>
-            <form className="mt-5 flex max-w-md gap-2">
+            <form
+              method="post"
+              className="mt-5 flex max-w-md gap-2"
+              onSubmit={async (event) => {
+                event.preventDefault();
+                setIsSubscribing(true);
+                try {
+                  toast.success(await subscribeNewsletter(newsletterEmail));
+                  setNewsletterEmail("");
+                } catch (error) {
+                  toast.error(
+                    error instanceof Error
+                      ? error.message
+                      : "Unable to subscribe right now.",
+                  );
+                } finally {
+                  setIsSubscribing(false);
+                }
+              }}
+            >
               <Input
                 type="email"
                 name="newsletter-email"
                 aria-label="Email address for newsletter"
+                required
                 placeholder="Your email address"
+                value={newsletterEmail}
+                onChange={(event) => setNewsletterEmail(event.target.value)}
                 className="h-11 rounded-none bg-muted"
               />
-              <Button type="submit" className="h-11 rounded-none px-5">
-                Subscribe
+              <Button
+                type="submit"
+                disabled={isSubscribing}
+                className="h-11 rounded-none px-5"
+              >
+                {isSubscribing ? "Subscribing…" : "Subscribe"}
               </Button>
             </form>
             <p className="mt-4 max-w-sm text-sm leading-6 text-muted-foreground">

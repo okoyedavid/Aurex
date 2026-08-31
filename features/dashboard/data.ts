@@ -2,9 +2,7 @@ import {
   Activity,
   Bell,
   Building2,
-  CircleDollarSign,
   ClipboardList,
-  FileText,
   LayoutDashboard,
   ListChecks,
   ReceiptText,
@@ -46,7 +44,6 @@ export function getEffectivePermissions(role: BusinessRole) {
   const denied = new Set(role.deniedPermissions);
   return new Set(role.permissions.filter((permission) => !denied.has(permission)));
 }
-
 export function canAccessBusinessNavigationItem(
   item: BusinessNavigationItem,
   permissions: ReadonlySet<Permission>,
@@ -57,8 +54,7 @@ export function canAccessBusinessNavigationItem(
   }
   return true;
 }
-
-export function getBusinessNavigationItems(
+function getBusinessNavigationItems(
   businessId: string,
 ): BusinessNavigationItem[] {
   const base = `/business/${businessId}`;
@@ -90,7 +86,6 @@ export function getBusinessNavigation(
     canAccessBusinessNavigationItem(item, permissions),
   );
 }
-
 export function getBusinessNavigationItemForPath(
   businessId: string,
   pathname: string,
@@ -109,82 +104,3 @@ export function isNavigationItemActive(
     (!item.exact && pathname.startsWith(`${item.href}/`))
   );
 }
-
-export const dashboardMetrics = [
-  {
-    label: "Available balance",
-    value: "NGN 84.2M",
-    detail: "+12.8% this month",
-    icon: CircleDollarSign,
-  },
-  {
-    label: "Pending settlements",
-    value: "NGN 18.4M",
-    detail: "4 expected this week",
-    icon: ListChecks,
-  },
-  {
-    label: "Open invoices",
-    value: "NGN 32.9M",
-    detail: "12 awaiting payment",
-    icon: FileText,
-  },
-];
-
-export const dashboardTransactions = [
-  {
-    company: "Northstar Retail",
-    reference: "INV-2048",
-    date: "Today, 10:42",
-    amount: "+NGN 8.42M",
-    status: "Received",
-    incoming: true,
-  },
-  {
-    company: "Atlas Logistics",
-    reference: "PAY-8371",
-    date: "Today, 09:18",
-    amount: "-NGN 2.75M",
-    status: "Processing",
-    incoming: false,
-  },
-  {
-    company: "Kora Systems",
-    reference: "INV-2045",
-    date: "Yesterday, 16:05",
-    amount: "+NGN 4.98M",
-    status: "Received",
-    incoming: true,
-  },
-  {
-    company: "Cedar Workspace",
-    reference: "PAY-8362",
-    date: "Yesterday, 11:30",
-    amount: "-NGN 1.28M",
-    status: "Completed",
-    incoming: false,
-  },
-];
-
-export const dashboardSettlements = [
-  {
-    label: "Card collections",
-    date: "June 16",
-    amount: "NGN 12.48M",
-    progress: 82,
-  },
-  {
-    label: "Bank transfers",
-    date: "June 17",
-    amount: "NGN 4.82M",
-    progress: 58,
-  },
-  {
-    label: "Invoice payouts",
-    date: "June 18",
-    amount: "NGN 1.12M",
-    progress: 34,
-  },
-];
-
-export const cashFlowBars = [44, 58, 48, 72, 66, 84, 76, 92, 70, 88, 78, 96];

@@ -86,8 +86,7 @@ export function CreateBusinessDialog({
     }
 
     let uploadedImage:
-      | Awaited<ReturnType<typeof uploadAvatarWithRollback>>
-      | undefined;
+      Awaited<ReturnType<typeof uploadAvatarWithRollback>> | undefined;
 
     try {
       // Validate and construct the complete API body before creating a remote
@@ -244,7 +243,7 @@ export function CreateBusinessDialog({
                       <input
                         ref={logoInputRef}
                         type="file"
-                        accept="image/*"
+                        accept="image/jpeg,image/png,image/webp"
                         className="hidden"
                         onChange={(event) => {
                           const file = event.target.files?.[0];

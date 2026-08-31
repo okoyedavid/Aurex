@@ -9,7 +9,7 @@ import {
   SessionApiError,
 } from "@/lib/session-api";
 
-export const sessionKeys = {
+const sessionKeys = {
   all: ["sessions"] as const,
   me: () => [...sessionKeys.all, "me"] as const,
 };

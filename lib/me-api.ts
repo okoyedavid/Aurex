@@ -9,7 +9,7 @@ type MeResponse = {
   success: boolean;
 };
 
-export class MeApiError extends Error {
+class MeApiError extends Error {
   status: number;
   response: ApiErrorResponse;
 
