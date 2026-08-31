@@ -25,6 +25,7 @@ const permissionGroups = [
   { label: "Team access", matches: (permission: Permission) => permission.startsWith("members:") || permission.startsWith("roles:") },
   { label: "Money movement", matches: (permission: Permission) => permission.startsWith("payments:") || permission.startsWith("providers:") || permission.startsWith("invoices:") },
   { label: "Workforce", matches: (permission: Permission) => permission.startsWith("employee") },
+  { label: "Policies", matches: (permission: Permission) => permission.startsWith("policies:") },
   { label: "Reporting & security", matches: (permission: Permission) => permission.startsWith("reports:") || permission.startsWith("audit_logs:") },
 ] as const;
 

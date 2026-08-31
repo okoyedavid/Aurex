@@ -40,7 +40,14 @@ export type Permission =
   | "employees:view"
   | "employees:update"
   | "employees:archive"
-  | "employees:verify";
+  | "employees:verify"
+  | "policies:view"
+  | "policies:create"
+  | "policies:update"
+  | "policies:archive"
+  | "policies:assign"
+  | "policies:view_audit"
+  | "policies:reconcile";
 
 export type User = {
   id: Id;

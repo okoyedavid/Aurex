@@ -88,6 +88,19 @@ describe("dashboard navigation matching", () => {
     ).toBe(false);
   });
 
+  it("shows policy navigation only with policies:view", () => {
+    expect(
+      getBusinessNavigation("business-1", new Set(["policies:view"])).some(
+        (item) => item.name === "Policies",
+      ),
+    ).toBe(true);
+    expect(
+      getBusinessNavigation("business-1", new Set()).some(
+        (item) => item.name === "Policies",
+      ),
+    ).toBe(false);
+  });
+
   it("denies direct member detail routes without members:view", () => {
     const item = getBusinessNavigationItemForPath(
       "business-1",

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import { ArrowLeft, Loader2, Plus, Pencil } from "lucide-react";
+import { ArrowLeft, Loader2, Plus, Pencil, ScrollText } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { BusinessApiError } from "@/lib/business-api";
@@ -55,6 +55,7 @@ export function EmployeeListDetailPage({
   const canCreate = access.effectivePermissions.has("employees:create");
   const canEditList = access.effectivePermissions.has("employee_lists:update");
   const canEditEmployee = access.effectivePermissions.has("employees:update");
+  const canViewPolicies = access.effectivePermissions.has("policies:view");
   const navigate = useCallback(
     (nextPage: number, nextLimit = limit) => {
       const params = new URLSearchParams(search.toString());
@@ -248,6 +249,14 @@ export function EmployeeListDetailPage({
                     )}
                   </td>
                   <td className="p-4">
+                    {canViewPolicies && (
+                      <Button asChild size="sm" variant="ghost">
+                        <Link href={`/business/${businessId}/employee-lists/${employeeListId}/employees/${employee.id}/policies`}>
+                          <ScrollText />
+                          Policies
+                        </Link>
+                      </Button>
+                    )}
                     {canEditEmployee && (
                       <Button
                         size="sm"

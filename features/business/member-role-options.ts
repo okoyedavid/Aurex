@@ -34,6 +34,13 @@ export const permissionLabels: Record<Permission, string> = {
   "employees:view_own": "Allow user to view his employee details",
   "employees:archive": "Allow this person to archive employees",
   "employees:verify": "Allow this person to verify employees",
+  "policies:view": "Allow this person to view policies and assignments",
+  "policies:create": "Allow this person to create policy categories and policies",
+  "policies:update": "Allow this person to update policies and assignment rules",
+  "policies:archive": "Allow this person to archive policy categories and policies",
+  "policies:assign": "Allow this person to manage manual policy assignments",
+  "policies:view_audit": "Allow this person to view policy audit history",
+  "policies:reconcile": "Allow this person to request policy reconciliation",
 };
 
 export const assignableSystemRoles = [
@@ -62,6 +69,13 @@ export const assignableSystemRoles = [
       "employees:update",
       "employees:archive",
       "employees:verify",
+      "policies:view",
+      "policies:create",
+      "policies:update",
+      "policies:archive",
+      "policies:assign",
+      "policies:view_audit",
+      "policies:reconcile",
     ],
   },
   {

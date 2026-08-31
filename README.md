@@ -25,6 +25,8 @@ The frontend consumes a separate Aurex backend configured through
 - Business-owned employee types and groups, including backend-provided system
   templates, custom classifications, archived historical labels, and
   permission-aware assignment
+- Employee policy categories, effective policies, structured assignment rules,
+  manual overrides, resolution explanations, reconciliation, and audit history
 - Consistent loading, error, empty, pagination, dialog, and toast states
 - Semantic light and dark themes with responsive, accessible controls
 
