@@ -11,7 +11,7 @@ import {
 
 export function BusinessEmptyState({ onCreate }: { onCreate: () => void }) {
   return (
-    <Card className="rounded-xl border border-border shadow-sm">
+    <Card className="rounded-md border border-border shadow-sm">
       <CardHeader>
         <div className="flex h-12 w-12 items-center justify-center rounded-md bg-primary/10 text-primary">
           <Building2 className="h-6 w-6" />

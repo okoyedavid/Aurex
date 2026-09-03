@@ -1,3 +1,4 @@
+import { SelectControl } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 export function Pagination({
   page,
@@ -18,6 +19,8 @@ export function Pagination({
   onLimit: (limit: number) => void;
   showLimit?: boolean;
 }) {
+  if (total <= 0 || totalPages <= 1) return null;
+
   return (
     <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm">
       <div className="text-muted-foreground">
@@ -27,15 +30,15 @@ export function Pagination({
       <div className="flex items-center gap-2">
         {showLimit ? <label>
           Rows{" "}
-          <select
-            className="h-8 rounded-md border border-input bg-background px-2"
+          <SelectControl
+            className="h-8 w-20 rounded-md border border-input bg-background px-2"
             value={limit}
             onChange={(event) => onLimit(Number(event.target.value))}
           >
             <option>20</option>
             <option>50</option>
             <option>100</option>
-          </select>
+          </SelectControl>
         </label> : null}
         <Button
           variant="outline"

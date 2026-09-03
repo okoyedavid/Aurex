@@ -1,308 +1,62 @@
 "use client";
 
+import { SelectControl } from "@/components/ui/select";
+
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
-import { ArrowLeft, Loader2, Plus, Pencil, ScrollText } from "lucide-react";
-import { useQueryClient } from "@tanstack/react-query";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { ArrowLeft, Loader2, Pencil, Plus } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { EmployeeDirectoryTable } from "@/features/employees/employee-directory-table";
+import { employeeDirectoryFilters } from "@/features/employees/employee-directory-utils";
+import { EmployeeSubnavigation } from "@/features/employees/employee-subnavigation";
+import { useBusinessEmployeesQuery } from "@/features/employees/employee-hooks";
 import { BusinessApiError } from "@/lib/business-api";
-import type { Employee } from "@/lib/employee-lists-api";
-import { getEmployees } from "@/lib/employee-lists-api";
 import { useBusinessAccess } from "./business-access-context";
-import {
-  friendlyEmployeeStatus,
-  friendlyListStatus,
-  maskAccountNumber,
-  normalizePagination,
-  safeEmployeeFailure,
-} from "./employee-list-display";
-import {
-  employeeListKeys,
-  useEmployeeListQuery,
-  useEmployeesQuery,
-  useVerificationStatusQuery,
-} from "./employee-list-hooks";
+import { useEmployeeGroupsQuery, useEmployeeTypesQuery } from "./employee-classification-hooks";
+import { friendlyListStatus } from "./employee-list-display";
+import { useEmployeeListQuery, useVerificationStatusQuery } from "./employee-list-hooks";
 import { labelFrequency } from "./employee-lists-page";
 import { Pagination } from "./pagination";
-import { StatusBadge as Badge } from "./status-badge";
 import { EmployeeListDetailFrame as Frame } from "./employee-list-detail-frame";
 import { EmployeeListDetailState as State } from "./employee-list-detail-state";
 import { EmployeeListMetric as Metric } from "./employee-list-metric";
-import { TableHeading as Th } from "./table-heading";
 import { EditListDialog } from "./components/edit-list-dialog";
 import { EmployeeDialog } from "./components/employee-dialog";
 
-export function EmployeeListDetailPage({
-  businessId,
-  employeeListId,
-}: {
-  businessId: string;
-  employeeListId: string;
-}) {
-  const search = useSearchParams();
+export function EmployeeListDetailPage({ businessId, employeeListId }: { businessId: string; employeeListId: string }) {
   const router = useRouter();
-  const qc = useQueryClient();
-  const page = normalizePagination(search.get("page"), 1);
-  const limit = normalizePagination(search.get("limit"), 20, 100);
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const access = useBusinessAccess();
-  const listQuery = useEmployeeListQuery(businessId, employeeListId);
-  const employees = useEmployeesQuery(businessId, employeeListId, page, limit);
-  const verification = useVerificationStatusQuery(businessId, employeeListId);
-  const [employeeOpen, setEmployeeOpen] = useState(false);
-  const [editListOpen, setEditListOpen] = useState(false);
-  const [editing, setEditing] = useState<Employee>();
+  const canViewEmployees = access.effectivePermissions.has("employees:view");
   const canCreate = access.effectivePermissions.has("employees:create");
   const canEditList = access.effectivePermissions.has("employee_lists:update");
-  const canEditEmployee = access.effectivePermissions.has("employees:update");
-  const canViewPolicies = access.effectivePermissions.has("policies:view");
-  const navigate = useCallback(
-    (nextPage: number, nextLimit = limit) => {
-      const params = new URLSearchParams(search.toString());
-      params.set("page", String(nextPage));
-      params.set("limit", String(nextLimit));
-      router.push(`?${params}`);
-    },
-    [limit, router, search],
-  );
-  useEffect(() => {
-    if (
-      search.get("page") !== String(page) ||
-      search.get("limit") !== String(limit)
-    ) {
-      const params = new URLSearchParams(search.toString());
-      params.set("page", String(page));
-      params.set("limit", String(limit));
-      router.replace(`?${params}`);
-    }
-  }, [page, limit, router, search]);
-  useEffect(() => {
-    const p = employees.data?.pagination;
-    if (p && page < p.totalPages)
-      void qc.prefetchQuery({
-        queryKey: employeeListKeys.employees(
-          businessId,
-          employeeListId,
-          page + 1,
-          limit,
-        ),
-        queryFn: () =>
-          getEmployees(businessId, employeeListId, page + 1, limit),
-      });
-  }, [businessId, employeeListId, page, limit, employees.data?.pagination, qc]);
-  useEffect(() => {
-    if (
-      employees.data &&
-      employees.data.items.length === 0 &&
-      page > Math.max(1, employees.data.pagination.totalPages)
-    )
-      navigate(Math.max(1, employees.data.pagination.totalPages));
-  }, [employees.data, page, navigate]);
-
+  const filters = employeeDirectoryFilters(new URLSearchParams(searchParams.toString()), employeeListId);
+  const [employeeOpen, setEmployeeOpen] = useState(false);
+  const [editListOpen, setEditListOpen] = useState(false);
+  const listQuery = useEmployeeListQuery(businessId, employeeListId);
+  const employees = useBusinessEmployeesQuery(businessId, filters, canViewEmployees);
+  const verification = useVerificationStatusQuery(businessId, employeeListId);
+  const types = useEmployeeTypesQuery(businessId, "active", canViewEmployees);
+  const groups = useEmployeeGroupsQuery(businessId, "active", canViewEmployees);
+  const update = (patch: Record<string, string | undefined>, resetPage = true) => {
+    const params = new URLSearchParams(searchParams.toString());
+    Object.entries(patch).forEach(([key, value]) => value ? params.set(key, value) : params.delete(key));
+    if (resetPage) params.set("page", "1");
+    router.replace(`${pathname}?${params.toString()}`);
+  };
   const error = listQuery.error || employees.error;
   const status = error instanceof BusinessApiError ? error.status : 0;
-  if (listQuery.isLoading || employees.isLoading)
-    return (
-      <Frame>
-        <div className="flex gap-2 text-muted-foreground">
-          <Loader2 className="animate-spin" />
-          Loading employee list…
-        </div>
-      </Frame>
-    );
-  if (status === 403)
-    return (
-      <Frame>
-        <State
-          title="Permission required"
-          detail="You do not have permission to view this employee list."
-        />
-      </Frame>
-    );
-  if (status === 404)
-    return (
-      <Frame>
-        <State
-          title="Employee list not found"
-          detail="This list may have been removed or does not belong to this business."
-        />
-      </Frame>
-    );
-  if (error || !listQuery.data || !employees.data)
-    return (
-      <Frame>
-        <State
-          title="Unable to load employee list"
-          detail={error instanceof Error ? error.message : "Try again."}
-          retry={() => {
-            void listQuery.refetch();
-            void employees.refetch();
-          }}
-        />
-      </Frame>
-    );
+  if (listQuery.isLoading || employees.isLoading) return <Frame><div className="flex gap-2 text-muted-foreground"><Loader2 className="animate-spin" />Loading department…</div></Frame>;
+  if (!canViewEmployees || status === 403) return <Frame><State title="Permission required" detail="Viewing a department directory requires employees:view." /></Frame>;
+  if (status === 404) return <Frame><State title="Department not found" detail="This department may have been removed or does not belong to this business." /></Frame>;
+  if (error || !listQuery.data || !employees.data) return <Frame><State title="Unable to load department" detail={error instanceof Error ? error.message : "Try again."} retry={() => { void listQuery.refetch(); void employees.refetch(); }} /></Frame>;
   const list = listQuery.data;
   const progress = verification.data ?? list;
-  const data = employees.data;
-  return (
-    <Frame>
-      <Link
-        href={`/business/${businessId}/employee-lists`}
-        className="inline-flex items-center gap-2 text-sm font-medium text-primary"
-      >
-        <ArrowLeft />
-        Employee Lists
-      </Link>
-      <div className="mt-5 flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold">{list.name}</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {list.description || "No description"} · {list.currency} ·{" "}
-            {labelFrequency(list.defaultPayFrequency)}
-          </p>
-        </div>
-        <div className="flex gap-2">
-          {canEditList && (
-            <Button variant="outline" onClick={() => setEditListOpen(true)}>
-              <Pencil />
-              Edit list
-            </Button>
-          )}
-          {canCreate && (
-            <Button
-              onClick={() => {
-                setEditing(undefined);
-                setEmployeeOpen(true);
-              }}
-            >
-              <Plus />
-              Add employee
-            </Button>
-          )}
-        </div>
-      </div>
-      <div className="mt-6 grid gap-3 sm:grid-cols-5">
-        <Metric
-          label="Status"
-          value={friendlyListStatus(progress.validationStatus)}
-        />
-        <Metric label="Total" value={progress.totalEmployeeCount} />
-        <Metric label="Pending" value={progress.pendingVerificationCount} />
-        <Metric label="Verified" value={progress.verifiedEmployeeCount} />
-        <Metric
-          label="Failed / error"
-          value={
-            progress.invalidEmployeeCount + progress.verificationErrorCount
-          }
-        />
-      </div>
-      <div className="mt-7 overflow-x-auto rounded-xl border border-border bg-card">
-        {data.items.length === 0 ? (
-          <div className="p-10 text-center">
-            <h2 className="font-semibold">No employees in this list</h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Add an employee when you are ready.
-            </p>
-          </div>
-        ) : (
-          <table className="w-full min-w-[1000px] text-left text-sm">
-            <thead className="border-b border-border bg-muted/50 text-xs text-muted-foreground">
-              <tr>
-                <Th>Employee</Th>
-                <Th>Bank account</Th>
-                <Th>Pay</Th>
-                <Th>Status</Th>
-                <Th></Th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {data.items.map((employee) => (
-                <tr key={employee.id}>
-                  <td className="p-4">
-                    <p className="font-semibold">{employee.fullName}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {employee.jobTitle || "No job title"}
-                    </p>
-                  </td>
-                  <td className="p-4">
-                    {employee.bankName}
-                    {employee.accountName && (
-                      <p className="mt-1 font-medium">{employee.accountName}</p>
-                    )}
-                    <p className="text-xs text-muted-foreground">
-                      {maskAccountNumber(employee.accountNumber)}
-                    </p>
-                  </td>
-                  <td className="p-4">
-                    {employee.currency}{" "}
-                    {Number(employee.amount).toLocaleString()}
-                    <p className="text-xs text-muted-foreground">
-                      {labelFrequency(employee.payFrequency)}
-                    </p>
-                  </td>
-                  <td className="p-4">
-                    <Badge>{friendlyEmployeeStatus(employee)}</Badge>
-                    {safeEmployeeFailure(employee) && (
-                      <p className="mt-1 max-w-xs text-xs text-destructive">
-                        {safeEmployeeFailure(employee)}
-                      </p>
-                    )}
-                  </td>
-                  <td className="p-4">
-                    {canViewPolicies && (
-                      <Button asChild size="sm" variant="ghost">
-                        <Link href={`/business/${businessId}/employee-lists/${employeeListId}/employees/${employee.id}/policies`}>
-                          <ScrollText />
-                          Policies
-                        </Link>
-                      </Button>
-                    )}
-                    {canEditEmployee && (
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => {
-                          setEditing(employee);
-                          setEmployeeOpen(true);
-                        }}
-                      >
-                        <Pencil />
-                        Edit
-                      </Button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
-      <Pagination
-        page={data.pagination.page}
-        totalPages={data.pagination.totalPages}
-        total={data.pagination.total}
-        limit={limit}
-        fetching={employees.isFetching}
-        onPage={(value) => navigate(value)}
-        onLimit={(value) => navigate(1, value)}
-      />
-      {employeeOpen && (
-        <EmployeeDialog
-          businessId={businessId}
-          listId={employeeListId}
-          employee={editing}
-          open
-          onOpenChange={setEmployeeOpen}
-        />
-      )}
-      {canEditList && editListOpen && (
-        <EditListDialog
-          businessId={businessId}
-          list={list}
-          open
-          onOpenChange={setEditListOpen}
-        />
-      )}
-    </Frame>
-  );
+  return <Frame><EmployeeSubnavigation businessId={businessId} current="departments" /><Link href={`/business/${businessId}/employee-lists`} className="inline-flex items-center gap-2 text-sm font-medium text-primary"><ArrowLeft />Departments</Link><div className="mt-5 flex flex-wrap items-start justify-between gap-4"><div><h1 className="text-3xl font-bold">{list.name}</h1><p className="mt-2 text-sm text-muted-foreground">{list.description || "No description"} · {list.currency} · {labelFrequency(list.defaultPayFrequency)}</p></div><div className="flex gap-2">{canEditList ? <Button variant="outline" onClick={() => setEditListOpen(true)}><Pencil />Edit department</Button> : null}{canCreate ? <Button onClick={() => setEmployeeOpen(true)}><Plus />Add employee</Button> : null}</div></div><div className="mt-6 grid gap-3 sm:grid-cols-5"><Metric label="Status" value={friendlyListStatus(progress.validationStatus)} /><Metric label="Total" value={progress.totalEmployeeCount} /><Metric label="Pending" value={progress.pendingVerificationCount} /><Metric label="Verified" value={progress.verifiedEmployeeCount} /><Metric label="Failed / error" value={progress.invalidEmployeeCount + progress.verificationErrorCount} /></div><div className="mt-7 grid gap-3 rounded-md border border-border bg-card p-4 sm:grid-cols-2 lg:grid-cols-5"><Filter label="All types" value={filters.employeeTypeId} onChange={(value) => update({ employeeTypeId: value })} items={types.data?.items.map((item) => [item.id, item.name]) ?? []} /><Filter label="All groups" value={filters.groupId} onChange={(value) => update({ groupId: value })} items={groups.data?.items.map((item) => [item.id, item.name]) ?? []} /><Filter label="All statuses" value={filters.status} onChange={(value) => update({ status: value })} items={[["active", "Active"], ["suspended", "Suspended"], ["on leave", "On leave"], ["archived", "Archived"]]} /><Input aria-label="Filter by state" value={filters.state ?? ""} onChange={(event) => update({ state: event.target.value.trim() || undefined })} placeholder="State" /><Button variant="ghost" onClick={() => router.replace(pathname)}>Clear filters</Button></div><div className="mt-6">{employees.data.items.length ? <EmployeeDirectoryTable businessId={businessId} employees={employees.data.items} returnTo={`${pathname}?${searchParams.toString()}`} /> : <State title="No employees found" detail="Try changing the filters or add an employee to this department." />}</div><Pagination page={employees.data.pagination.page} totalPages={employees.data.pagination.totalPages} total={employees.data.pagination.total} limit={filters.limit} fetching={employees.isFetching} onPage={(page) => update({ page: String(page) }, false)} onLimit={(limit) => update({ limit: String(limit), page: "1" }, false)} />{employeeOpen ? <EmployeeDialog businessId={businessId} listId={employeeListId} open onOpenChange={setEmployeeOpen} /> : null}{canEditList && editListOpen ? <EditListDialog businessId={businessId} list={list} open onOpenChange={setEditListOpen} /> : null}</Frame>;
 }
+
+function Filter({ label, value, onChange, items }: { label: string; value?: string; onChange: (value?: string) => void; items: string[][] }) { return <label><span className="sr-only">{label}</span><SelectControl className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm" value={value ?? ""} onChange={(event) => onChange(event.target.value || undefined)}><option value="">{label}</option>{items.map(([id, name]) => <option key={id} value={id}>{name}</option>)}</SelectControl></label>; }

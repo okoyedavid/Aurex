@@ -16,7 +16,7 @@ export function BusinessLayoutSkeleton() {
         <div className="h-16 animate-pulse border-b border-border bg-background" />
         <div className="space-y-5 p-8">
           <div className="h-10 w-72 animate-pulse rounded bg-card" />
-          <div className="h-64 animate-pulse rounded-xl bg-card" />
+          <div className="h-64 animate-pulse rounded-md bg-card" />
         </div>
       </section>
     </main>

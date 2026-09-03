@@ -1,5 +1,8 @@
 "use client";
 
+import { SelectControl } from "@/components/ui/select";
+import { DateInput } from "@/components/ui/date-input";
+
 import { useMemo, useState } from "react";
 import { Loader2, Plus, X } from "lucide-react";
 import { toast } from "sonner";
@@ -127,14 +130,14 @@ export function EmployeeClassificationFields({
   };
 
   return (
-    <section className="mt-4 space-y-4 rounded-xl border border-border bg-muted/20 p-4">
+    <section className="mt-4 space-y-4 rounded-md border border-border bg-muted/20 p-4">
       <div className="grid gap-4 sm:grid-cols-3">
         <label className="space-y-2 text-sm font-medium">
           Employee type
-          <select
+          <SelectControl
             value={selectedTypeValue}
             disabled={typeBusy || (!access.canView && !access.canCreateTypes)}
-            className="h-9 w-full rounded-lg border border-input bg-background px-3 text-sm"
+            className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
             onChange={(event) => {
               const [kind, value] = event.target.value.split(":", 2);
               if (!value) {
@@ -160,12 +163,12 @@ export function EmployeeClassificationFields({
                 {option.name} · {option.kind === "template" ? "Default" : option.sourceTemplateKey ? "Business" : "Custom"}
               </option>
             ))}
-          </select>
+          </SelectControl>
         </label>
         <label className="space-y-2 text-sm font-medium">
           Employment start date
-          <Input
-            type="date"
+          <DateInput
+            kind="date"
             value={employee.employmentStartDate ?? ""}
             disabled={disabled}
             onChange={(event) => onUpdate({ employmentStartDate: event.target.value })}
@@ -245,7 +248,7 @@ export function EmployeeClassificationFields({
               const value = classificationOptionValue(option);
               const checked = option.kind === "owned" && selectedGroupIds.has(option.id);
               return (
-                <label key={value} className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-sm">
+                <label key={value} className="flex items-center gap-2 rounded-md border border-border bg-background px-3 py-2 text-sm">
                   <input
                     type="checkbox"
                     checked={checked}
@@ -263,7 +266,7 @@ export function EmployeeClassificationFields({
               );
             })}
             {archivedSelectedGroups.map((group) => (
-              <div key={group.id} className="flex items-center gap-2 rounded-lg border border-dashed border-border px-3 py-2 text-sm text-muted-foreground">
+              <div key={group.id} className="flex items-center gap-2 rounded-md border border-dashed border-border px-3 py-2 text-sm text-muted-foreground">
                 <span>{group.name}</span><span className="ml-auto text-xs">Archived</span>
               </div>
             ))}

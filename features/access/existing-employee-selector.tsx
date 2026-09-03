@@ -1,5 +1,7 @@
 "use client";
 
+import { SelectControl } from "@/components/ui/select";
+
 import { Check, Link2, UserRound } from "lucide-react";
 import { useState } from "react";
 
@@ -46,7 +48,7 @@ export function ExistingEmployeeSelector({
 
   if (!enabled) {
     return (
-      <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-800 dark:text-amber-200">
+      <div className="rounded-md border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-800 dark:text-amber-200">
         Browsing existing employees requires members:invite,
         employee_lists:view, and employees:view.
       </div>
@@ -62,8 +64,8 @@ export function ExistingEmployeeSelector({
       ) : lists.data?.items.length ? (
         <label className="block space-y-2 text-sm font-medium">
           Employee list
-          <select
-            className="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+          <SelectControl
+            className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
             value={employeeListId}
             onChange={(event) => {
               const next = changeEmployeeList(event.target.value);
@@ -78,10 +80,10 @@ export function ExistingEmployeeSelector({
                 {list.name} · {list.totalEmployeeCount} employees
               </option>
             ))}
-          </select>
+          </SelectControl>
         </label>
       ) : (
-        <div className="rounded-xl border border-dashed border-border p-5 text-center text-sm text-muted-foreground">
+        <div className="rounded-md border border-dashed border-border p-5 text-center text-sm text-muted-foreground">
           No employee lists are available.
         </div>
       )}
@@ -132,7 +134,7 @@ export function ExistingEmployeeSelector({
               />
             </>
           ) : (
-            <div className="rounded-xl border border-dashed border-border p-5 text-center text-sm text-muted-foreground">
+            <div className="rounded-md border border-dashed border-border p-5 text-center text-sm text-muted-foreground">
               This employee list has no employees.
             </div>
           )}
@@ -160,7 +162,7 @@ function EmployeeChoice({
       disabled={linked}
       onClick={onSelect}
       className={cn(
-        "flex w-full items-start gap-3 rounded-xl border p-3 text-left transition disabled:cursor-not-allowed disabled:opacity-55",
+        "flex w-full items-start gap-3 rounded-md border p-3 text-left transition disabled:cursor-not-allowed disabled:opacity-55",
         selected
           ? "border-primary bg-primary/5 ring-1 ring-primary/20"
           : "border-border hover:border-primary/25 hover:bg-muted/30",
@@ -168,7 +170,7 @@ function EmployeeChoice({
     >
       <span
         className={cn(
-          "mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg",
+          "mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-md",
           selected ? "bg-primary text-primary-foreground" : "bg-muted",
         )}
       >

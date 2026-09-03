@@ -152,8 +152,8 @@ export default function Testimonials() {
               variants={fadeUp}
               className="relative mx-auto w-full max-w-md"
             >
-              <div className="absolute -left-8 -top-8 h-20 w-20 rounded-tl-[4rem] bg-cyan-400" />
-              <div className="absolute -bottom-10 right-2 h-28 w-28 rounded-br-[5rem] bg-cyan-400" />
+              <div className="absolute -left-8 -top-8 h-20 w-20 rounded-tl-md bg-cyan-400" />
+              <div className="absolute -bottom-10 right-2 h-28 w-28 rounded-br-md bg-cyan-400" />
 
               <div className="absolute right-4 top-2 z-0 grid grid-cols-8 gap-2 opacity-30">
                 {Array.from({ length: 48 }).map((_, index) => (

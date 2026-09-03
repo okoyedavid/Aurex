@@ -100,7 +100,7 @@ export function BusinessMemberDetailPage({
         <ArrowLeft className="h-4 w-4" /> Members
       </Link>
 
-      <section className="mt-5 rounded-xl border border-border bg-card p-6 shadow-sm">
+      <section className="mt-5 rounded-md border border-border bg-card p-6 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex items-center gap-4">
             <MemberAvatar user={member.userId} />
@@ -173,7 +173,7 @@ export function BusinessMemberDetailPage({
         </dl>
         <div className="mt-6 border-t border-border pt-6">
           <h2 className="font-semibold">Current role access</h2>
-          <div className="mt-4 rounded-lg bg-muted/30 p-4">
+          <div className="mt-4 rounded-md bg-muted/30 p-4">
             <PermissionList
               permissions={member.roleId.permissions}
               denied={member.roleId.deniedPermissions}

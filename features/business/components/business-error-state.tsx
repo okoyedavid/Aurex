@@ -17,7 +17,7 @@ export function BusinessErrorState({
   onRetry: () => void;
 }) {
   return (
-    <Card className="rounded-xl border border-border shadow-sm">
+    <Card className="rounded-md border border-border shadow-sm">
       <CardHeader>
         <div className="flex items-start gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-destructive/10 text-destructive">

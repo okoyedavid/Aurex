@@ -18,6 +18,7 @@ import { businessKeys } from "@/lib/business-api";
 import { authKeys } from "@/lib/me-api";
 import type { User } from "@/types/generic";
 import { notificationKeys, roleKeys } from "@/features/access/hooks";
+import { auditKeys } from "@/features/audit/audit-hooks";
 
 export const businessMemberKeys = {
   root: (businessId: string) => ["businesses", businessId, "members"] as const,
@@ -95,6 +96,8 @@ function useMemberMutation<TPayload>(
         }),
         queryClient.invalidateQueries({ queryKey: roleKeys.root(businessId) }),
         queryClient.invalidateQueries({ queryKey: notificationKeys.root }),
+        queryClient.invalidateQueries({ queryKey: auditKeys.organizationRoot(businessId) }),
+        queryClient.invalidateQueries({ queryKey: auditKeys.personalRoot(businessId) }),
         ...(me?.id === member.userId.id
           ? [
               queryClient.invalidateQueries({

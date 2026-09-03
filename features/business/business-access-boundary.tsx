@@ -13,6 +13,7 @@ import { DashboardShell } from "@/features/dashboard/dashboard-shell";
 import {
   canAccessBusinessNavigationItem,
   getBusinessNavigation,
+  getBusinessHeaderCommands,
   getBusinessNavigationItemForPath,
   getEffectivePermissions,
 } from "@/features/dashboard/data";
@@ -114,6 +115,7 @@ export function BusinessAccessBoundary({
     );
 
   const navigation = getBusinessNavigation(businessId, effectivePermissions);
+  const headerCommands = getBusinessHeaderCommands(businessId, effectivePermissions);
   const routeItem = getBusinessNavigationItemForPath(businessId, pathname);
   const routeAllowed =
     !routeItem ||
@@ -143,6 +145,7 @@ export function BusinessAccessBoundary({
         businessId={businessId}
         businessName={query.data.business.name}
         businessNavigation={navigation}
+        headerCommands={headerCommands}
         isRefreshing={query.isFetching && !query.isLoading}
       >
         {content}

@@ -96,7 +96,7 @@ export default function Growth() {
                 >
                   <Card>
                     <CardHeader className="space-y-5">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary/10 text-primary">
                         <Icon className="h-5 w-5" />
                       </div>
                       <CardTitle>{feature.title}</CardTitle>

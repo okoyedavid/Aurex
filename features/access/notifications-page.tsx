@@ -46,7 +46,7 @@ export function NotificationsPage() {
             </Button>
           ) : null}
         </div>
-        <div className="mt-6 inline-flex rounded-lg bg-muted p-1">
+        <div className="mt-6 inline-flex rounded-md bg-muted p-1">
           <button
             className={`rounded-md px-4 py-1.5 text-sm ${!unread ? "bg-background font-semibold shadow-sm" : "text-muted-foreground"}`}
             onClick={() => {
@@ -66,7 +66,7 @@ export function NotificationsPage() {
             Unread
           </button>
         </div>
-        <div className="mt-5 overflow-hidden rounded-xl border border-border bg-card">
+        <div className="mt-5 overflow-hidden rounded-md border border-border bg-card">
           {query.isLoading ? (
             <div className="p-5">
               <LoadingState />

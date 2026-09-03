@@ -54,8 +54,58 @@ describe("dashboard navigation matching", () => {
     );
     expect(navigation.map((item) => item.name)).toEqual([
       "Overview",
-      "Invoices",
+      "Payments",
+      "Audit Logs",
     ]);
+  });
+
+  it("groups invoices and providers under the Payments navigation item", () => {
+    const navigation = getBusinessNavigation(
+      "business-1",
+      new Set(["invoices:view", "providers:view"]),
+    );
+
+    expect(navigation.map((item) => item.name)).toEqual([
+      "Overview",
+      "Payments",
+      "Audit Logs",
+    ]);
+    expect(
+      isNavigationItemActive(
+        "/business/business-1/invoices",
+        navigation[1],
+      ),
+    ).toBe(true);
+    expect(
+      isNavigationItemActive(
+        "/business/business-1/providers",
+        navigation[1],
+      ),
+    ).toBe(true);
+  });
+
+  it("keeps direct financial route permissions specific", () => {
+    const invoiceRoute = getBusinessNavigationItemForPath(
+      "business-1",
+      "/business/business-1/invoices",
+    )!;
+    const providerRoute = getBusinessNavigationItemForPath(
+      "business-1",
+      "/business/business-1/providers",
+    )!;
+
+    expect(
+      canAccessBusinessNavigationItem(
+        invoiceRoute,
+        new Set(["providers:view"]),
+      ),
+    ).toBe(false);
+    expect(
+      canAccessBusinessNavigationItem(
+        providerRoute,
+        new Set(["providers:view"]),
+      ),
+    ).toBe(true);
   });
 
   it.each(["payments:view", "payments:view_own"] as const)(
@@ -69,10 +119,33 @@ describe("dashboard navigation matching", () => {
     },
   );
 
-  it("shows Overview to active members with no section permissions", () => {
+  it("shows Overview and personal Audit Logs to active members with no section permissions", () => {
     expect(
       getBusinessNavigation("business-1", new Set()).map((item) => item.name),
-    ).toEqual(["Overview"]);
+    ).toEqual(["Overview", "Audit Logs"]);
+  });
+
+  it("keeps departments out of the primary business navigation", () => {
+    const navigation = getBusinessNavigation(
+      "business-1",
+      new Set(["employee_lists:view"]),
+    );
+
+    expect(navigation.map((item) => item.name)).toEqual(["Overview", "Audit Logs"]);
+
+    const departmentRoute = getBusinessNavigationItemForPath(
+      "business-1",
+      "/business/business-1/employee-lists",
+    )!;
+    expect(
+      canAccessBusinessNavigationItem(departmentRoute, new Set()),
+    ).toBe(false);
+    expect(
+      canAccessBusinessNavigationItem(
+        departmentRoute,
+        new Set(["employee_lists:view"]),
+      ),
+    ).toBe(true);
   });
 
   it("shows Members only with members:view", () => {
@@ -116,5 +189,12 @@ describe("dashboard navigation matching", () => {
       new Set(["business:update"]),
     ).find((item) => item.name === "Settings")!;
     expect(canAccessBusinessNavigationItem(settings, new Set())).toBe(false);
+  });
+
+  it("requires employees:view for the directory and ignores view_own", () => {
+    expect(getBusinessNavigation("business-1", new Set(["employees:view"])).some((item) => item.name === "Employees")).toBe(true);
+    expect(getBusinessNavigation("business-1", new Set(["employees:view_own"])).some((item) => item.name === "Employees")).toBe(false);
+    const employeeRoute = getBusinessNavigationItemForPath("business-1", "/business/business-1/employees/employee-1")!;
+    expect(canAccessBusinessNavigationItem(employeeRoute, new Set(["employees:view_own"]))).toBe(false);
   });
 });

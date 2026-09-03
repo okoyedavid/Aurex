@@ -5,6 +5,7 @@ import { BusinessSettingsForm } from "./business-settings-form";
 import SettingsNavigation from "./settings-navigation";
 import { TeamAccessPanel } from "./team-access-panel";
 import { BusinessSettingsPageFrame } from "./business-settings-page-frame";
+import { PreferencesSettingsPanel } from "./preferences-settings-panel";
 
 export function BusinessSettingsPageContent() {
   const { business } = useBusinessAccess();
@@ -24,6 +25,7 @@ export function BusinessSettingsPageContent() {
         <div className="min-w-0 space-y-6">
           <BusinessSettingsForm business={business} />
           <TeamAccessPanel />
+          <PreferencesSettingsPanel />
         </div>
       </div>
     </BusinessSettingsPageFrame>

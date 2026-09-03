@@ -79,6 +79,10 @@ export async function login(body: LoginBody): Promise<LoginResult> {
   }
 }
 
+export async function logout(): Promise<void> {
+  await api.post(`${authBasePath}/logout`, undefined, authRequestConfig);
+}
+
 export async function register(body: RegisterBody): Promise<RegisterResult> {
   try {
     const response = await api.post(

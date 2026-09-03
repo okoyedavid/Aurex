@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, LifeBuoy, X } from "lucide-react";
+import { LifeBuoy, X } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/utils";
@@ -10,7 +10,6 @@ import {
   type BusinessNavigationItem,
   isNavigationItemActive,
   personalNavigation,
-  personalSecondaryActions,
 } from "@/features/dashboard/data";
 
 type DashboardSidebarProps = {
@@ -33,7 +32,11 @@ export function DashboardSidebar({
   onMobileClose,
 }: DashboardSidebarProps) {
   const pathname = usePathname();
-  const navigation = mode === "business" ? businessNavigation ?? [] : personalNavigation;
+  const allNavigation =
+    mode === "business" ? businessNavigation ?? [] : personalNavigation;
+  const settingsItem = allNavigation.find((item) => item.name === "Settings");
+  const SettingsIcon = settingsItem?.icon;
+  const navigation = allNavigation.filter((item) => item.name !== "Settings");
 
   return (
     <>
@@ -96,21 +99,6 @@ export function DashboardSidebar({
           </button>
         </div>
 
-        {mode === "business" ? (
-          <Link
-            href="/dashboard"
-            onClick={onMobileClose}
-            className={cn(
-              "mt-5 flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground",
-              collapsed && "lg:justify-center lg:px-0",
-            )}
-            title={collapsed ? "Dashboard" : undefined}
-          >
-            <ArrowLeft className="h-4 w-4 shrink-0" />
-            <span className={cn(collapsed && "lg:hidden")}>Dashboard</span>
-          </Link>
-        ) : null}
-
         <nav className="mt-8 space-y-1" aria-label="Dashboard navigation">
           {navigation.map((item) => {
             const Icon = item.icon;
@@ -139,32 +127,26 @@ export function DashboardSidebar({
           })}
         </nav>
 
-        {mode === "personal" ? (
-          <div className="mt-8 border-t border-border pt-5">
-            {personalSecondaryActions.map((item) => {
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  title={collapsed ? item.name : undefined}
-                  onClick={onMobileClose}
-                  className={cn(
-                    "flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground",
-                    collapsed && "lg:justify-center lg:gap-0 lg:px-0",
-                  )}
-                >
-                  <Icon className="h-4 w-4 shrink-0" />
-                  <span className={cn(collapsed && "lg:hidden")}>
-                    {item.name}
-                  </span>
-                </Link>
-              );
-            })}
-          </div>
-        ) : null}
-
-        <div className="mt-auto border-t border-border pt-5">
+        <div className="mt-auto space-y-1 border-t border-border pt-5">
+          {settingsItem && SettingsIcon ? (
+            <Link
+              href={settingsItem.href}
+              title={collapsed ? settingsItem.name : undefined}
+              onClick={onMobileClose}
+              className={cn(
+                "flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition",
+                collapsed && "lg:justify-center lg:gap-0 lg:px-0",
+                isNavigationItemActive(pathname, settingsItem)
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground",
+              )}
+            >
+              <SettingsIcon className="h-4 w-4 shrink-0" />
+              <span className={cn(collapsed && "lg:hidden")}>
+                {settingsItem.name}
+              </span>
+            </Link>
+          ) : null}
           <Link
             href="/contact"
             onClick={onMobileClose}

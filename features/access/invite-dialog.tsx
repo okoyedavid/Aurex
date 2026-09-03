@@ -1,5 +1,7 @@
 "use client";
 
+import { SelectControl } from "@/components/ui/select";
+
 import {
   ArrowLeft,
   BriefcaseBusiness,
@@ -195,8 +197,8 @@ export function InviteDialog({
                 ) : (
                   <label className="block space-y-2 text-sm font-medium">
                     Role
-                    <select
-                      className="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm"
+                    <SelectControl
+                      className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                       value={roleId}
                       disabled={create.isPending}
                       onChange={(event) => setRoleId(event.target.value)}
@@ -209,12 +211,12 @@ export function InviteDialog({
                             {role.name} · {role.type}
                           </option>
                         ))}
-                    </select>
+                    </SelectControl>
                   </label>
                 )}
 
                 {selectedRole ? (
-                  <div className="rounded-xl border border-border bg-muted/30 p-4">
+                  <div className="rounded-md border border-border bg-muted/30 p-4">
                     <PermissionList
                       permissions={selectedRole.permissions}
                       denied={selectedRole.deniedPermissions}
@@ -267,7 +269,7 @@ export function InviteDialog({
                         onEmployeeChange={setEmployeeId}
                       />
                     ) : (
-                      <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm leading-6 text-muted-foreground">
+                      <div className="rounded-md border border-primary/20 bg-primary/5 p-4 text-sm leading-6 text-muted-foreground">
                         An authorized approver will choose an employee list and
                         enter the employee&apos;s payroll and banking details.
                         No employee details are collected or sent now.
@@ -340,9 +342,9 @@ function InvitationTypeButton({
     <button
       type="button"
       onClick={onClick}
-      className="rounded-xl border border-border p-5 text-left transition hover:border-primary/35 hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+      className="rounded-md border border-border p-5 text-left transition hover:border-primary/35 hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
     >
-      <span className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+      <span className="flex size-10 items-center justify-center rounded-md bg-primary/10 text-primary">
         {icon}
       </span>
       <span className="mt-4 block font-semibold">{title}</span>
@@ -373,7 +375,7 @@ function SourceButton({
       type="button"
       disabled={disabled}
       onClick={onClick}
-      className={`rounded-xl border p-3 text-left transition disabled:cursor-not-allowed disabled:opacity-50 ${
+      className={`rounded-md border p-3 text-left transition disabled:cursor-not-allowed disabled:opacity-50 ${
         active
           ? "border-primary bg-primary/5 ring-1 ring-primary/20"
           : "border-border hover:border-primary/25"

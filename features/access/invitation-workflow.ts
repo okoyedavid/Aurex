@@ -9,6 +9,54 @@ import type { Employee } from "@/lib/employee-lists-api";
 import type { Permission } from "@/types/generic";
 
 export type EmployeeSource = "existing" | "new";
+export type InviteManagementView = "sent" | "approvals";
+export type SentInvitationTone = "good" | "bad" | "warn" | "neutral";
+
+const inviteStatusLabels: Record<BusinessInvite["status"], string> = {
+  pending: "Pending",
+  accepted: "Accepted",
+  rejected: "Rejected",
+  revoked: "Revoked",
+  expired: "Expired",
+};
+
+export function sentInvitationPresentation(
+  invite: Pick<BusinessInvite, "status" | "approvalStatus">,
+): {
+  label: string;
+  tone: SentInvitationTone;
+  approvalRequired: boolean;
+} {
+  if (invite.status === "accepted" && invite.approvalStatus === "pending") {
+    return {
+      label: "Approval required",
+      tone: "warn",
+      approvalRequired: true,
+    };
+  }
+  if (invite.approvalStatus === "rejected") {
+    return { label: "Rejected", tone: "bad", approvalRequired: false };
+  }
+  return {
+    label: inviteStatusLabels[invite.status],
+    tone:
+      invite.status === "accepted"
+        ? "good"
+        : invite.status === "pending"
+          ? "warn"
+          : "bad",
+    approvalRequired: false,
+  };
+}
+
+export function resolveInviteManagementView(
+  requested: InviteManagementView,
+  canInvite: boolean,
+  canApprove: boolean,
+): InviteManagementView {
+  if (requested === "approvals") return canApprove ? "approvals" : "sent";
+  return canInvite ? "sent" : "approvals";
+}
 
 export function canBrowseExistingEmployees(
   permissions: ReadonlySet<Permission>,

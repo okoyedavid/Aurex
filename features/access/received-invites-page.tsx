@@ -1,5 +1,7 @@
 "use client";
 
+import { SelectControl } from "@/components/ui/select";
+
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -60,9 +62,9 @@ export function ReceivedInvitesPage() {
               Review pending access and employee invitations.
             </p>
           </div>
-          <select
+          <SelectControl
             aria-label="Invitation status"
-            className="h-9 rounded-lg border border-input bg-background px-3 text-sm"
+            className="h-9 w-40 shrink-0 rounded-md border border-input bg-background px-3 text-sm"
             value={status ?? ""}
             onChange={(event) => {
               setStatus(
@@ -77,7 +79,7 @@ export function ReceivedInvitesPage() {
                 <option key={value}>{value}</option>
               ),
             )}
-          </select>
+          </SelectControl>
         </div>
 
         <div className="mt-7 grid gap-4">
@@ -89,19 +91,19 @@ export function ReceivedInvitesPage() {
             query.data.items.map((invite) => (
               <article
                 key={invite.id}
-                className="rounded-xl border border-border bg-card p-5"
+                className="rounded-md border border-border bg-card p-5"
               >
                 <div className="flex flex-wrap justify-between gap-4">
                   <div className="flex gap-3">
                     {invite.businessId.profile_img ? (
                       <span
-                        className="h-11 w-11 rounded-lg bg-cover bg-center"
+                        className="h-11 w-11 rounded-md bg-cover bg-center"
                         style={{
                           backgroundImage: `url(${invite.businessId.profile_img})`,
                         }}
                       />
                     ) : (
-                      <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 font-bold text-primary">
+                      <span className="flex h-11 w-11 items-center justify-center rounded-md bg-primary/10 font-bold text-primary">
                         {invite.businessId.name.slice(0, 2).toUpperCase()}
                       </span>
                     )}
@@ -141,7 +143,7 @@ export function ReceivedInvitesPage() {
                     Requested role
                   </p>
                   <p className="mt-1 font-semibold">{invite.roleId.name}</p>
-                  <div className="mt-3 rounded-lg bg-muted/40 p-4">
+                  <div className="mt-3 rounded-md bg-muted/40 p-4">
                     <PermissionList
                       permissions={invite.roleId.permissions}
                       denied={invite.roleId.deniedPermissions}
@@ -187,7 +189,7 @@ export function ReceivedInvitesPage() {
               </article>
             ))
           ) : (
-            <p className="rounded-lg border border-dashed p-10 text-center text-sm text-muted-foreground">
+            <p className="rounded-md border border-dashed p-10 text-center text-sm text-muted-foreground">
               No invitations found.
             </p>
           )}

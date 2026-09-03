@@ -1,5 +1,7 @@
 "use client";
 
+import { SelectControl } from "@/components/ui/select";
+
 import {
   Archive,
   ChevronDown,
@@ -10,7 +12,8 @@ import {
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -22,8 +25,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { useBusinessAccess } from "@/features/business/business-access-context";
+import { BusinessPageHeader } from "@/features/business/business-page-header";
 import { MembersPageFrame } from "@/features/business/members-page-frame";
 import { Pagination } from "@/features/business/pagination";
 import type { BusinessRole } from "@/lib/access-api";
@@ -37,8 +40,11 @@ type RoleTypeFilter = "all" | BusinessRole["type"];
 
 export function BusinessRolesPage({ businessId }: { businessId: string }) {
   const { business, effectivePermissions } = useBusinessAccess();
+  const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
+  const search = searchParams.get("search") ?? "";
   const [typeFilter, setTypeFilter] = useState<RoleTypeFilter>("all");
   const [expandedRoleId, setExpandedRoleId] = useState<string | null>(null);
   const [editing, setEditing] = useState<BusinessRole | null | undefined>(
@@ -50,6 +56,20 @@ export function BusinessRolesPage({ businessId }: { businessId: string }) {
   const query = useAllBusinessRoles(businessId, canView);
   const archiveMutation = useArchiveCustomRole(businessId, archive?.id ?? "");
   const available = Array.from(effectivePermissions);
+
+  useEffect(() => {
+    setPage(1);
+    setExpandedRoleId(null);
+  }, [search]);
+
+  const clearFilters = () => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("search");
+    params.delete("page");
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+    setTypeFilter("all");
+  };
 
   const filteredRoles = useMemo(() => {
     const normalizedSearch = search.trim().toLocaleLowerCase();
@@ -79,101 +99,62 @@ export function BusinessRolesPage({ businessId }: { businessId: string }) {
 
   return (
     <MembersPageFrame>
-      <section className="relative overflow-hidden rounded-2xl border border-border bg-card px-5 py-6 shadow-sm sm:px-7 sm:py-7">
-        <div className="pointer-events-none absolute -right-16 -top-20 size-56 rounded-full bg-primary/10 blur-3xl" />
-        <div className="relative flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-          <div className="max-w-2xl">
-            <div className="mb-4 flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/15">
-              <ShieldCheck className="size-5" />
-            </div>
-            <p className="text-sm font-medium text-primary">{business.name}</p>
-            <h1 className="mt-1 text-3xl font-bold tracking-tight sm:text-4xl">
-              Roles & permissions
-            </h1>
-            <p className="mt-3 max-w-xl text-sm leading-6 text-muted-foreground">
-              Find an access profile quickly, then expand it only when you need
-              to review or change its permissions.
-            </p>
-          </div>
-          {canCreate ? (
+      <BusinessPageHeader
+        eyebrow={business.name}
+        title="Roles & permissions"
+        description="View and manage system and custom roles for your business."
+        actions={
+          canCreate ? (
             <Button
-              size="lg"
-              className="self-start sm:self-auto"
               onClick={() => setEditing(null)}
             >
               <Plus /> Create custom role
             </Button>
-          ) : null}
-        </div>
-      </section>
+          ) : null
+        }
+      />
 
       <div className="mt-8">
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <h2 className="text-lg font-semibold tracking-tight">
-              Access profiles
-            </h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {query.data
-                ? `${query.data.length} ${query.data.length === 1 ? "role" : "roles"} configured`
-                : "Loading configured roles"}
-            </p>
-          </div>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-2.5 py-1">
-              <LockKeyhole className="size-3" /> System managed
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-2.5 py-1">
-              <Sparkles className="size-3 text-primary" /> Custom
-            </span>
-          </div>
+        <div>
+          <h2 className="text-lg font-semibold tracking-tight">
+            Access profiles
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {query.data
+              ? `${query.data.length} ${query.data.length === 1 ? "role" : "roles"} configured`
+              : "Loading configured roles"}
+          </p>
         </div>
 
-        <div className="mt-4 flex flex-col gap-3 rounded-xl border border-border bg-card p-3 shadow-sm sm:flex-row">
-          <label className="relative flex-1" htmlFor="role-search">
-            <span className="sr-only">Search roles by name</span>
-            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              id="role-search"
-              type="search"
-              value={search}
-              onChange={(event) => {
-                setSearch(event.target.value);
-                setPage(1);
-                setExpandedRoleId(null);
-              }}
-              placeholder="Search roles by name..."
-              className="h-10 pl-9"
-            />
-          </label>
+        <div className="mt-4 flex justify-end rounded-md border border-border bg-card p-3 shadow-sm">
           <label className="sm:w-48">
             <span className="sr-only">Filter roles by type</span>
-            <select
+            <SelectControl
               value={typeFilter}
               onChange={(event) => {
                 setTypeFilter(event.target.value as RoleTypeFilter);
                 setPage(1);
                 setExpandedRoleId(null);
               }}
-              className="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm outline-none transition focus:border-ring focus:ring-3 focus:ring-ring/50"
+              className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none transition focus:border-ring focus:ring-3 focus:ring-ring/50"
             >
               <option value="all">All role types</option>
               <option value="system">System roles</option>
               <option value="custom">Custom roles</option>
-            </select>
+            </SelectControl>
           </label>
         </div>
       </div>
 
       <div className="mt-4">
         {query.isLoading ? (
-          <div className="rounded-2xl border border-border bg-card px-6">
+          <div className="rounded-md border border-border bg-card px-6">
             <LoadingState />
           </div>
         ) : query.error ? (
           <ErrorState error={query.error} onRetry={() => query.refetch()} />
         ) : visibleRoles.length ? (
-          <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+          <div className="overflow-hidden rounded-md border border-border bg-card shadow-sm">
             {visibleRoles.map((role, index) => (
               <RoleRow
                 key={role.id}
@@ -193,8 +174,8 @@ export function BusinessRolesPage({ businessId }: { businessId: string }) {
             ))}
           </div>
         ) : (
-          <div className="rounded-2xl border border-dashed border-border bg-card p-10 text-center">
-            <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-muted text-muted-foreground">
+          <div className="rounded-md border border-dashed border-border bg-card p-10 text-center">
+            <div className="mx-auto flex size-12 items-center justify-center rounded-md bg-muted text-muted-foreground">
               {query.data?.length ? (
                 <Search className="size-6" />
               ) : (
@@ -214,8 +195,7 @@ export function BusinessRolesPage({ businessId }: { businessId: string }) {
                 variant="outline"
                 className="mt-5"
                 onClick={() => {
-                  setSearch("");
-                  setTypeFilter("all");
+                  clearFilters();
                 }}
               >
                 Clear filters
@@ -262,7 +242,7 @@ export function BusinessRolesPage({ businessId }: { businessId: string }) {
         }}
       >
         <DialogContent className="max-w-md">
-          <div className="flex size-10 items-center justify-center rounded-xl bg-destructive/10 text-destructive">
+          <div className="flex size-10 items-center justify-center rounded-md bg-destructive/10 text-destructive">
             <Archive className="size-5" />
           </div>
           <DialogHeader>
@@ -272,7 +252,7 @@ export function BusinessRolesPage({ businessId }: { businessId: string }) {
               Existing audit history will remain intact.
             </DialogDescription>
           </DialogHeader>
-          <div className="rounded-lg border border-border bg-muted/40 p-3 text-sm text-muted-foreground">
+          <div className="rounded-md border border-border bg-muted/40 p-3 text-sm text-muted-foreground">
             Existing members using this role may require a replacement role.
           </div>
           <DialogFooter>
@@ -337,7 +317,7 @@ function RoleRow({
         onClick={onToggle}
         className="flex w-full items-center gap-3 px-4 py-4 text-left transition hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-inset focus-visible:ring-ring/50 sm:px-5"
       >
-        <span className={`flex size-9 shrink-0 items-center justify-center rounded-lg ${isCustom ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
+        <span className={`flex size-9 shrink-0 items-center justify-center rounded-md ${isCustom ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
           {isCustom ? <Sparkles className="size-4" /> : <LockKeyhole className="size-4" />}
         </span>
         <span className="min-w-0 flex-1">

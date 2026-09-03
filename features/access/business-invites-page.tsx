@@ -1,7 +1,10 @@
 "use client";
 
+import { SelectControl } from "@/components/ui/select";
+
 import { BriefcaseBusiness, Plus, UserRoundCheck } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -14,6 +17,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useBusinessAccess } from "@/features/business/business-access-context";
+import { BusinessPageHeader } from "@/features/business/business-page-header";
 import { MembersPageFrame } from "@/features/business/members-page-frame";
 import { Pagination } from "@/features/business/pagination";
 import type {
@@ -34,7 +38,10 @@ import { InviteDialog } from "./invite-dialog";
 import { InviteEmployeeSummary } from "./invite-employee-summary";
 import {
   approvalPermissionGate,
+  type InviteManagementView,
   membershipOutcomeBlocksApproval,
+  resolveInviteManagementView,
+  sentInvitationPresentation,
 } from "./invitation-workflow";
 import { MembershipOutcome } from "./membership-outcome";
 import {
@@ -45,25 +52,16 @@ import {
   PermissionList,
 } from "./shared";
 
-function tone(value: string) {
-  return value === "approved" || value === "accepted" || value === "sent"
-    ? "good"
-    : value === "failed" ||
-        value === "rejected" ||
-        value === "expired" ||
-        value === "revoked"
-      ? "bad"
-      : value === "pending" || value === "retrying"
-        ? "warn"
-        : ("neutral" as const);
-}
-
 export function BusinessInvitesPage({ businessId }: { businessId: string }) {
-  const { effectivePermissions } = useBusinessAccess();
+  const { business, effectivePermissions } = useBusinessAccess();
+  const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [sentPage, setSentPage] = useState(1);
   const [sentLimit, setSentLimit] = useState(20);
   const [approvalPage, setApprovalPage] = useState(1);
   const [approvalLimit, setApprovalLimit] = useState(20);
+  const [view, setView] = useState<InviteManagementView>("sent");
   const [status, setStatus] = useState<InviteStatus | undefined>("pending");
   const [inviteType, setInviteType] = useState<InvitationType | null>(null);
   const [approvalInvite, setApprovalInvite] =
@@ -71,20 +69,34 @@ export function BusinessInvitesPage({ businessId }: { businessId: string }) {
   const [rejectInvite, setRejectInvite] = useState<BusinessInvite | null>(null);
   const canInvite = effectivePermissions.has("members:invite");
   const canApprove = effectivePermissions.has("roles:assign");
+  const activeView = resolveInviteManagementView(
+    view,
+    canInvite,
+    canApprove,
+  );
   const sent = useSentBusinessInvites(
     businessId,
     sentPage,
     sentLimit,
     status,
-    canInvite,
+    canInvite && activeView === "sent",
   );
   const pending = usePendingInviteApprovals(
     businessId,
     approvalPage,
     approvalLimit,
-    canApprove,
+    canApprove && activeView === "approvals",
   );
   const reject = useRejectInviteApproval(businessId);
+
+  useEffect(() => {
+    if (searchParams.get("action") !== "invite-employee" || !canInvite) return;
+    setInviteType("EMPLOYEE");
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("action");
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+  }, [canInvite, pathname, router, searchParams]);
 
   if (!canInvite && !canApprove) {
     return (
@@ -98,16 +110,13 @@ export function BusinessInvitesPage({ businessId }: { businessId: string }) {
 
   return (
     <MembersPageFrame>
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="text-sm text-muted-foreground">Team access</p>
-          <h1 className="mt-1 text-3xl font-bold">Invitations</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Invite business members or connect employee records through approval.
-          </p>
-        </div>
-        {canInvite ? (
-          <div className="flex flex-wrap gap-2">
+      <BusinessPageHeader
+        eyebrow={business.name}
+        title="Invitations"
+        description="Invite business members, connect employee records, and review access approvals without mixing each workflow together."
+        actions={
+          canInvite ? (
+            <>
             <Button onClick={() => setInviteType("MEMBER")}>
               <Plus /> Invite member
             </Button>
@@ -117,12 +126,33 @@ export function BusinessInvitesPage({ businessId }: { businessId: string }) {
             >
               <BriefcaseBusiness /> Invite employee
             </Button>
-          </div>
-        ) : null}
-      </div>
+            </>
+          ) : null
+        }
+        tabs={[
+          ...(canInvite
+            ? [
+                {
+                  label: "Sent invites",
+                  active: activeView === "sent",
+                  onSelect: () => setView("sent"),
+                },
+              ]
+            : []),
+          ...(canApprove
+            ? [
+                {
+                  label: "Pending approvals",
+                  active: activeView === "approvals",
+                  onSelect: () => setView("approvals"),
+                },
+              ]
+            : []),
+        ]}
+      />
 
-      {canApprove ? (
-        <section className="mt-8">
+      {canApprove && activeView === "approvals" ? (
+        <section className="mt-6">
           <div>
             <h2 className="text-xl font-bold">Pending approvals</h2>
             <p className="mt-1 text-sm text-muted-foreground">
@@ -145,7 +175,7 @@ export function BusinessInvitesPage({ businessId }: { businessId: string }) {
                 />
               ))
             ) : (
-              <p className="rounded-lg border border-dashed p-6 text-sm text-muted-foreground">
+              <p className="rounded-md border border-dashed p-6 text-sm text-muted-foreground">
                 No approvals are waiting.
               </p>
             )}
@@ -167,13 +197,13 @@ export function BusinessInvitesPage({ businessId }: { businessId: string }) {
         </section>
       ) : null}
 
-      {canInvite ? (
-        <section className="mt-10">
+      {canInvite && activeView === "sent" ? (
+        <section className="mt-6">
           <div className="flex items-center justify-between gap-3">
             <h2 className="text-xl font-bold">Sent invitations</h2>
-            <select
+            <SelectControl
               aria-label="Invitation status"
-              className="h-9 rounded-lg border border-input bg-background px-3 text-sm"
+              className="h-9 w-40 rounded-md border border-input bg-background px-3 text-sm"
               value={status ?? ""}
               onChange={(event) => {
                 setStatus(
@@ -188,7 +218,7 @@ export function BusinessInvitesPage({ businessId }: { businessId: string }) {
                   <option key={value}>{value}</option>
                 ),
               )}
-            </select>
+            </SelectControl>
           </div>
           <div className="mt-4 grid gap-3">
             {sent.isLoading ? (
@@ -197,10 +227,14 @@ export function BusinessInvitesPage({ businessId }: { businessId: string }) {
               <ErrorState error={sent.error} onRetry={() => sent.refetch()} />
             ) : sent.data?.items.length ? (
               sent.data.items.map((invite) => (
-                <SentInviteCard key={invite.id} invite={invite} />
+                <SentInviteCard
+                  key={invite.id}
+                  invite={invite}
+                  onReview={canApprove ? () => setView("approvals") : undefined}
+                />
               ))
             ) : (
-              <p className="rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">
+              <p className="rounded-md border border-dashed p-8 text-center text-sm text-muted-foreground">
                 No invitations found.
               </p>
             )}
@@ -305,7 +339,7 @@ function ApprovalCard({
   const approvalUnavailable = approvalBlocked || !permissionGate.allowed;
 
   return (
-    <article className="rounded-xl border border-border bg-card p-5 shadow-sm">
+    <article className="rounded-md border border-border bg-card p-5 shadow-sm">
       <div className="flex flex-wrap justify-between gap-3">
         <div>
           <div className="flex flex-wrap items-center gap-2">
@@ -323,7 +357,7 @@ function ApprovalCard({
       </div>
 
       <div className="mt-5 grid gap-4 lg:grid-cols-2">
-        <section className="rounded-xl border border-border p-4">
+        <section className="rounded-md border border-border p-4">
           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             Requested role
           </p>
@@ -344,7 +378,7 @@ function ApprovalCard({
           {invite.employeeId ? (
             <InviteEmployeeSummary employeeId={invite.employeeId} />
           ) : (
-            <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-800 dark:text-amber-200">
+            <div className="rounded-md border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-800 dark:text-amber-200">
               Employee details still need to be created. The approver must
               choose an employee list and complete the employee form.
             </div>
@@ -353,7 +387,7 @@ function ApprovalCard({
       ) : null}
 
       {!permissionGate.allowed ? (
-        <p className="mt-4 rounded-lg bg-destructive/5 p-3 text-sm text-destructive">
+        <p className="mt-4 rounded-md bg-destructive/5 p-3 text-sm text-destructive">
           Approval requires: {permissionGate.missing.join(", ")}.
         </p>
       ) : null}
@@ -379,12 +413,32 @@ function ApprovalCard({
   );
 }
 
-function SentInviteCard({ invite }: { invite: BusinessInvite }) {
+export function SentInviteCard({
+  invite,
+  onReview,
+}: {
+  invite: BusinessInvite;
+  onReview?: () => void;
+}) {
+  const presentation = sentInvitationPresentation(invite);
+  const typeLabel =
+    invite.type === "EMPLOYEE" ? "Employee invitation" : "Member invitation";
+  const event =
+    invite.status === "accepted" && invite.acceptedAt
+      ? { label: "Accepted", date: invite.acceptedAt }
+      : invite.status === "rejected" && invite.rejectedAt
+        ? { label: "Rejected", date: invite.rejectedAt }
+        : invite.status === "revoked" && invite.revokedAt
+          ? { label: "Revoked", date: invite.revokedAt }
+          : invite.status === "expired"
+            ? { label: "Expired", date: invite.expiresAt }
+            : { label: "Invited", date: invite.createdAt };
+
   return (
-    <article className="rounded-xl border border-border bg-card p-5">
+    <article className="rounded-md border border-border bg-card p-5">
       <div className="flex flex-wrap justify-between gap-3">
         <div className="flex gap-3">
-          <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
             {invite.type === "EMPLOYEE" ? (
               <BriefcaseBusiness className="size-4" />
             ) : (
@@ -394,24 +448,14 @@ function SentInviteCard({ invite }: { invite: BusinessInvite }) {
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <h3 className="font-semibold">{invite.email}</h3>
-              <Badge>{invite.type.toLowerCase()}</Badge>
+              <Badge>{typeLabel}</Badge>
             </div>
             <p className="mt-1 text-sm text-muted-foreground">
               {invite.roleId.name} · invited by {invite.invitedByUserId.name}
             </p>
           </div>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Badge tone={tone(invite.status)}>{invite.status}</Badge>
-          <Badge tone={tone(invite.approvalStatus)}>
-            {invite.approvalStatus.replaceAll("_", " ")}
-          </Badge>
-          <Badge tone={tone(invite.emailDeliveryStatus)}>
-            {invite.emailDeliveryStatus === "retrying"
-              ? "delivery pending"
-              : invite.emailDeliveryStatus}
-          </Badge>
-        </div>
+        <Badge tone={presentation.tone}>{presentation.label}</Badge>
       </div>
 
       {invite.type === "EMPLOYEE" && invite.employeeId ? (
@@ -420,20 +464,27 @@ function SentInviteCard({ invite }: { invite: BusinessInvite }) {
         </div>
       ) : null}
 
-      <dl className="mt-4 grid gap-2 border-t border-border pt-4 text-sm sm:grid-cols-2">
-        <div>
-          <dt className="text-muted-foreground">Created</dt>
-          <dd>{formatDateTime(invite.createdAt)}</dd>
+      {presentation.approvalRequired ? (
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-md border border-primary/20 bg-primary/5 p-4">
+          <p className="max-w-2xl text-sm text-muted-foreground">
+            The recipient accepted this invitation. {invite.type === "EMPLOYEE"
+              ? "Employee setup and access must be reviewed before membership is activated."
+              : "The requested access must be reviewed before membership is activated."}
+          </p>
+          {onReview ? (
+            <Button size="sm" onClick={onReview}>
+              {invite.type === "EMPLOYEE" ? "Review employee" : "Review approval"}
+            </Button>
+          ) : null}
         </div>
-        <div>
-          <dt className="text-muted-foreground">Expires</dt>
-          <dd>{formatDateTime(invite.expiresAt)}</dd>
-        </div>
-      </dl>
-      {invite.emailDeliveryStatus === "failed" &&
-      invite.emailFailureReason ? (
+      ) : null}
+
+      <p className="mt-4 border-t border-border pt-4 text-sm text-muted-foreground">
+        {event.label} {formatDateTime(event.date)}
+      </p>
+      {invite.emailDeliveryStatus === "failed" ? (
         <p className="mt-3 text-sm text-destructive">
-          Delivery failed: {invite.emailFailureReason}
+          Delivery failed{invite.emailFailureReason ? `: ${invite.emailFailureReason}` : "."}
         </p>
       ) : null}
     </article>

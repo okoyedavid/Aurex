@@ -29,7 +29,11 @@ export default function NavBar() {
     return () => window.removeEventListener("scroll", updateNavbar);
   }, []);
 
-  if (pathname.startsWith("/dashboard") || pathname.startsWith("/business"))
+  if (
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/business") ||
+    pathname.startsWith("/warp-demo")
+  )
     return null;
 
   return (

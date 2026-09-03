@@ -4,7 +4,7 @@ export function BusinessSkeleton() {
       {Array.from({ length: 4 }).map((_, index) => (
         <div
           key={index}
-          className="rounded-xl border border-border bg-card p-5 shadow-sm"
+          className="rounded-md border border-border bg-card p-5 shadow-sm"
         >
           <div className="flex gap-4">
             <div className="h-12 w-12 animate-pulse rounded-md bg-muted" />

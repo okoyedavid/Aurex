@@ -68,7 +68,7 @@ export function BusinessDashboardPage() {
                   <Link
                     key={business.id}
                     href={`/business/${business.id}`}
-                    className="group rounded-xl border border-border bg-card p-5 shadow-sm transition hover:bg-muted/40"
+                    className="group rounded-md border border-border bg-card p-5 shadow-sm transition hover:bg-muted/40"
                   >
                     <div className="flex gap-4">
                       <BusinessLogo item={item} />

@@ -13,7 +13,7 @@ export function MembershipOutcome({
 
   if (outcome.kind === "apply_requested") {
     return (
-      <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/10 p-4">
+      <div className="rounded-md border border-emerald-500/25 bg-emerald-500/10 p-4">
         <p className="flex items-center gap-2 text-sm font-semibold text-emerald-800 dark:text-emerald-200">
           <CheckCircle2 className="size-4" /> Requested role will be applied
         </p>
@@ -28,7 +28,7 @@ export function MembershipOutcome({
 
   if (outcome.kind === "preserve_current") {
     return (
-      <div className="rounded-xl border border-primary/25 bg-primary/5 p-4">
+      <div className="rounded-md border border-primary/25 bg-primary/5 p-4">
         <p className="flex items-center gap-2 text-sm font-semibold text-primary">
           <ShieldCheck className="size-4" /> Existing membership preserved
         </p>
@@ -47,7 +47,7 @@ export function MembershipOutcome({
 
   if (outcome.kind === "blocked_suspended") {
     return (
-      <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-4">
+      <div className="rounded-md border border-destructive/30 bg-destructive/5 p-4">
         <p className="flex items-center gap-2 text-sm font-semibold text-destructive">
           <AlertTriangle className="size-4" /> Approval blocked: suspended member
         </p>
@@ -65,7 +65,7 @@ export function MembershipOutcome({
   }
 
   return (
-    <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-4">
+    <div className="rounded-md border border-destructive/30 bg-destructive/5 p-4">
       <p className="flex items-center gap-2 text-sm font-semibold text-destructive">
         <AlertTriangle className="size-4" /> Approval blocked: existing member
       </p>

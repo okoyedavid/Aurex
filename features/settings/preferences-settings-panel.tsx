@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import { BellRing } from "lucide-react";
 import { toast } from "sonner";
 
@@ -18,16 +18,31 @@ import {
   type ThemePreference,
 } from "@/lib/theme";
 
+const THEME_CHANGE_EVENT = "aurex-theme-change";
+
+function subscribeToTheme(onStoreChange: () => void) {
+  window.addEventListener("storage", onStoreChange);
+  window.addEventListener(THEME_CHANGE_EVENT, onStoreChange);
+
+  return () => {
+    window.removeEventListener("storage", onStoreChange);
+    window.removeEventListener(THEME_CHANGE_EVENT, onStoreChange);
+  };
+}
+
 export function PreferencesSettingsPanel() {
   const userQuery = useMeQuery();
   const updatePreferencesMutation = useUpdatePreferencesMutation();
-  const [theme, setTheme] = useState<ThemePreference>(() => getStoredTheme());
+  const theme = useSyncExternalStore<ThemePreference>(
+    subscribeToTheme,
+    getStoredTheme,
+    () => "system",
+  );
   const twoFactorEnabled = updatePreferencesMutation.isPending
     ? Boolean(updatePreferencesMutation.variables?.preferences.twoFactorEnabled)
     : Boolean(userQuery.data?.preferences?.twoFactorEnabled);
 
   useEffect(() => {
-    window.localStorage.setItem(THEME_STORAGE_KEY, theme);
     applyTheme(theme);
 
     if (theme !== "system") {
@@ -84,7 +99,11 @@ export function PreferencesSettingsPanel() {
             key={option}
             type="button"
             aria-pressed={theme === option}
-            onClick={() => setTheme(option)}
+            onClick={() => {
+              window.localStorage.setItem(THEME_STORAGE_KEY, option);
+              applyTheme(option);
+              window.dispatchEvent(new Event(THEME_CHANGE_EVENT));
+            }}
             className={[
               "rounded-md border px-4 py-3 text-left text-sm font-semibold transition",
               theme === option

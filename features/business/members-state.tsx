@@ -12,7 +12,7 @@ export function MembersState({
   retry?: () => void;
 }) {
   return (
-    <div className="rounded-xl border border-border bg-card p-8 text-center">
+    <div className="rounded-md border border-border bg-card p-8 text-center">
       <AlertCircle className="mx-auto h-6 w-6 text-muted-foreground" />
       <h1 className="mt-3 font-semibold">{title}</h1>
       <p className="mt-2 text-sm text-muted-foreground">{detail}</p>

@@ -10,7 +10,7 @@ export function BusinessLayoutError({
 }) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-muted p-6">
-      <div className="rounded-xl border border-border bg-card p-6 text-center">
+      <div className="rounded-md border border-border bg-card p-6 text-center">
         <AlertCircle className="mx-auto text-destructive" />
         <h1 className="mt-3 font-bold">Unable to load business</h1>
         <p className="mt-2 text-sm text-muted-foreground">{message}</p>

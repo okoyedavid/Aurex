@@ -1,5 +1,7 @@
 "use client";
 
+import { SelectControl } from "@/components/ui/select";
+
 import { Plus, Trash2 } from "lucide-react";
 import type { Dispatch, SetStateAction } from "react";
 
@@ -151,7 +153,7 @@ export function EmployeeListsDraftEditor({
                 <div className="grid gap-3 sm:grid-cols-2">
                   <label className="text-sm font-medium">
                     Currency
-                    <select
+                    <SelectControl
                       className="mt-2 h-10 w-full rounded-md border border-input bg-background px-3"
                       value={list.currency ?? "NGN"}
                       disabled={disabled}
@@ -165,11 +167,11 @@ export function EmployeeListsDraftEditor({
                       <option value="NGN">NGN</option>
                       <option value="USD">USD</option>
                       <option value="GBP">GBP</option>
-                    </select>
+                    </SelectControl>
                   </label>
                   <label className="text-sm font-medium">
                     Pay frequency
-                    <select
+                    <SelectControl
                       className="mt-2 h-10 w-full rounded-md border border-input bg-background px-3"
                       value={list.payFrequency ?? "monthly"}
                       disabled={disabled}
@@ -184,7 +186,7 @@ export function EmployeeListsDraftEditor({
                       <option value="monthly">Monthly</option>
                       <option value="weekly">Weekly</option>
                       <option value="one_time">One time</option>
-                    </select>
+                    </SelectControl>
                   </label>
                 </div>
                 {list.employees.map((employee) => (

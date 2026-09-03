@@ -9,6 +9,7 @@ import {
 
 import { businessMemberKeys } from "@/features/business/business-member-hooks";
 import { employeeListKeys } from "@/features/business/employee-list-hooks";
+import { auditKeys } from "@/features/audit/audit-hooks";
 import * as service from "@/lib/access-api";
 import { BusinessApiError, businessKeys } from "@/lib/business-api";
 
@@ -110,6 +111,8 @@ function useRoleMutation(
         queryClient.invalidateQueries({
           queryKey: roleKeys.assignable(id, 1, 100),
         }),
+        queryClient.invalidateQueries({ queryKey: auditKeys.organizationRoot(id) }),
+        queryClient.invalidateQueries({ queryKey: auditKeys.personalRoot(id) }),
       ]);
     },
   });
@@ -128,7 +131,11 @@ export const useArchiveCustomRole = (id: string, roleId: string) => {
   return useMutation({
     mutationFn: () => service.archiveBusinessRole(id, roleId),
     onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: roleKeys.root(id) }),
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: roleKeys.root(id) }),
+        queryClient.invalidateQueries({ queryKey: auditKeys.organizationRoot(id) }),
+        queryClient.invalidateQueries({ queryKey: auditKeys.personalRoot(id) }),
+      ]),
   });
 };
 
@@ -184,6 +191,8 @@ export const useCreateBusinessInvite = (id: string) => {
         queryKey: businessMemberKeys.root(id),
       }),
       queryClient.invalidateQueries({ queryKey: employeeListKeys.root(id) }),
+      queryClient.invalidateQueries({ queryKey: auditKeys.organizationRoot(id) }),
+      queryClient.invalidateQueries({ queryKey: auditKeys.personalRoot(id) }),
       ...(variables.employeeListId
         ? [
             queryClient.invalidateQueries({
@@ -234,6 +243,8 @@ export const useAcceptBusinessInvite = () => {
         queryClient.invalidateQueries({
           queryKey: employeeListKeys.root(businessId),
         }),
+        queryClient.invalidateQueries({ queryKey: auditKeys.organizationRoot(businessId) }),
+        queryClient.invalidateQueries({ queryKey: auditKeys.personalRoot(businessId) }),
         ...(result.meta.membershipActivated || result.meta.membershipCreated
           ? [
               queryClient.invalidateQueries({
@@ -255,9 +266,16 @@ export const useRejectBusinessInvite = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: service.rejectInvite,
-    onSettled: (_data, error) => {
+    onSettled: (data, error) => {
       if (!error || isConflict(error)) {
-        void queryClient.invalidateQueries({ queryKey: inviteKeys.root });
+        const businessId = data?.businessId.id;
+        void Promise.all([
+          queryClient.invalidateQueries({ queryKey: inviteKeys.root }),
+          ...(businessId ? [
+            queryClient.invalidateQueries({ queryKey: auditKeys.organizationRoot(businessId) }),
+            queryClient.invalidateQueries({ queryKey: auditKeys.personalRoot(businessId) }),
+          ] : []),
+        ]);
       }
     },
   });
@@ -280,6 +298,8 @@ export const useApproveBusinessInvite = (id: string) => {
       }),
       queryClient.invalidateQueries({ queryKey: employeeListKeys.root(id) }),
       queryClient.invalidateQueries({ queryKey: notificationKeys.root }),
+      queryClient.invalidateQueries({ queryKey: auditKeys.organizationRoot(id) }),
+      queryClient.invalidateQueries({ queryKey: auditKeys.personalRoot(id) }),
       ...(variables.employeeListId
         ? [
             queryClient.invalidateQueries({
@@ -326,6 +346,8 @@ export const useRejectInviteApproval = (id: string) => {
         }),
         queryClient.invalidateQueries({ queryKey: employeeListKeys.root(id) }),
         queryClient.invalidateQueries({ queryKey: notificationKeys.root }),
+        queryClient.invalidateQueries({ queryKey: auditKeys.organizationRoot(id) }),
+        queryClient.invalidateQueries({ queryKey: auditKeys.personalRoot(id) }),
       ]),
     onError: (error) => {
       if (isConflict(error)) {

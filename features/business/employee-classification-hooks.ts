@@ -8,6 +8,7 @@ import {
 } from "@tanstack/react-query";
 
 import * as service from "@/lib/employee-classifications-api";
+import { auditKeys } from "@/features/audit/audit-hooks";
 
 export const employeeTypeKeys = {
   systemRoot: (businessId: string) =>
@@ -67,6 +68,21 @@ export function useEmployeeTypesQuery(
   });
 }
 
+export function useEmployeeTypesPageQuery(
+  businessId: string,
+  page: number,
+  limit: number,
+  status: service.EmployeeClassificationStatus,
+  enabled = true,
+) {
+  return useQuery({
+    queryKey: employeeTypeKeys.list(businessId, page, limit, status),
+    queryFn: () => service.getEmployeeTypes(businessId, page, limit, status),
+    enabled: Boolean(businessId) && enabled,
+    placeholderData: keepPreviousData,
+  });
+}
+
 export function useSystemEmployeeGroupsQuery(
   businessId: string,
   enabled = true,
@@ -91,16 +107,32 @@ export function useEmployeeGroupsQuery(
   });
 }
 
+export function useEmployeeGroupsPageQuery(
+  businessId: string,
+  page: number,
+  limit: number,
+  status: service.EmployeeClassificationStatus,
+  enabled = true,
+) {
+  return useQuery({
+    queryKey: employeeGroupKeys.list(businessId, page, limit, status),
+    queryFn: () => service.getEmployeeGroups(businessId, page, limit, status),
+    enabled: Boolean(businessId) && enabled,
+    placeholderData: keepPreviousData,
+  });
+}
+
 export function useCreateOrResolveEmployeeTypeMutation(businessId: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (
       body: service.CreateClassificationBody<service.DefaultEmployeeTypeKey>,
     ) => service.createOrResolveEmployeeType(businessId, body),
-    onSuccess: () =>
-      queryClient.invalidateQueries({
-        queryKey: employeeTypeKeys.ownedRoot(businessId),
-      }),
+    onSuccess: () => Promise.all([
+      queryClient.invalidateQueries({ queryKey: employeeTypeKeys.ownedRoot(businessId) }),
+      queryClient.invalidateQueries({ queryKey: auditKeys.organizationRoot(businessId) }),
+      queryClient.invalidateQueries({ queryKey: auditKeys.personalRoot(businessId) }),
+    ]),
   });
 }
 
@@ -114,10 +146,11 @@ export function useUpdateEmployeeTypeMutation(businessId: string) {
       id: string;
       body: service.UpdateClassificationBody;
     }) => service.updateEmployeeType(businessId, id, body),
-    onSuccess: () =>
-      queryClient.invalidateQueries({
-        queryKey: employeeTypeKeys.ownedRoot(businessId),
-      }),
+    onSuccess: () => Promise.all([
+      queryClient.invalidateQueries({ queryKey: employeeTypeKeys.ownedRoot(businessId) }),
+      queryClient.invalidateQueries({ queryKey: auditKeys.organizationRoot(businessId) }),
+      queryClient.invalidateQueries({ queryKey: auditKeys.personalRoot(businessId) }),
+    ]),
   });
 }
 
@@ -127,10 +160,11 @@ export function useCreateOrResolveEmployeeGroupMutation(businessId: string) {
     mutationFn: (
       body: service.CreateClassificationBody<service.DefaultEmployeeGroupKey>,
     ) => service.createOrResolveEmployeeGroup(businessId, body),
-    onSuccess: () =>
-      queryClient.invalidateQueries({
-        queryKey: employeeGroupKeys.ownedRoot(businessId),
-      }),
+    onSuccess: () => Promise.all([
+      queryClient.invalidateQueries({ queryKey: employeeGroupKeys.ownedRoot(businessId) }),
+      queryClient.invalidateQueries({ queryKey: auditKeys.organizationRoot(businessId) }),
+      queryClient.invalidateQueries({ queryKey: auditKeys.personalRoot(businessId) }),
+    ]),
   });
 }
 
@@ -144,9 +178,10 @@ export function useUpdateEmployeeGroupMutation(businessId: string) {
       id: string;
       body: service.UpdateClassificationBody;
     }) => service.updateEmployeeGroup(businessId, id, body),
-    onSuccess: () =>
-      queryClient.invalidateQueries({
-        queryKey: employeeGroupKeys.ownedRoot(businessId),
-      }),
+    onSuccess: () => Promise.all([
+      queryClient.invalidateQueries({ queryKey: employeeGroupKeys.ownedRoot(businessId) }),
+      queryClient.invalidateQueries({ queryKey: auditKeys.organizationRoot(businessId) }),
+      queryClient.invalidateQueries({ queryKey: auditKeys.personalRoot(businessId) }),
+    ]),
   });
 }

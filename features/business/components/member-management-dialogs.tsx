@@ -1,5 +1,7 @@
 "use client";
 
+import { SelectControl } from "@/components/ui/select";
+
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -73,7 +75,7 @@ export function ChangeMemberRoleDialog({
         ) : roles.error ? (
           <ErrorState error={roles.error} onRetry={() => roles.refetch()} />
         ) : confirming && selected ? (
-          <div className="rounded-lg border border-border bg-muted/30 p-4">
+          <div className="rounded-md border border-border bg-muted/30 p-4">
             <div className="flex items-center justify-between gap-3">
               <p className="font-semibold">{selected.name}</p>
               <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
@@ -91,7 +93,7 @@ export function ChangeMemberRoleDialog({
           <>
             <label className="text-sm font-medium">
               Business role
-              <select
+              <SelectControl
                 className="mt-2 h-10 w-full rounded-md border border-input bg-background px-3"
                 value={roleId}
                 onChange={(event) => setRoleId(event.target.value)}
@@ -101,10 +103,10 @@ export function ChangeMemberRoleDialog({
                     {role.name} · {role.type}
                   </option>
                 ))}
-              </select>
+              </SelectControl>
             </label>
             {selected ? (
-              <div className="rounded-lg border border-border bg-muted/30 p-4">
+              <div className="rounded-md border border-border bg-muted/30 p-4">
                 <PermissionList
                   permissions={selected.permissions}
                   denied={selected.deniedPermissions}

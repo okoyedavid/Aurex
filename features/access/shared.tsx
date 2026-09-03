@@ -1,7 +1,7 @@
 "use client";
 import { AlertTriangle, Ban, Check, LoaderCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { BusinessApiError } from "@/lib/business-api";
+import { BusinessApiError, businessErrorMessage } from "@/lib/business-api";
 import { permissionLabels } from "@/features/business/member-role-options";
 import type { Permission } from "@/types/generic";
 import { formatDate } from "@/features/dashboard/format";
@@ -19,7 +19,7 @@ export function ErrorState({
 }) {
   const status = errorStatus(error);
   return (
-    <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-5">
+    <div className="rounded-md border border-destructive/30 bg-destructive/5 p-5">
       <div className="flex gap-3">
         <AlertTriangle className="mt-0.5 h-5 w-5 text-destructive" />
         <div>
@@ -31,7 +31,7 @@ export function ErrorState({
                 : "Unable to load this content"}
           </p>
           <p className="mt-1 text-sm text-muted-foreground">
-            {error instanceof Error ? error.message : "Please try again."}
+            {businessErrorMessage(error, "Please try again.")}
           </p>
           {onRetry ? (
             <Button className="mt-3" variant="outline" onClick={onRetry}>
@@ -92,7 +92,7 @@ export function PermissionList({
             effective.map((permission) => (
               <li
                 key={permission}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-500/10 px-2.5 py-1.5 text-xs font-medium text-emerald-700 dark:text-emerald-300"
+                className="inline-flex items-center gap-1.5 rounded-md bg-emerald-500/10 px-2.5 py-1.5 text-xs font-medium text-emerald-700 dark:text-emerald-300"
               >
                 <Check className="size-3" />
                 {permissionLabels[permission].replace(
@@ -102,7 +102,7 @@ export function PermissionList({
               </li>
             ))
           ) : (
-            <li className="rounded-lg bg-muted px-2.5 py-1.5 text-xs text-muted-foreground">
+            <li className="rounded-md bg-muted px-2.5 py-1.5 text-xs text-muted-foreground">
               No effective permissions
             </li>
           )}
@@ -117,7 +117,7 @@ export function PermissionList({
             {denied.map((permission) => (
               <li
                 key={permission}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-destructive/10 px-2.5 py-1.5 text-xs font-medium"
+                className="inline-flex items-center gap-1.5 rounded-md bg-destructive/10 px-2.5 py-1.5 text-xs font-medium"
               >
                 <Ban className="size-3" />
                 {permissionLabels[permission].replace(

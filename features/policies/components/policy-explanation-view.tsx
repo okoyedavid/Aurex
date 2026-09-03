@@ -20,7 +20,7 @@ function ConditionRows({ evaluations }: { evaluations: ConditionEvaluation[] }) 
       {evaluations.map((evaluation, index) => (
         <div
           key={index}
-          className={`rounded-lg px-3 py-2 text-xs ${evaluation.matched ? "bg-emerald-500/10" : "bg-destructive/10"}`}
+          className={`rounded-md px-3 py-2 text-xs ${evaluation.matched ? "bg-emerald-500/10" : "bg-destructive/10"}`}
         >
           <span className="font-semibold">
             {evaluation.matched ? "Matched" : "Failed"}
@@ -66,7 +66,7 @@ export function PolicyExplanationView({
             {explanation.desiredPolicies.map((resolved) => (
               <article
                 key={`${resolved.policyId}-${resolved.source}`}
-                className="rounded-xl border border-border p-4"
+                className="rounded-md border border-border p-4"
               >
                 <div className="flex items-center justify-between gap-2">
                   <p className="font-semibold">{policyName(resolved.policyId)}</p>
@@ -100,7 +100,7 @@ export function PolicyExplanationView({
         {explanation.evaluatedRules.length ? (
           <div className="space-y-3">
             {explanation.evaluatedRules.map((rule) => (
-              <article key={rule.ruleId} className="rounded-xl border border-border p-4">
+              <article key={rule.ruleId} className="rounded-md border border-border p-4">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
                     <p className="font-semibold">{policyName(rule.policyId)}</p>
@@ -128,7 +128,7 @@ export function PolicyExplanationView({
             {explanation.suppressedCandidates.map((candidate) => (
               <div
                 key={`${candidate.policyId}-${candidate.reason}`}
-                className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border p-3"
+                className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-border p-3"
               >
                 <div>
                   <p className="font-medium">{policyName(candidate.policyId)}</p>
@@ -154,7 +154,7 @@ export function PolicyExplanationView({
         <h4 className="mb-3 font-semibold">Category decisions</h4>
         <div className="grid gap-3 md:grid-cols-2">
           {explanation.categoryDecisions.map((decision) => (
-            <div key={decision.categoryId} className="rounded-xl border border-border p-3">
+            <div key={decision.categoryId} className="rounded-md border border-border p-3">
               <div className="flex justify-between gap-2">
                 <p className="font-semibold">{decision.name}</p>
                 <PolicyBadge tone="info">{decision.cardinality}</PolicyBadge>

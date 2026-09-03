@@ -1,5 +1,7 @@
 "use client";
 
+import { SelectControl } from "@/components/ui/select";
+
 import { Loader2 } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
@@ -154,7 +156,7 @@ export function ApprovalDialog({
           </div>
 
           {!permissionGate.allowed ? (
-            <div className="mb-5 rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
+            <div className="mb-5 rounded-md border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
               You do not have the required permissions:{" "}
               {permissionGate.missing.join(", ")}.
             </div>
@@ -177,14 +179,14 @@ export function ApprovalDialog({
               ) : (
                 <label className="block space-y-2 text-sm font-medium">
                   Employee list
-                  <select
+                  <SelectControl
                     value={employeeListId}
                     disabled={approve.isPending || resolveType.isPending}
                     onChange={(event) => {
                       setEmployeeListId(event.target.value);
                       setDraft(newEmployee());
                     }}
-                    className="h-10 w-full rounded-lg border border-input bg-background px-3"
+                    className="h-10 w-full rounded-md border border-input bg-background px-3"
                   >
                     <option value="">Select an employee list</option>
                     {lists.data?.items.map((list) => (
@@ -192,7 +194,7 @@ export function ApprovalDialog({
                         {list.name}
                       </option>
                     ))}
-                  </select>
+                  </SelectControl>
                 </label>
               )}
               {employeeListId ? (
@@ -209,7 +211,7 @@ export function ApprovalDialog({
                   onRemove={() => undefined}
                 />
               ) : (
-                <p className="rounded-xl border border-dashed border-border p-5 text-sm text-muted-foreground">
+                <p className="rounded-md border border-dashed border-border p-5 text-sm text-muted-foreground">
                   Select an employee list to enter employee details.
                 </p>
               )}

@@ -2,6 +2,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
 import type {
+  BusinessInvite,
   BusinessRole,
   InviteEmployee,
   InviteMembershipContext,
@@ -11,6 +12,7 @@ import type { Permission } from "@/types/generic";
 import { BusinessApiError } from "@/lib/business-api";
 
 import { InviteEmployeeSummary } from "./invite-employee-summary";
+import { SentInviteCard } from "./business-invites-page";
 import { MembershipOutcome } from "./membership-outcome";
 import { ErrorState } from "./shared";
 import {
@@ -24,6 +26,8 @@ import {
   membershipApprovalPresentation,
   membershipOutcomeBlocksApproval,
   needsEmployeeCreation,
+  resolveInviteManagementView,
+  sentInvitationPresentation,
 } from "./invitation-workflow";
 
 const role = {
@@ -38,6 +42,45 @@ const role = {
   createdAt: "2026-08-30T00:00:00.000Z",
   updatedAt: "2026-08-30T00:00:00.000Z",
 } satisfies BusinessRole;
+
+const sentInvite = (
+  values: Partial<BusinessInvite> = {},
+): BusinessInvite => ({
+  id: "invite-1",
+  businessId: {
+    id: "business-1",
+    name: "Aurex",
+    industry: "Technology",
+  },
+  roleId: role,
+  email: "employee@example.com",
+  type: "EMPLOYEE",
+  employeeId: null,
+  invitedByUserId: {
+    id: "user-1",
+    name: "Admin User",
+    email: "admin@example.com",
+  },
+  acceptedByUserId: null,
+  rejectedByUserId: null,
+  approvedByUserId: null,
+  approvalRejectedByUserId: null,
+  status: "pending",
+  approvalStatus: "not_required",
+  emailDeliveryStatus: "sent",
+  emailDeliveryAttempts: 1,
+  lastEmailAttemptAt: "2026-08-30T10:00:00.000Z",
+  emailDeliveredAt: "2026-08-30T10:00:00.000Z",
+  expiresAt: "2026-09-06T10:00:00.000Z",
+  acceptedAt: null,
+  rejectedAt: null,
+  approvedAt: null,
+  approvalRejectedAt: null,
+  revokedAt: null,
+  createdAt: "2026-08-30T10:00:00.000Z",
+  updatedAt: "2026-08-30T10:00:00.000Z",
+  ...values,
+});
 
 const membershipContext = (
   roleOutcome: InviteMembershipContext["roleOutcome"],
@@ -82,6 +125,87 @@ const approvalInvite = (
   }) satisfies ApprovalFixture;
 
 describe("invitation workflow", () => {
+  it("opens sent invitations first and falls back to an allowed view", () => {
+    expect(resolveInviteManagementView("sent", true, true)).toBe("sent");
+    expect(resolveInviteManagementView("sent", false, true)).toBe(
+      "approvals",
+    );
+    expect(resolveInviteManagementView("approvals", true, false)).toBe(
+      "sent",
+    );
+  });
+
+  it.each([
+    ["pending", "not_required", "Pending", "warn", false],
+    ["accepted", "not_required", "Accepted", "good", false],
+    ["accepted", "pending", "Approval required", "warn", true],
+    ["accepted", "approved", "Accepted", "good", false],
+    ["accepted", "rejected", "Rejected", "bad", false],
+    ["rejected", "not_required", "Rejected", "bad", false],
+    ["expired", "not_required", "Expired", "bad", false],
+    ["revoked", "not_required", "Revoked", "bad", false],
+  ] as const)(
+    "maps %s/%s to one human-readable invitation state",
+    (status, approvalStatus, label, tone, approvalRequired) => {
+      expect(sentInvitationPresentation({ status, approvalStatus })).toEqual({
+        label,
+        tone,
+        approvalRequired,
+      });
+    },
+  );
+
+  it("renders one primary status without completed delivery internals", () => {
+    const markup = renderToStaticMarkup(
+      <SentInviteCard
+        invite={sentInvite({
+          status: "accepted",
+          approvalStatus: "not_required",
+          acceptedAt: "2026-08-30T12:00:00.000Z",
+        })}
+      />,
+    );
+
+    expect(markup).toContain("Employee invitation");
+    expect(markup).toContain("Accepted");
+    expect(markup).not.toContain("not required");
+    expect(markup).not.toContain(">sent<");
+  });
+
+  it.each([
+    ["MEMBER", "pending", "not_required", "Member invitation", "Pending"],
+    ["MEMBER", "accepted", "not_required", "Member invitation", "Accepted"],
+    ["EMPLOYEE", "pending", "not_required", "Employee invitation", "Pending"],
+    ["EMPLOYEE", "accepted", "approved", "Employee invitation", "Accepted"],
+  ] as const)(
+    "renders a %s invitation in the %s/%s state",
+    (type, status, approvalStatus, typeLabel, statusLabel) => {
+      const markup = renderToStaticMarkup(
+        <SentInviteCard
+          invite={sentInvite({ type, status, approvalStatus })}
+        />,
+      );
+      expect(markup).toContain(typeLabel);
+      expect(markup).toContain(statusLabel);
+    },
+  );
+
+  it("shows the real approval action only while approval is pending", () => {
+    const markup = renderToStaticMarkup(
+      <SentInviteCard
+        invite={sentInvite({
+          status: "accepted",
+          approvalStatus: "pending",
+          acceptedAt: "2026-08-30T12:00:00.000Z",
+        })}
+        onReview={() => undefined}
+      />,
+    );
+
+    expect(markup).toContain("Approval required");
+    expect(markup).toContain("Review employee");
+  });
+
   it("builds a MEMBER invitation", () => {
     expect(
       buildInvitationPayload({
@@ -186,7 +310,25 @@ describe("invitation workflow", () => {
     expect(markup).toContain("Jane Doe");
     expect(markup).toContain("Intern");
     expect(markup).toContain("Graduate staff");
-    expect(markup).toContain("verified");
+    expect(markup).toContain("Not linked");
+  });
+
+  it("never renders a raw employee list ID as a department name", () => {
+    const employee: InviteEmployee = {
+      id: "employee-1",
+      fullName: "Jane Doe",
+      jobTitle: "Intern",
+      employeeListId: "6a405df858f472a2f58ccbb9",
+      status: "active",
+      accountVerificationStatus: "verified",
+      businessMemberId: null,
+    };
+    const markup = renderToStaticMarkup(
+      <InviteEmployeeSummary employeeId={employee} />,
+    );
+
+    expect(markup).toContain("Name unavailable");
+    expect(markup).not.toContain("6a405df858f472a2f58ccbb9");
   });
 
   it("identifies when the employee creation form is required", () => {

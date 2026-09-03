@@ -1,4 +1,6 @@
 "use client";
+
+import { SelectControl } from "@/components/ui/select";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -104,8 +106,8 @@ export function EditListDialog({
             </label>
             <label className="text-sm">
               Pay frequency
-              <select
-                className="mt-2 h-8 w-full rounded-lg border border-input bg-background px-2"
+              <SelectControl
+                className="mt-2 h-8 w-full rounded-md border border-input bg-background px-2"
                 value={form.defaultPayFrequency}
                 onChange={(event) =>
                   setForm({ ...form, defaultPayFrequency: event.target.value })
@@ -114,7 +116,7 @@ export function EditListDialog({
                 <option value="monthly">Monthly</option>
                 <option value="weekly">Weekly</option>
                 <option value="one_time">One time</option>
-              </select>
+              </SelectControl>
             </label>
           </div>
           <DialogFooter>

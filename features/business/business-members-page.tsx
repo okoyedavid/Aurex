@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 import { useBusinessAccess } from "./business-access-context";
+import { BusinessPageHeader } from "./business-page-header";
 import { useBusinessMembersQuery } from "./business-member-hooks";
 import { MemberAvatar } from "./member-avatar";
 import { MembersPageFrame } from "./members-page-frame";
@@ -93,7 +94,7 @@ export function BusinessMembersPage({ businessId }: { businessId: string }) {
       <MembersPageFrame>
         <MembersState
           title="Unable to load members"
-          detail={query.error.message}
+          detail={businessErrorMessage(query.error)}
           retry={() => query.refetch()}
         />
       </MembersPageFrame>
@@ -103,13 +104,13 @@ export function BusinessMembersPage({ businessId }: { businessId: string }) {
   const data = query.data!;
   return (
     <MembersPageFrame>
-      <p className="text-sm text-muted-foreground">{access.business.name}</p>
-      <h1 className="mt-1 text-3xl font-bold tracking-tight">Members</h1>
-      <p className="mt-2 text-sm text-muted-foreground">
-        View people with access to this business and their assigned roles.
-      </p>
+      <BusinessPageHeader
+        eyebrow={access.business.name}
+        title="Members"
+        description="View people with access to this business and their assigned roles."
+      />
 
-      <div className="mt-7 overflow-x-auto rounded-xl border border-border bg-card shadow-sm">
+      <div className="mt-7 overflow-x-auto rounded-md border border-border bg-card shadow-sm">
         {data.items.length === 0 ? (
           <div className="p-10 text-center">
             <h2 className="font-semibold">No business members</h2>
@@ -206,7 +207,7 @@ function MemberRowActions({ member }: { member: BusinessMember }) {
         >
           <MoreHorizontal className="h-4 w-4" />
         </summary>
-        <div className="absolute right-0 z-20 mt-2 w-44 overflow-hidden rounded-lg border border-border bg-popover p-1 shadow-lg">
+        <div className="absolute right-0 z-20 mt-2 w-44 overflow-hidden rounded-md border border-border bg-popover p-1 shadow-lg">
           {role ? (
             <button
               className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm hover:bg-muted"

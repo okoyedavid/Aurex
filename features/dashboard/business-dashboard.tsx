@@ -26,7 +26,7 @@ import {
 import { Badge, formatDateTime } from "@/features/access/shared";
 
 function Skeleton({ className = "" }: { className?: string }) {
-  return <div className={`animate-pulse rounded-lg bg-muted ${className}`} />;
+  return <div className={`animate-pulse rounded-md bg-muted ${className}`} />;
 }
 
 export function BusinessDashboard({ businessId }: { businessId: string }) {
@@ -114,11 +114,11 @@ export function BusinessDashboard({ businessId }: { businessId: string }) {
   return (
     <div className="min-w-0 px-3 py-5 pb-12 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
       <div className="mx-auto min-w-0 max-w-[1360px]">
-        <section className="relative overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-8">
+        <section className="relative overflow-hidden rounded-md border border-border bg-card p-4 shadow-sm sm:p-8">
           <div className="absolute -right-20 -top-24 h-64 w-64 rounded-full bg-primary/10 blur-3xl" />
           <div className="relative flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-primary/10 text-lg font-bold text-primary sm:h-14 sm:w-14 sm:text-xl">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-md bg-primary/10 text-lg font-bold text-primary sm:h-14 sm:w-14 sm:text-xl">
                 {business.profile_img ? (
                   <span
                     className="h-full w-full bg-cover bg-center"
@@ -180,7 +180,7 @@ export function BusinessDashboard({ businessId }: { businessId: string }) {
               <Link
                 key={label}
                 href={href}
-                className="group rounded-xl border border-border bg-card p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md"
+                className="group rounded-md border border-border bg-card p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md"
               >
                 <div className="flex justify-between gap-3">
                   <div>
@@ -190,7 +190,7 @@ export function BusinessDashboard({ businessId }: { businessId: string }) {
                       {detail}
                     </p>
                   </div>
-                  <span className="h-fit rounded-lg bg-primary/10 p-2.5 text-primary">
+                  <span className="h-fit rounded-md bg-primary/10 p-2.5 text-primary">
                     <Icon className="h-5 w-5" />
                   </span>
                 </div>
@@ -199,9 +199,9 @@ export function BusinessDashboard({ businessId }: { businessId: string }) {
         </section>
 
         {canApprove && pendingApprovals > 0 ? (
-          <section className="mt-5 flex flex-col gap-4 rounded-xl border border-amber-500/25 bg-amber-500/5 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+          <section className="mt-5 flex flex-col gap-4 rounded-md border border-amber-500/25 bg-amber-500/5 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
             <div className="flex min-w-0 gap-3">
-              <span className="h-fit rounded-lg bg-amber-500/10 p-2.5 text-amber-700 dark:text-amber-300">
+              <span className="h-fit rounded-md bg-amber-500/10 p-2.5 text-amber-700 dark:text-amber-300">
                 <ShieldCheck className="h-5 w-5" />
               </span>
               <div className="min-w-0">
@@ -226,7 +226,7 @@ export function BusinessDashboard({ businessId }: { businessId: string }) {
         <div className="mt-5 grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1.15fr)_minmax(320px,.85fr)]">
           <div className="min-w-0 space-y-5">
             {canMembers ? (
-              <section className="min-w-0 rounded-xl border border-border bg-card shadow-sm">
+              <section className="min-w-0 rounded-md border border-border bg-card shadow-sm">
                 <div className="flex items-start justify-between gap-3 border-b border-border p-4 sm:items-center sm:p-5">
                   <div className="min-w-0">
                     <h2 className="font-bold">Team members</h2>
@@ -257,7 +257,7 @@ export function BusinessDashboard({ businessId }: { businessId: string }) {
                       <Link
                         href={`/business/${businessId}/members/${member.id}`}
                         key={member.id}
-                        className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-2 rounded-lg p-3 hover:bg-muted/60 sm:flex"
+                        className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-2 rounded-md p-3 hover:bg-muted/60 sm:flex"
                       >
                         <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary/10 text-sm font-bold text-primary">
                           {member.userId.avatar ? (
@@ -301,7 +301,7 @@ export function BusinessDashboard({ businessId }: { businessId: string }) {
             ) : null}
 
             {canLists ? (
-              <section className="min-w-0 rounded-xl border border-border bg-card shadow-sm">
+              <section className="min-w-0 rounded-md border border-border bg-card shadow-sm">
                 <div className="flex items-start justify-between gap-3 border-b border-border p-4 sm:items-center sm:p-5">
                   <div className="min-w-0">
                     <h2 className="font-bold">Employee lists</h2>
@@ -328,7 +328,7 @@ export function BusinessDashboard({ businessId }: { businessId: string }) {
                       <Link
                         href={`/business/${businessId}/employee-lists/${list.id}`}
                         key={list.id}
-                        className="min-w-0 rounded-lg border border-border p-4 transition hover:bg-muted/50"
+                        className="min-w-0 rounded-md border border-border p-4 transition hover:bg-muted/50"
                       >
                         <div className="flex min-w-0 flex-col items-start gap-2 min-[400px]:flex-row min-[400px]:justify-between">
                           <div className="min-w-0">
@@ -389,7 +389,7 @@ export function BusinessDashboard({ businessId }: { businessId: string }) {
           </div>
 
       <aside className="min-w-0 space-y-5">
-        <section className="min-w-0 rounded-xl border border-border bg-card shadow-sm">
+        <section className="min-w-0 rounded-md border border-border bg-card shadow-sm">
           <div className="flex items-start justify-between gap-3 border-b border-border p-4 sm:items-center sm:p-5">
             <div className="min-w-0">
                   <h2 className="font-bold">Recent notifications</h2>
@@ -420,7 +420,7 @@ export function BusinessDashboard({ businessId }: { businessId: string }) {
                     <Link
                       href="/dashboard/notifications"
                       key={n.id}
-                      className={`flex gap-3 rounded-lg p-3 hover:bg-muted/60 ${n.readAt ? "" : "bg-primary/5"}`}
+                      className={`flex gap-3 rounded-md p-3 hover:bg-muted/60 ${n.readAt ? "" : "bg-primary/5"}`}
                     >
                       <span
                         className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${n.readAt ? "bg-border" : "bg-primary"}`}
@@ -450,9 +450,9 @@ export function BusinessDashboard({ businessId }: { businessId: string }) {
               </div>
             </section>
 
-            <section className="rounded-xl border border-border bg-card p-5 shadow-sm">
+            <section className="rounded-md border border-border bg-card p-5 shadow-sm">
               <div className="flex items-center gap-3">
-                <span className="rounded-lg bg-primary/10 p-2.5 text-primary">
+                <span className="rounded-md bg-primary/10 p-2.5 text-primary">
                   <Building2 className="h-5 w-5" />
                 </span>
                 <div>
@@ -495,7 +495,7 @@ export function BusinessDashboard({ businessId }: { businessId: string }) {
                 </div>
               </dl>
               {!business.isVerified ? (
-                <div className="mt-5 flex gap-2 rounded-lg bg-amber-500/10 p-3 text-sm text-amber-800 dark:text-amber-200">
+                <div className="mt-5 flex gap-2 rounded-md bg-amber-500/10 p-3 text-sm text-amber-800 dark:text-amber-200">
                   <CircleAlert className="mt-0.5 h-4 w-4 shrink-0" />
                   <p>Business verification is incomplete.</p>
                 </div>

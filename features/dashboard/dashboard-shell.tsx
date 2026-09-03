@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
 import { DashboardHeader } from "@/features/dashboard/dashboard-header";
 import { DashboardSidebar } from "@/features/dashboard/dashboard-sidebar";
 import { cn } from "@/lib/utils";
-import type { BusinessNavigationItem } from "@/features/dashboard/data";
+import { getHeaderSearchMetadata, getPersonalHeaderCommands, type BusinessNavigationItem, type HeaderCommand } from "@/features/dashboard/data";
 
 export function DashboardShell({
   children,
@@ -13,6 +14,7 @@ export function DashboardShell({
   businessId,
   businessName,
   businessNavigation,
+  headerCommands,
   isRefreshing = false,
 }: {
   children: React.ReactNode;
@@ -20,10 +22,14 @@ export function DashboardShell({
   businessId?: string;
   businessName?: string;
   businessNavigation?: BusinessNavigationItem[];
+  headerCommands?: HeaderCommand[];
   isRefreshing?: boolean;
 }) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const pathname = usePathname();
+  const searchMetadata = getHeaderSearchMetadata(pathname, mode, businessId);
+  const commands = headerCommands ?? getPersonalHeaderCommands();
 
   useEffect(() => {
     if (!mobileOpen) return;
@@ -65,6 +71,8 @@ export function DashboardShell({
         <DashboardHeader
           mode={mode}
           businessName={businessName}
+          searchMetadata={searchMetadata}
+          commands={commands}
           sidebarCollapsed={sidebarCollapsed}
           onMenuOpen={() => setMobileOpen(true)}
           onSidebarToggle={() =>

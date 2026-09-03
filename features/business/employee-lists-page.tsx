@@ -17,6 +17,7 @@ import { getEmployeeLists } from "@/lib/employee-lists-api";
 import { BusinessApiError } from "@/lib/business-api";
 import { EmployeeListsPageFrame as PageFrame } from "./employee-lists-page-frame";
 import { EmployeeListsState as State } from "./employee-lists-state";
+import { EmployeeSubnavigation } from "@/features/employees/employee-subnavigation";
 import { Pagination } from "./pagination";
 import { StatusBadge as Badge } from "./status-badge";
 import { TableHeading as Th } from "./table-heading";
@@ -102,14 +103,15 @@ export function EmployeeListsPage({ businessId }: { businessId: string }) {
   const data = query.data!;
   return (
     <PageFrame>
+      <EmployeeSubnavigation businessId={businessId} current="departments" />
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-sm text-muted-foreground">
             {access.business.name}
           </p>
-          <h1 className="mt-1 text-3xl font-bold">Employee Lists</h1>
+          <h1 className="mt-1 text-3xl font-bold">Departments</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Manage payroll groups and employee verification.
+            Organize employees into departments and manage payroll verification.
           </p>
         </div>
         {canCreate && (
@@ -119,10 +121,10 @@ export function EmployeeListsPage({ businessId }: { businessId: string }) {
           </Button>
         )}
       </div>
-      <div className="mt-7 overflow-x-auto rounded-xl border border-border bg-card shadow-sm">
+      <div className="mt-7 overflow-x-auto rounded-md border border-border bg-card shadow-sm">
         {data.items.length === 0 ? (
           <div className="p-10 text-center">
-            <h2 className="font-semibold">No employee lists</h2>
+            <h2 className="font-semibold">No departments</h2>
             <p className="mt-2 text-sm text-muted-foreground">
               Create a list to organize payroll employees.
             </p>

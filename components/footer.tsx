@@ -26,7 +26,11 @@ export default function Footer() {
   const [newsletterEmail, setNewsletterEmail] = useState("");
   const [isSubscribing, setIsSubscribing] = useState(false);
 
-  if (pathname.startsWith("/dashboard") || pathname.startsWith("/business"))
+  if (
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/business") ||
+    pathname.startsWith("/warp-demo")
+  )
     return null;
 
   return (

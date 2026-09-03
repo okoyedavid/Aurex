@@ -63,11 +63,19 @@ export class BusinessApiError extends Error {
   response: ApiErrorResponse;
 
   constructor(status: number, response: ApiErrorResponse) {
-    super(response.message);
+    const message = safeBusinessErrorMessage(status, response.message);
+    super(message);
     this.name = "BusinessApiError";
     this.status = status;
-    this.response = response;
+    this.response = { ...response, message };
   }
+}
+
+function safeBusinessErrorMessage(status: number, message?: string) {
+  if (status === 401 || /refresh token|access token|authentication required|unauthorized/i.test(message ?? "")) {
+    return "Your session has expired. Please sign in again.";
+  }
+  return message || "Something went wrong. Please try again.";
 }
 export const businessKeys = {
   all: ["businesses"] as const,
@@ -96,7 +104,7 @@ export function businessErrorMessage(
   }
 
   if (error instanceof Error) {
-    return error.message;
+    return safeBusinessErrorMessage(0, error.message);
   }
 
   return fallback;

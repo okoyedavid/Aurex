@@ -16,7 +16,7 @@ export function InviteEmployeeSummary({
   if (!employeeId) return null;
   if (!employee) {
     return (
-      <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-800 dark:text-amber-200">
+      <div className="rounded-md border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-800 dark:text-amber-200">
         The invitation references an employee, but the backend response did not
         populate the employee details.
       </div>
@@ -28,9 +28,9 @@ export function InviteEmployeeSummary({
 function EmployeeDetails({ employee }: { employee: InviteEmployee }) {
   const list = employeeListIdentity(employee);
   return (
-    <div className="rounded-xl border border-border bg-muted/30 p-4">
+    <div className="rounded-md border border-border bg-muted/30 p-4">
       <div className="flex items-start gap-3">
-        <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
           <BriefcaseBusiness className="size-4" />
         </span>
         <div>
@@ -41,17 +41,11 @@ function EmployeeDetails({ employee }: { employee: InviteEmployee }) {
         </div>
       </div>
       <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
-        <Detail label="Employee list" value={list.name ?? list.id} />
+        <Detail label="Department" value={list.name ?? "Name unavailable"} />
         <Detail label="Employment status" value={employee.status} />
         <Detail
-          label="Account verification"
-          value={employee.accountVerificationStatus}
-        />
-        <Detail
-          label="Member link"
-          value={
-            employee.businessMemberId ? "Already linked" : "Not currently linked"
-          }
+          label="Account"
+          value={employee.businessMemberId ? "Linked" : "Not linked"}
           linked={Boolean(employee.businessMemberId)}
         />
       </dl>

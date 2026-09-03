@@ -158,7 +158,7 @@ export function PolicyDetailPage({
       </div>
 
       <div className="mt-6 grid gap-3 sm:grid-cols-3">
-        <div className="rounded-xl border border-border bg-card p-4">
+        <div className="rounded-md border border-border bg-card p-4">
           <p className="text-xs text-muted-foreground">
             Effective start (inclusive)
           </p>
@@ -168,7 +168,7 @@ export function PolicyDetailPage({
               : "Immediately"}
           </p>
         </div>
-        <div className="rounded-xl border border-border bg-card p-4">
+        <div className="rounded-md border border-border bg-card p-4">
           <p className="text-xs text-muted-foreground">
             Effective end (exclusive)
           </p>
@@ -176,14 +176,14 @@ export function PolicyDetailPage({
             {formatPolicyDate(item.effectiveTo)}
           </p>
         </div>
-        <div className="rounded-xl border border-border bg-card p-4">
+        <div className="rounded-md border border-border bg-card p-4">
           <p className="text-xs text-muted-foreground">Configuration</p>
           {item.configuration ? (
             <details className="mt-1">
               <summary className="cursor-pointer font-medium">
                 View configuration
               </summary>
-              <pre className="mt-2 max-h-48 overflow-auto rounded-lg bg-muted p-2 text-xs">
+              <pre className="mt-2 max-h-48 overflow-auto rounded-md bg-muted p-2 text-xs">
                 {JSON.stringify(item.configuration, null, 2)}
               </pre>
             </details>
@@ -218,7 +218,7 @@ export function PolicyDetailPage({
             {rules.data.items.map((rule) => (
               <article
                 key={rule.id}
-                className="rounded-xl border border-border bg-card p-4"
+                className="rounded-md border border-border bg-card p-4"
               >
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
@@ -262,7 +262,7 @@ export function PolicyDetailPage({
                   {rule.conditions.map((condition, index) => (
                     <div
                       key={`${rule.id}-${index}`}
-                      className="rounded-lg bg-muted/60 px-3 py-2 text-sm"
+                      className="rounded-md bg-muted/60 px-3 py-2 text-sm"
                     >
                       <span className="font-medium">
                         {fieldLabels[condition.field]}

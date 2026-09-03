@@ -38,7 +38,7 @@ export function NotificationBell() {
         <div
           role="dialog"
           aria-label="Recent notifications"
-          className="fixed left-3 right-3 top-[4.5rem] z-50 overflow-hidden rounded-xl border border-border bg-popover shadow-xl sm:absolute sm:left-auto sm:right-0 sm:top-12 sm:w-96"
+          className="fixed left-3 right-3 top-[4.5rem] z-50 overflow-hidden rounded-md border border-border bg-popover shadow-xl sm:absolute sm:left-auto sm:right-0 sm:top-12 sm:w-96"
         >
           <div className="border-b border-border px-4 py-3.5">
             <h2 className="font-semibold">Notifications</h2>

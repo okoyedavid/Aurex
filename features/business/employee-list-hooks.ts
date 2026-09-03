@@ -8,6 +8,7 @@ import {
 } from "@tanstack/react-query";
 import * as service from "@/lib/employee-lists-api";
 import type { EmployeeListPayload } from "@/features/business/employee-list-form";
+import { auditKeys } from "@/features/audit/audit-hooks";
 
 export const employeeListKeys = {
   root: (businessId: string) =>
@@ -114,6 +115,9 @@ export function useUpdateEmployeeListMutation(
           queryKey: employeeListKeys.detail(businessId, listId),
         }),
         qc.invalidateQueries({ queryKey: employeeListKeys.root(businessId) }),
+        qc.invalidateQueries({ queryKey: ["business-employees", businessId] }),
+        qc.invalidateQueries({ queryKey: auditKeys.organizationRoot(businessId) }),
+        qc.invalidateQueries({ queryKey: auditKeys.personalRoot(businessId) }),
       ]),
   });
 }
@@ -134,6 +138,9 @@ export function useCreateEmployeeMutation(businessId: string, listId: string) {
           queryKey: employeeListKeys.verification(businessId, listId),
         }),
         qc.invalidateQueries({ queryKey: employeeListKeys.root(businessId) }),
+        qc.invalidateQueries({ queryKey: ["business-employees", businessId] }),
+        qc.invalidateQueries({ queryKey: auditKeys.organizationRoot(businessId) }),
+        qc.invalidateQueries({ queryKey: auditKeys.personalRoot(businessId) }),
       ]),
   });
 }
@@ -161,6 +168,9 @@ export function useUpdateEmployeeMutation(
           queryKey: employeeListKeys.verification(businessId, listId),
         }),
         qc.invalidateQueries({ queryKey: employeeListKeys.root(businessId) }),
+        qc.invalidateQueries({ queryKey: ["business-employees", businessId] }),
+        qc.invalidateQueries({ queryKey: auditKeys.organizationRoot(businessId) }),
+        qc.invalidateQueries({ queryKey: auditKeys.personalRoot(businessId) }),
       ]),
   });
 }

@@ -1,5 +1,7 @@
 "use client";
 
+import { SelectControl } from "@/components/ui/select";
+
 import { CheckCircle2, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
@@ -123,7 +125,7 @@ export function EmployeeDraftRow({
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="text-sm font-medium text-foreground">
             Currency
-            <select
+            <SelectControl
               value={employee.currency ?? "NGN"}
               disabled={disabled}
               onChange={(event) => onUpdate({ currency: event.target.value })}
@@ -132,11 +134,11 @@ export function EmployeeDraftRow({
               <option value="NGN">NGN</option>
               <option value="USD">USD</option>
               <option value="GBP">GBP</option>
-            </select>
+            </SelectControl>
           </label>
           <label className="text-sm font-medium text-foreground">
             Pay frequency
-            <select
+            <SelectControl
               value={employee.payFrequency ?? "monthly"}
               disabled={disabled}
               onChange={(event) =>
@@ -151,7 +153,7 @@ export function EmployeeDraftRow({
               <option value="weekly">Weekly</option>
               <option value="bi-weekly">Bi-weekly</option>
               <option value="one_time">One time</option>
-            </select>
+            </SelectControl>
           </label>
         </div>
         <div className="text-sm font-medium text-foreground">

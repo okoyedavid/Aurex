@@ -31,6 +31,12 @@ const personalSettingsNavigation = [
 const businessSettingsNavigation = [
   { label: "Business", id: "business", href: "#business", icon: Building2 },
   { label: "Team access", id: "team", href: "#team", icon: UsersRound },
+  {
+    label: "Preferences",
+    id: "preferences",
+    href: "#preferences",
+    icon: BellRing,
+  },
 ];
 
 export default function SettingsNavigation({

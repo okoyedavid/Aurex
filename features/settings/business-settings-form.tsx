@@ -1,5 +1,7 @@
 "use client";
 
+import { SelectControl } from "@/components/ui/select";
+
 import { useState } from "react";
 import { Building2 } from "lucide-react";
 
@@ -51,22 +53,22 @@ export function BusinessSettingsForm({ business }: { business: Business }) {
           </label>
           <label className="text-sm font-medium text-foreground">
             Country
-            <select value={form.country} onChange={(e) => updateField("country", e.target.value)} className="mt-2 h-11 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50">
+            <SelectControl value={form.country} onChange={(e) => updateField("country", e.target.value)} className="mt-2 h-11 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50">
               <option>Nigeria</option>
               <option>Ghana</option>
               <option>Kenya</option>
               <option>United Kingdom</option>
               <option>United States</option>
-            </select>
+            </SelectControl>
           </label>
           <label className="text-sm font-medium text-foreground">
             Default currency
-            <select value={form.defaultCurrency} onChange={(e) => updateField("defaultCurrency", e.target.value)} className="mt-2 h-11 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50">
+            <SelectControl value={form.defaultCurrency} onChange={(e) => updateField("defaultCurrency", e.target.value)} className="mt-2 h-11 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50">
               <option value="NGN">NGN - Nigerian Naira</option>
               <option value="USD">USD - US Dollar</option>
               <option value="GBP">GBP - British Pound</option>
               <option value="EUR">EUR - Euro</option>
-            </select>
+            </SelectControl>
           </label>
           <label className="text-sm font-medium text-foreground sm:col-span-2">
             Business address

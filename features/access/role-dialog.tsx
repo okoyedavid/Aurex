@@ -127,7 +127,7 @@ function RoleForm({
       <form onSubmit={submit}>
         <div className="border-b border-border bg-muted/35 px-5 py-5 sm:px-7">
           <DialogHeader>
-            <div className="mb-2 flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+            <div className="mb-2 flex size-10 items-center justify-center rounded-md bg-primary/10 text-primary">
               <ShieldCheck className="size-5" />
             </div>
             <DialogTitle className="text-xl">
@@ -187,7 +187,7 @@ function RoleForm({
                         return (
                           <div
                             key={permission}
-                            className={`rounded-xl border p-3 transition-colors ${granted ? "border-primary/30 bg-primary/5" : "border-border bg-card hover:border-primary/20 hover:bg-muted/30"}`}
+                            className={`rounded-md border p-3 transition-colors ${granted ? "border-primary/30 bg-primary/5" : "border-border bg-card hover:border-primary/20 hover:bg-muted/30"}`}
                           >
                             <label className="flex cursor-pointer items-start gap-3">
                               <input type="checkbox" className="mt-0.5 size-4 accent-primary" checked={granted} onChange={() => toggleGrant(permission)} />
@@ -210,7 +210,7 @@ function RoleForm({
                 );
               })}
               {!available.length ? (
-                <div className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+                <div className="rounded-md border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
                   You do not have any permissions available to delegate.
                 </div>
               ) : null}
