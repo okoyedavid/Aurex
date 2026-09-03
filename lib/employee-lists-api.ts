@@ -21,13 +21,13 @@ type VerificationStatus =
   | "processing"
   | "completed"
   | "completed_with_errors";
-type AccountVerificationStatus =
-  | "pending"
-  | "verified"
-  | "failed"
-  | "stale";
+type AccountVerificationStatus = "pending" | "verified" | "failed" | "stale";
 type VerificationJobStatus =
-  "pending" | "processing" | "retrying" | "exhausted" | "completed";
+  | "pending"
+  | "processing"
+  | "retrying"
+  | "exhausted"
+  | "completed";
 
 export type EmployeeList = {
   id: string;

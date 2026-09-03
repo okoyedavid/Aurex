@@ -116,7 +116,9 @@ export function useUpdateEmployeeListMutation(
         }),
         qc.invalidateQueries({ queryKey: employeeListKeys.root(businessId) }),
         qc.invalidateQueries({ queryKey: ["business-employees", businessId] }),
-        qc.invalidateQueries({ queryKey: auditKeys.organizationRoot(businessId) }),
+        qc.invalidateQueries({
+          queryKey: auditKeys.organizationRoot(businessId),
+        }),
         qc.invalidateQueries({ queryKey: auditKeys.personalRoot(businessId) }),
       ]),
   });
@@ -139,7 +141,9 @@ export function useCreateEmployeeMutation(businessId: string, listId: string) {
         }),
         qc.invalidateQueries({ queryKey: employeeListKeys.root(businessId) }),
         qc.invalidateQueries({ queryKey: ["business-employees", businessId] }),
-        qc.invalidateQueries({ queryKey: auditKeys.organizationRoot(businessId) }),
+        qc.invalidateQueries({
+          queryKey: auditKeys.organizationRoot(businessId),
+        }),
         qc.invalidateQueries({ queryKey: auditKeys.personalRoot(businessId) }),
       ]),
   });
@@ -169,7 +173,9 @@ export function useUpdateEmployeeMutation(
         }),
         qc.invalidateQueries({ queryKey: employeeListKeys.root(businessId) }),
         qc.invalidateQueries({ queryKey: ["business-employees", businessId] }),
-        qc.invalidateQueries({ queryKey: auditKeys.organizationRoot(businessId) }),
+        qc.invalidateQueries({
+          queryKey: auditKeys.organizationRoot(businessId),
+        }),
         qc.invalidateQueries({ queryKey: auditKeys.personalRoot(businessId) }),
       ]),
   });

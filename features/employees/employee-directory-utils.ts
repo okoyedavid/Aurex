@@ -1,9 +1,18 @@
-import type { EmployeeDirectoryFilters, EmployeeStatus } from "@/lib/employees-api";
+import type {
+  EmployeeDirectoryFilters,
+  EmployeeStatus,
+} from "@/lib/employees-api";
 import type { Permission } from "@/types/generic";
 
-const positiveInteger = (value: string | null, fallback: number, maximum = 100) => {
+const positiveInteger = (
+  value: string | null,
+  fallback: number,
+  maximum = 100,
+) => {
   const parsed = Number(value);
-  return Number.isInteger(parsed) && parsed > 0 ? Math.min(parsed, maximum) : fallback;
+  return Number.isInteger(parsed) && parsed > 0
+    ? Math.min(parsed, maximum)
+    : fallback;
 };
 
 export function employeeDirectoryFilters(
@@ -18,7 +27,9 @@ export function employeeDirectoryFilters(
     ...(employeeListId || value("employeeListId")
       ? { employeeListId: employeeListId ?? value("employeeListId") }
       : {}),
-    ...(value("employeeTypeId") ? { employeeTypeId: value("employeeTypeId") } : {}),
+    ...(value("employeeTypeId")
+      ? { employeeTypeId: value("employeeTypeId") }
+      : {}),
     ...(value("groupId") ? { groupId: value("groupId") } : {}),
     ...(value("state") ? { state: value("state") } : {}),
     ...(value("status") ? { status: value("status") as EmployeeStatus } : {}),
@@ -34,8 +45,10 @@ export function employeeDetailHref(
   return returnTo ? `${href}?returnTo=${encodeURIComponent(returnTo)}` : href;
 }
 
-export const canonicalEmployeePoliciesHref = (businessId: string, employeeId: string) =>
-  `/business/${businessId}/employees/${employeeId}/policies`;
+export const canonicalEmployeePoliciesHref = (
+  businessId: string,
+  employeeId: string,
+) => `/business/${businessId}/employees/${employeeId}/policies`;
 
 export function employeePermissions(permissions: ReadonlySet<Permission>) {
   return {

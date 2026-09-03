@@ -13,13 +13,40 @@ import type { EmployeePolicyAssignment } from "@/lib/policy-api";
 import { useBusinessAccess } from "@/features/business/business-access-context";
 import { Pagination } from "@/features/business/pagination";
 import { formatPolicyDate, policyPermissions } from "./policy-helpers";
-import { useEmployeePoliciesQuery, useEmployeePolicyHistoryQuery, usePoliciesQuery, usePolicyCategoriesQuery, usePolicyExplanationQuery, useReconcileEmployeeMutation } from "./policy-hooks";
+import {
+  useEmployeePoliciesQuery,
+  useEmployeePolicyHistoryQuery,
+  usePoliciesQuery,
+  usePolicyCategoriesQuery,
+  usePolicyExplanationQuery,
+  useReconcileEmployeeMutation,
+} from "./policy-hooks";
 import { EndManualAssignmentDialog } from "./components/end-manual-assignment-dialog";
 import { ManualAssignmentDialog } from "./components/manual-assignment-dialog";
 import { PolicyExplanationView } from "./components/policy-explanation-view";
-import { ConfirmPolicyAction, PolicyAuditTable, PolicyBadge, PolicyEmpty, PolicyError, PolicyLoading, PolicyPageFrame } from "./components/policy-ui";
+import {
+  ConfirmPolicyAction,
+  PolicyAuditTable,
+  PolicyBadge,
+  PolicyEmpty,
+  PolicyError,
+  PolicyLoading,
+  PolicyPageFrame,
+} from "./components/policy-ui";
 
-export function EmployeePoliciesPage({ businessId, employeeId, employeeName, jobTitle, embedded = false }: { businessId: string; employeeId: string; employeeName?: string; jobTitle?: string | null; embedded?: boolean }) {
+export function EmployeePoliciesPage({
+  businessId,
+  employeeId,
+  employeeName,
+  jobTitle,
+  embedded = false,
+}: {
+  businessId: string;
+  employeeId: string;
+  employeeName?: string;
+  jobTitle?: string | null;
+  embedded?: boolean;
+}) {
   const access = policyPermissions(useBusinessAccess().effectivePermissions);
   const [asOfInput, setAsOfInput] = useState("");
   const [asOf, setAsOf] = useState<string>();
@@ -29,17 +56,331 @@ export function EmployeePoliciesPage({ businessId, employeeId, employeeName, job
   const [reconcileOpen, setReconcileOpen] = useState(false);
   const [jobId, setJobId] = useState<string>();
   const [historyPage, setHistoryPage] = useState(1);
-  const assignments = useEmployeePoliciesQuery(businessId, employeeId, asOf, access.view);
-  const explanation = usePolicyExplanationQuery(businessId, employeeId, asOf, access.view && explain);
-  const categories = usePolicyCategoriesQuery(businessId, 1, 100, "active", access.view);
+  const assignments = useEmployeePoliciesQuery(
+    businessId,
+    employeeId,
+    asOf,
+    access.view,
+  );
+  const explanation = usePolicyExplanationQuery(
+    businessId,
+    employeeId,
+    asOf,
+    access.view && explain,
+  );
+  const categories = usePolicyCategoriesQuery(
+    businessId,
+    1,
+    100,
+    "active",
+    access.view,
+  );
   const policies = usePoliciesQuery(businessId, 1, 100, {}, access.view);
-  const history = useEmployeePolicyHistoryQuery(businessId, employeeId, historyPage, 20, access.audit);
+  const history = useEmployeePolicyHistoryQuery(
+    businessId,
+    employeeId,
+    historyPage,
+    20,
+    access.audit,
+  );
   const reconcile = useReconcileEmployeeMutation(businessId, employeeId);
-  const policyNames = useMemo(() => new Map((policies.data?.items ?? []).map((policy) => [policy.id, policy.name])), [policies.data]);
-  if (!access.view) return <PolicyPageFrame><PolicyError message="You do not have permission to view employee policies." retry={() => undefined} /></PolicyPageFrame>;
-  if (assignments.isLoading || categories.isLoading || policies.isLoading) return <PolicyLoading label="Loading employee policies…" />;
-  if (assignments.error || categories.error || policies.error) return <PolicyPageFrame><PolicyError message={businessErrorMessage(assignments.error || categories.error || policies.error)} retry={() => { void assignments.refetch(); void categories.refetch(); void policies.refetch(); }} /></PolicyPageFrame>;
-  const refresh = () => { void assignments.refetch(); if (explain) void explanation.refetch(); };
-  const body = <>{!embedded ? <Link href={`/business/${businessId}/employees/${employeeId}`} className="text-sm font-medium text-primary">← {employeeName ?? "Employee"}</Link> : null}<div className={embedded ? "flex flex-wrap items-start justify-between gap-4" : "mt-4 flex flex-wrap items-start justify-between gap-4"}><div><h1 className={embedded ? "text-xl font-bold" : "text-3xl font-bold"}>Employee policies</h1><p className="mt-2 text-sm text-muted-foreground">{employeeName ? `${employeeName}${jobTitle ? ` · ${jobTitle}` : ""}` : "Assigned policies and resolution history"}</p></div><div className="flex flex-wrap gap-2"><Button variant="outline" onClick={refresh}><RefreshCw />Refresh</Button>{access.reconcile ? <Button variant="outline" onClick={() => setReconcileOpen(true)}><RefreshCw />Reconcile</Button> : null}{access.assign ? <Button onClick={() => setManualOpen(true)}><Plus />Manual assignment</Button> : null}</div></div>{jobId ? <details className="mt-4 rounded-md border border-primary/20 bg-primary/5 p-4"><summary className="cursor-pointer font-medium">Reconciliation queued.</summary><p className="mt-2 text-xs text-muted-foreground">Job ID: {jobId}. Use Refresh later to load processed assignments.</p></details> : null}<div className="mt-6 flex flex-wrap items-end gap-3 rounded-md border border-border bg-card p-4"><label className="space-y-2 text-sm font-medium">Assignments effective as of<DateInput kind="datetime-local" value={asOfInput} onChange={(event) => setAsOfInput(event.target.value)} /></label><Button variant="outline" onClick={() => setAsOf(asOfInput ? new Date(asOfInput).toISOString() : undefined)}><Search />Apply date</Button>{asOf ? <Button variant="ghost" onClick={() => { setAsOfInput(""); setAsOf(undefined); }}>Current</Button> : null}<p className="text-xs text-muted-foreground">Starts are inclusive; ends are exclusive.</p></div><section className="mt-8"><div className="flex items-center justify-between"><div><h2 className="text-xl font-bold">Effective assignments</h2><p className="mt-1 text-sm text-muted-foreground">{assignments.data?.asOf ? `As of ${new Date(assignments.data.asOf).toLocaleString()}` : "Current assignments"}</p></div><Button variant="outline" onClick={() => setExplain((value) => !value)}>{explain ? "Hide explanation" : "Explain resolution"}</Button></div>{assignments.data?.items.length ? <div className="mt-4 grid gap-3 md:grid-cols-2">{assignments.data.items.map((assignment) => <article key={assignment.id} className="rounded-md border border-border bg-card p-4"><div className="flex flex-wrap items-center justify-between gap-2"><h3 className="font-semibold">{policyNames.get(assignment.policyId) ?? assignment.policyId}</h3><div className="flex gap-2"><PolicyBadge tone={assignment.source === "manual" ? "info" : "success"}>{assignment.source === "manual" ? "Manually assigned" : "Automatic"}</PolicyBadge><PolicyBadge tone={assignment.status === "active" ? "success" : "neutral"}>{assignment.status}</PolicyBadge></div></div><p className="mt-2 text-xs text-muted-foreground">Policy version {assignment.policyVersion}</p><p className="mt-2 text-sm">{formatPolicyDate(assignment.effectiveFrom)} → {assignment.effectiveTo ? formatPolicyDate(assignment.effectiveTo) : "No scheduled end"}</p>{assignment.source === "manual" ? <div className="mt-3 flex flex-wrap items-center justify-between gap-2"><p className="text-xs text-muted-foreground">Assigned by {assignment.createdBy || "an authorized member"}</p>{access.assign && assignment.status === "active" ? <Button size="sm" variant="destructive" onClick={() => setEnding(assignment)}>End manual assignment</Button> : null}</div> : <p className="mt-3 text-xs text-muted-foreground">Winning rule {assignment.winningRuleId || "not available"} · matched rules {assignment.matchedRuleIds.join(", ") || "none"}</p>}</article>)}</div> : <div className="mt-4"><PolicyEmpty title="This employee has no policies effective on this date." /></div>}</section>{explain ? <section className="mt-8 rounded-md border border-border bg-card p-5">{explanation.isLoading ? <p className="text-sm text-muted-foreground">Loading explanation…</p> : explanation.error ? <PolicyError message={businessErrorMessage(explanation.error)} retry={() => void explanation.refetch()} /> : explanation.data ? <PolicyExplanationView explanation={explanation.data} policies={policies.data?.items ?? []} /> : null}</section> : null}{access.audit ? <section className="mt-8"><h2 className="mb-4 text-xl font-bold">Employee policy history</h2>{history.isLoading ? <p className="text-sm text-muted-foreground">Loading history…</p> : history.error ? <PolicyError message={businessErrorMessage(history.error)} retry={() => void history.refetch()} /> : <><PolicyAuditTable items={history.data?.items ?? []} /><Pagination page={history.data?.pagination.page ?? 1} totalPages={history.data?.pagination.totalPages ?? 0} total={history.data?.pagination.total ?? 0} limit={20} fetching={history.isFetching} showLimit={false} onPage={setHistoryPage} onLimit={() => undefined} /></>}</section> : null}{manualOpen ? <ManualAssignmentDialog businessId={businessId} employeeId={employeeId} categories={categories.data?.items ?? []} open onOpenChange={setManualOpen} /> : null}{ending ? <EndManualAssignmentDialog businessId={businessId} employeeId={employeeId} policyId={ending.policyId} policyName={policyNames.get(ending.policyId) ?? ending.policyId} open onOpenChange={(open) => !open && setEnding(undefined)} /> : null}<ConfirmPolicyAction open={reconcileOpen} title="Reconcile this employee's policies?" description="This queues an asynchronous evaluation. Existing data may remain visible until processing completes." confirmLabel="Queue reconciliation" pending={reconcile.isPending} onOpenChange={setReconcileOpen} onConfirm={() => reconcile.mutate(undefined, { onSuccess: (data) => { setJobId(data.jobId); setReconcileOpen(false); toast.success("Reconciliation queued."); }, onError: (error) => toast.error(businessErrorMessage(error)) })} /></>;
+  const policyNames = useMemo(
+    () =>
+      new Map(
+        (policies.data?.items ?? []).map((policy) => [policy.id, policy.name]),
+      ),
+    [policies.data],
+  );
+  if (!access.view)
+    return (
+      <PolicyPageFrame>
+        <PolicyError
+          message="You do not have permission to view employee policies."
+          retry={() => undefined}
+        />
+      </PolicyPageFrame>
+    );
+  if (assignments.isLoading || categories.isLoading || policies.isLoading)
+    return <PolicyLoading label="Loading employee policies…" />;
+  if (assignments.error || categories.error || policies.error)
+    return (
+      <PolicyPageFrame>
+        <PolicyError
+          message={businessErrorMessage(
+            assignments.error || categories.error || policies.error,
+          )}
+          retry={() => {
+            void assignments.refetch();
+            void categories.refetch();
+            void policies.refetch();
+          }}
+        />
+      </PolicyPageFrame>
+    );
+  const refresh = () => {
+    void assignments.refetch();
+    if (explain) void explanation.refetch();
+  };
+  const body = (
+    <>
+      {!embedded ? (
+        <Link
+          href={`/business/${businessId}/employees/${employeeId}`}
+          className="text-sm font-medium text-primary"
+        >
+          ← {employeeName ?? "Employee"}
+        </Link>
+      ) : null}
+      <div
+        className={
+          embedded
+            ? "flex flex-wrap items-start justify-between gap-4"
+            : "mt-4 flex flex-wrap items-start justify-between gap-4"
+        }
+      >
+        <div>
+          <h1 className={embedded ? "text-xl font-bold" : "text-3xl font-bold"}>
+            Employee policies
+          </h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {employeeName
+              ? `${employeeName}${jobTitle ? ` · ${jobTitle}` : ""}`
+              : "Assigned policies and resolution history"}
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={refresh}>
+            <RefreshCw />
+            Refresh
+          </Button>
+          {access.reconcile ? (
+            <Button variant="outline" onClick={() => setReconcileOpen(true)}>
+              <RefreshCw />
+              Reconcile
+            </Button>
+          ) : null}
+          {access.assign ? (
+            <Button onClick={() => setManualOpen(true)}>
+              <Plus />
+              Manual assignment
+            </Button>
+          ) : null}
+        </div>
+      </div>
+      {jobId ? (
+        <details className="mt-4 rounded-md border border-primary/20 bg-primary/5 p-4">
+          <summary className="cursor-pointer font-medium">
+            Reconciliation queued.
+          </summary>
+          <p className="mt-2 text-xs text-muted-foreground">
+            Job ID: {jobId}. Use Refresh later to load processed assignments.
+          </p>
+        </details>
+      ) : null}
+      <div className="mt-6 flex flex-wrap items-end gap-3 rounded-md border border-border bg-card p-4">
+        <label className="space-y-2 text-sm font-medium">
+          Assignments effective as of
+          <DateInput
+            kind="datetime-local"
+            value={asOfInput}
+            onChange={(event) => setAsOfInput(event.target.value)}
+          />
+        </label>
+        <Button
+          variant="outline"
+          onClick={() =>
+            setAsOf(asOfInput ? new Date(asOfInput).toISOString() : undefined)
+          }
+        >
+          <Search />
+          Apply date
+        </Button>
+        {asOf ? (
+          <Button
+            variant="ghost"
+            onClick={() => {
+              setAsOfInput("");
+              setAsOf(undefined);
+            }}
+          >
+            Current
+          </Button>
+        ) : null}
+        <p className="text-xs text-muted-foreground">
+          Starts are inclusive; ends are exclusive.
+        </p>
+      </div>
+      <section className="mt-8">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-xl font-bold">Effective assignments</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {assignments.data?.asOf
+                ? `As of ${new Date(assignments.data.asOf).toLocaleString()}`
+                : "Current assignments"}
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            onClick={() => setExplain((value) => !value)}
+          >
+            {explain ? "Hide explanation" : "Explain resolution"}
+          </Button>
+        </div>
+        {assignments.data?.items.length ? (
+          <div className="mt-4 grid gap-3 md:grid-cols-2">
+            {assignments.data.items.map((assignment) => (
+              <article
+                key={assignment.id}
+                className="rounded-md border border-border bg-card p-4"
+              >
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <h3 className="font-semibold">
+                    {policyNames.get(assignment.policyId) ??
+                      assignment.policyId}
+                  </h3>
+                  <div className="flex gap-2">
+                    <PolicyBadge
+                      tone={assignment.source === "manual" ? "info" : "success"}
+                    >
+                      {assignment.source === "manual"
+                        ? "Manually assigned"
+                        : "Automatic"}
+                    </PolicyBadge>
+                    <PolicyBadge
+                      tone={
+                        assignment.status === "active" ? "success" : "neutral"
+                      }
+                    >
+                      {assignment.status}
+                    </PolicyBadge>
+                  </div>
+                </div>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  Policy version {assignment.policyVersion}
+                </p>
+                <p className="mt-2 text-sm">
+                  {formatPolicyDate(assignment.effectiveFrom)} →{" "}
+                  {assignment.effectiveTo
+                    ? formatPolicyDate(assignment.effectiveTo)
+                    : "No scheduled end"}
+                </p>
+                {assignment.source === "manual" ? (
+                  <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+                    <p className="text-xs text-muted-foreground">
+                      Assigned by{" "}
+                      {assignment.createdBy || "an authorized member"}
+                    </p>
+                    {access.assign && assignment.status === "active" ? (
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => setEnding(assignment)}
+                      >
+                        End manual assignment
+                      </Button>
+                    ) : null}
+                  </div>
+                ) : (
+                  <p className="mt-3 text-xs text-muted-foreground">
+                    Winning rule {assignment.winningRuleId || "not available"} ·
+                    matched rules{" "}
+                    {assignment.matchedRuleIds.join(", ") || "none"}
+                  </p>
+                )}
+              </article>
+            ))}
+          </div>
+        ) : (
+          <div className="mt-4">
+            <PolicyEmpty title="This employee has no policies effective on this date." />
+          </div>
+        )}
+      </section>
+      {explain ? (
+        <section className="mt-8 rounded-md border border-border bg-card p-5">
+          {explanation.isLoading ? (
+            <p className="text-sm text-muted-foreground">
+              Loading explanation…
+            </p>
+          ) : explanation.error ? (
+            <PolicyError
+              message={businessErrorMessage(explanation.error)}
+              retry={() => void explanation.refetch()}
+            />
+          ) : explanation.data ? (
+            <PolicyExplanationView
+              explanation={explanation.data}
+              policies={policies.data?.items ?? []}
+            />
+          ) : null}
+        </section>
+      ) : null}
+      {access.audit ? (
+        <section className="mt-8">
+          <h2 className="mb-4 text-xl font-bold">Employee policy history</h2>
+          {history.isLoading ? (
+            <p className="text-sm text-muted-foreground">Loading history…</p>
+          ) : history.error ? (
+            <PolicyError
+              message={businessErrorMessage(history.error)}
+              retry={() => void history.refetch()}
+            />
+          ) : (
+            <>
+              <PolicyAuditTable items={history.data?.items ?? []} />
+              <Pagination
+                page={history.data?.pagination.page ?? 1}
+                totalPages={history.data?.pagination.totalPages ?? 0}
+                total={history.data?.pagination.total ?? 0}
+                limit={20}
+                fetching={history.isFetching}
+                showLimit={false}
+                onPage={setHistoryPage}
+                onLimit={() => undefined}
+              />
+            </>
+          )}
+        </section>
+      ) : null}
+      {manualOpen ? (
+        <ManualAssignmentDialog
+          businessId={businessId}
+          employeeId={employeeId}
+          categories={categories.data?.items ?? []}
+          open
+          onOpenChange={setManualOpen}
+        />
+      ) : null}
+      {ending ? (
+        <EndManualAssignmentDialog
+          businessId={businessId}
+          employeeId={employeeId}
+          policyId={ending.policyId}
+          policyName={policyNames.get(ending.policyId) ?? ending.policyId}
+          open
+          onOpenChange={(open) => !open && setEnding(undefined)}
+        />
+      ) : null}
+      <ConfirmPolicyAction
+        open={reconcileOpen}
+        title="Reconcile this employee's policies?"
+        description="This queues an asynchronous evaluation. Existing data may remain visible until processing completes."
+        confirmLabel="Queue reconciliation"
+        pending={reconcile.isPending}
+        onOpenChange={setReconcileOpen}
+        onConfirm={() =>
+          reconcile.mutate(undefined, {
+            onSuccess: (data) => {
+              setJobId(data.jobId);
+              setReconcileOpen(false);
+              toast.success("Reconciliation queued.");
+            },
+            onError: (error) => toast.error(businessErrorMessage(error)),
+          })
+        }
+      />
+    </>
+  );
   return embedded ? body : <PolicyPageFrame>{body}</PolicyPageFrame>;
 }
