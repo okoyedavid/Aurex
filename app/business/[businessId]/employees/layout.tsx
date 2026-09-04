@@ -1,5 +1,5 @@
 import { BusinessSubnavigation } from "@/components/BusinessSubnavigation";
-import { PolicyPageFrame } from "@/features/policies/components/policy-ui";
+import { PageFrame } from "@/components/page-frame";
 
 export default async function EmployeesLayout({
   children,
@@ -30,14 +30,12 @@ export default async function EmployeesLayout({
     },
   ];
   return (
-    <div className="px-4 py-6 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-[1400px]">
-        <BusinessSubnavigation
-          ariaLabel="Employee management"
-          items={employeeNavigation}
-        />{" "}
-        {children}
-      </div>
-    </div>
+    <PageFrame>
+      <BusinessSubnavigation
+        ariaLabel="Employee management"
+        items={employeeNavigation}
+      />{" "}
+      {children}
+    </PageFrame>
   );
 }

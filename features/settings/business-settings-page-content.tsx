@@ -1,18 +1,17 @@
 "use client";
 
+import { PageFrame } from "@/components/page-frame";
 import { useBusinessAccess } from "@/features/business/business-access-context";
 import { BusinessSettingsForm } from "./business-settings-form";
+import { PreferencesSettingsPanel } from "./preferences-settings-panel";
 import SettingsNavigation from "./settings-navigation";
 import { TeamAccessPanel } from "./team-access-panel";
-import { BusinessSettingsPageFrame } from "./business-settings-page-frame";
-import { PreferencesSettingsPanel } from "./preferences-settings-panel";
 
 export function BusinessSettingsPageContent() {
   const { business } = useBusinessAccess();
 
   return (
-    <BusinessSettingsPageFrame>
-      <p className="text-sm text-muted-foreground">{business.name}</p>
+    <PageFrame>
       <h1 className="mt-1 text-3xl font-bold tracking-tight">
         Business settings
       </h1>
@@ -28,6 +27,6 @@ export function BusinessSettingsPageContent() {
           <PreferencesSettingsPanel />
         </div>
       </div>
-    </BusinessSettingsPageFrame>
+    </PageFrame>
   );
 }

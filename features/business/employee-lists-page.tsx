@@ -1,10 +1,11 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { Loading } from "@/components/ui/loading";
 import { BusinessApiError } from "@/lib/business-api";
 import { getEmployeeLists } from "@/lib/employee-lists-api";
 import { useQueryClient } from "@tanstack/react-query";
-import { Loader2, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
@@ -70,12 +71,7 @@ export function EmployeeListsPage({ businessId }: { businessId: string }) {
 
   if (query.isLoading)
     return (
-      <>
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <Loader2 className="animate-spin" />
-          Loading employee lists
-        </div>
-      </>
+      <Loading label="Loading employee lists…" variant="spinner" />
     );
   if (query.error instanceof BusinessApiError && query.error.status === 403)
     return (
@@ -104,9 +100,6 @@ export function EmployeeListsPage({ businessId }: { businessId: string }) {
     <>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-sm text-muted-foreground">
-            {access.business.name}
-          </p>
           <h1 className="mt-1 text-3xl font-bold">Departments</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             Organize employees into departments and manage payroll verification.

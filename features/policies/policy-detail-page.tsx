@@ -1,15 +1,24 @@
 "use client";
 
+import { Archive, Pencil, Plus, Power } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { Archive, Pencil, Plus, Power } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { businessErrorMessage } from "@/lib/business-api";
-import type { PolicyRule } from "@/lib/policy-api";
+import { FeedbackState } from "@/components/ui/feedback-state";
+import { Loading } from "@/components/ui/loading";
 import { useBusinessAccess } from "@/features/business/business-access-context";
 import { Pagination } from "@/features/business/pagination";
+import { businessErrorMessage } from "@/lib/business-api";
+import type { PolicyRule } from "@/lib/policy-api";
+import { PolicyDialog } from "./components/policy-dialog";
+import {
+  ConfirmPolicyAction,
+  PolicyBadge,
+} from "./components/policy-ui";
+import { RuleDialog } from "./components/rule-dialog";
+import { RuleHistoryPanel } from "./components/rule-history-panel";
 import {
   fieldLabels,
   formatPolicyDate,
@@ -26,18 +35,7 @@ import {
   usePolicyRulesQuery,
   useSetRuleEnabledMutation,
 } from "./policy-hooks";
-import { PolicyDialog } from "./components/policy-dialog";
-import { RuleDialog } from "./components/rule-dialog";
-import { RuleHistoryPanel } from "./components/rule-history-panel";
-import {
-  ConfirmPolicyAction,
-  PolicyAuditTable,
-  PolicyBadge,
-  PolicyEmpty,
-  PolicyError,
-  PolicyLoading,
-  PolicyPageFrame,
-} from "./components/policy-ui";
+import { PolicyAuditTable } from "./components/policy-audit-table";
 
 export function PolicyDetailPage({
   businessId,
@@ -83,19 +81,18 @@ export function PolicyDetailPage({
   );
 
   if (policy.isLoading || rules.isLoading) {
-    return <PolicyLoading label="Loading policy…" />;
+    return <Loading label="Loading policy…" />;
   }
   if (policy.error || rules.error || !policy.data) {
     return (
-      <PolicyPageFrame>
-        <PolicyError
-          message={businessErrorMessage(policy.error || rules.error)}
-          retry={() => {
-            void policy.refetch();
-            void rules.refetch();
-          }}
-        />
-      </PolicyPageFrame>
+      <FeedbackState
+        title="Unable to load policy data"
+        message={businessErrorMessage(policy.error || rules.error)}
+        retry={() => {
+          void policy.refetch();
+          void rules.refetch();
+        }}
+      />
     );
   }
 
@@ -103,7 +100,7 @@ export function PolicyDetailPage({
   const category = policyCategory.data;
 
   return (
-    <PolicyPageFrame>
+    <>
       <Link
         href={`/business/${businessId}/policies`}
         className="text-sm font-medium text-primary"
@@ -198,8 +195,8 @@ export function PolicyDetailPage({
           <div>
             <h2 className="text-xl font-bold">Assignment rules</h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              An employee must satisfy every condition in a rule. Higher
-              numeric priority wins.
+              An employee must satisfy every condition in a rule. Higher numeric
+              priority wins.
             </p>
           </div>
           {access.update ? (
@@ -267,7 +264,7 @@ export function PolicyDetailPage({
                       <span className="font-medium">
                         {fieldLabels[condition.field]}
                       </span>{" "}
-                      {operatorLabels[condition.operator].toLowerCase()} {" "}
+                      {operatorLabels[condition.operator].toLowerCase()}{" "}
                       <code className="rounded bg-background px-1.5 py-0.5 text-xs">
                         {Array.isArray(condition.value)
                           ? condition.value.join(", ")
@@ -280,7 +277,8 @@ export function PolicyDetailPage({
                   {rule.effectiveFrom
                     ? `Starts ${formatPolicyDate(rule.effectiveFrom)}`
                     : "Effective immediately"}{" "}
-                  · {rule.effectiveTo
+                  ·{" "}
+                  {rule.effectiveTo
                     ? `Ends ${formatPolicyDate(rule.effectiveTo)}`
                     : "No scheduled end"}
                 </p>
@@ -292,7 +290,11 @@ export function PolicyDetailPage({
           </div>
         ) : (
           <div className="mt-4">
-            <PolicyEmpty title="This policy has no assignment rules." />
+            <FeedbackState
+              title="This policy has no assignment rules."
+              tone="neutral"
+              variant="empty"
+            />
           </div>
         )}
       </section>
@@ -303,7 +305,8 @@ export function PolicyDetailPage({
           {history.isLoading ? (
             <p className="text-sm text-muted-foreground">Loading history…</p>
           ) : history.error ? (
-            <PolicyError
+            <FeedbackState
+              title="Unable to load policy data"
               message={businessErrorMessage(history.error)}
               retry={() => void history.refetch()}
             />
@@ -401,6 +404,6 @@ export function PolicyDetailPage({
           })
         }
       />
-    </PolicyPageFrame>
+    </>
   );
 }

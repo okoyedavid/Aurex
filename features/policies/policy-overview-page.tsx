@@ -9,21 +9,18 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { FeedbackState } from "@/components/ui/feedback-state";
+import { Loading } from "@/components/ui/loading";
 import { useBusinessAccess } from "@/features/business/business-access-context";
 import { Pagination } from "@/features/business/pagination";
 import { businessErrorMessage } from "@/lib/business-api";
-import type { PolicyCategory, PolicyStatus } from "@/lib/policy-api";
-import { CategoryDialog } from "./components/category-dialog";
+import type { PolicyStatus } from "@/lib/policy-api";
 import { PolicyDialog } from "./components/policy-dialog";
 import {
   ConfirmPolicyAction,
   PolicyBadge,
-  PolicyEmpty,
-  PolicyError,
-  PolicyLoading,
-  PolicyPageFrame,
 } from "./components/policy-ui";
-import { cardinalityDescription, policyPermissions } from "./policy-helpers";
+import { policyPermissions } from "./policy-helpers";
 import {
   useArchiveCategoryMutation,
   usePoliciesQuery,
@@ -31,31 +28,22 @@ import {
   useReconcileBusinessMutation,
 } from "./policy-hooks";
 
-export function PolicyOverviewPage({
-  businessId,
-  lockedCategory,
-}: {
-  businessId: string;
-  lockedCategory?: PolicyCategory;
-}) {
-  const lockedCategoryId = lockedCategory?.id;
+export function PolicyOverviewPage({ businessId }: { businessId: string }) {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { effectivePermissions } = useBusinessAccess();
   const access = policyPermissions(effectivePermissions);
-  const [categoryPage, setCategoryPage] = useState(1);
   const [policyPage, setPolicyPage] = useState(1);
-  const [categoryId, setCategoryId] = useState(lockedCategoryId ?? "");
+  const [categoryId, setCategoryId] = useState("");
   const [status, setStatus] = useState<PolicyStatus | "">("");
-  const [categoryOpen, setCategoryOpen] = useState(false);
   const [policyOpen, setPolicyOpen] = useState(false);
   const [reconcileOpen, setReconcileOpen] = useState(false);
   const [archiveCategoryOpen, setArchiveCategoryOpen] = useState(false);
   const [jobId, setJobId] = useState<string>();
   const categories = usePolicyCategoriesQuery(
     businessId,
-    categoryPage,
+    1,
     20,
     "active",
     access.view,
@@ -82,10 +70,7 @@ export function PolicyOverviewPage({
     access.view,
   );
   const reconcile = useReconcileBusinessMutation(businessId);
-  const archiveCategory = useArchiveCategoryMutation(
-    businessId,
-    lockedCategoryId ?? "",
-  );
+  const archiveCategory = useArchiveCategoryMutation(businessId, "");
   useEffect(() => {
     if (searchParams.get("action") !== "create-policy" || !access.create)
       return;
@@ -99,25 +84,23 @@ export function PolicyOverviewPage({
   }, [access.create, pathname, router, searchParams]);
   if (!access.view)
     return (
-      <PolicyPageFrame>
-        <PolicyError
-          message="You do not have permission to view policies."
-          retry={() => undefined}
-        />
-      </PolicyPageFrame>
+      <FeedbackState
+        title="Unable to load policy data"
+        message="You do not have permission to view policies."
+        retry={() => undefined}
+      />
     );
-  if (categories.isLoading || policies.isLoading) return <PolicyLoading />;
+  if (categories.isLoading || policies.isLoading)
+    return <Loading label="Loading policies..." />;
   if (categories.error || policies.error)
     return (
-      <PolicyPageFrame>
-        <PolicyError
-          message={businessErrorMessage(categories.error || policies.error)}
-          retry={() => {
-            void categories.refetch();
-            void policies.refetch();
-          }}
-        />
-      </PolicyPageFrame>
+      <FeedbackState
+        message={businessErrorMessage(categories.error || policies.error)}
+        retry={() => {
+          void categories.refetch();
+          void policies.refetch();
+        }}
+      />
     );
   const counts = (policies.data?.items ?? []).reduce(
     (result, policy) => ({
@@ -130,63 +113,20 @@ export function PolicyOverviewPage({
     <div>
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          {lockedCategory ? (
-            <Link
-              href={`/business/${businessId}/policies`}
-              className="text-sm font-medium text-primary"
-            >
-              ← All policies
-            </Link>
-          ) : null}
-          <h1 className="mt-2 text-3xl font-bold">
-            {lockedCategory?.name ?? "Policies"}
-          </h1>
+          <h1 className="mt-2 text-3xl font-bold">Policies</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            {lockedCategory
-              ? lockedCategory.description ||
-                cardinalityDescription(lockedCategory.cardinality)
-              : "Define policy categories, effective policies, and assignment rules."}
+            Define policy categories, effective policies, and assignment rules.
           </p>
-          {lockedCategory ? (
-            <div className="mt-3">
-              <PolicyBadge tone="info">
-                {lockedCategory.cardinality}
-              </PolicyBadge>
-              <p className="mt-2 max-w-2xl text-xs text-muted-foreground">
-                {cardinalityDescription(lockedCategory.cardinality)}
-              </p>
-            </div>
-          ) : null}
         </div>
         <div className="flex flex-wrap gap-2">
-          {lockedCategory && access.update ? (
-            <Button variant="outline" onClick={() => setCategoryOpen(true)}>
-              Edit category
-            </Button>
-          ) : null}
-          {lockedCategory && access.archive ? (
-            <Button
-              variant="destructive"
-              onClick={() => setArchiveCategoryOpen(true)}
-            >
-              Archive category
-            </Button>
-          ) : null}
-
-          {access.reconcile && !lockedCategory ? (
+          {access.reconcile && (
             <Button variant="outline" onClick={() => setReconcileOpen(true)}>
               <RefreshCw />
               Reconcile business
             </Button>
-          ) : null}
+          )}
           {access.create ? (
             <>
-              {!lockedCategory ? (
-                <Button variant="outline" onClick={() => setCategoryOpen(true)}>
-                  <Plus />
-                  Category
-                </Button>
-              ) : null}
               <Button
                 onClick={() => setPolicyOpen(true)}
                 disabled={!categoryOptions.data?.items.length}
@@ -233,26 +173,25 @@ export function PolicyOverviewPage({
             </p>
           </div>
           <div className="flex gap-2">
-            {!lockedCategoryId ? (
-              <label className="text-xs font-medium">
-                Category
-                <SelectControl
-                  className="ml-2 h-9 rounded-md border border-input bg-background px-2 text-sm"
-                  value={categoryId}
-                  onChange={(event) => {
-                    setCategoryId(event.target.value);
-                    setPolicyPage(1);
-                  }}
-                >
-                  <option value="">All categories</option>
-                  {categoryOptions.data?.items.map((category) => (
-                    <option key={category.id} value={category.id}>
-                      {category.name}
-                    </option>
-                  ))}
-                </SelectControl>
-              </label>
-            ) : null}
+            <label className="text-xs font-medium">
+              Category
+              <SelectControl
+                className="ml-2 h-9 rounded-md border border-input bg-background px-2 text-sm"
+                value={categoryId}
+                onChange={(event) => {
+                  setCategoryId(event.target.value);
+                  setPolicyPage(1);
+                }}
+              >
+                <option value="">All </option>
+                {categoryOptions.data?.items.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </SelectControl>
+            </label>
+
             <label className="text-xs font-medium">
               Status
               <SelectControl
@@ -273,7 +212,7 @@ export function PolicyOverviewPage({
         </div>
         {policies.data?.items.length ? (
           <div className="mt-3 overflow-x-auto rounded-md border border-border bg-card">
-            <table className="w-full min-w-[720px] text-left text-sm">
+            <table className="w-full min-w-180 text-left text-sm">
               <thead className="border-b border-border bg-muted/50 text-xs text-muted-foreground">
                 <tr>
                   <th className="p-4">Policy</th>
@@ -332,7 +271,11 @@ export function PolicyOverviewPage({
           </div>
         ) : (
           <div className="mt-3">
-            <PolicyEmpty title="No policies match these filters." />
+            <FeedbackState
+              title="No policies match these filters."
+              tone="neutral"
+              variant="empty"
+            />
           </div>
         )}
         <Pagination
@@ -346,19 +289,11 @@ export function PolicyOverviewPage({
           onLimit={() => undefined}
         />
       </section>
-      {categoryOpen ? (
-        <CategoryDialog
-          businessId={businessId}
-          category={lockedCategory}
-          open
-          onOpenChange={setCategoryOpen}
-        />
-      ) : null}
+
       {policyOpen ? (
         <PolicyDialog
           businessId={businessId}
           categories={categoryOptions.data?.items ?? []}
-          initialCategoryId={lockedCategoryId}
           open
           onOpenChange={setPolicyOpen}
         />

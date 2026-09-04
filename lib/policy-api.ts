@@ -3,6 +3,7 @@ import { AxiosError } from "axios";
 import { api } from "@/lib/api";
 import { BusinessApiError, type BusinessResponse } from "@/lib/business-api";
 import type { ApiErrorResponse } from "@/types/generic";
+import { AuditItem } from "./audit-api";
 
 export type PolicyCardinality = "ONE" | "MANY";
 export type PolicyCategoryStatus = "active" | "archived";
@@ -152,37 +153,6 @@ export interface PolicyExplanation {
   historicalEmployeeAttributeSnapshotAvailable: boolean;
 }
 
-export type PolicyAuditEntityType =
-  | "policy_category"
-  | "policy"
-  | "policy_rule"
-  | "employee_policy_assignment"
-  | "manual_assignment"
-  | "reconciliation";
-export interface PolicyAudit {
-  id: string;
-  businessId: string;
-  entityType: PolicyAuditEntityType;
-  entityId: string;
-  action: string;
-  actorType: "user" | "system" | "worker";
-  actorUserId?: string | null;
-  actorBusinessMemberId?: string | null;
-  employeeId?: string | null;
-  policyId?: string | null;
-  policyRuleId?: string | null;
-  categoryId?: string | null;
-  before?: unknown;
-  after?: unknown;
-  changedFields?: string[];
-  reason?: string | null;
-  metadata?: Record<string, unknown> | null;
-  occurredAt: string;
-  correlationId?: string | null;
-  reconciliationRunId?: string | null;
-  createdAt: string;
-}
-
 export type CategoryBody = {
   name: string;
   description?: string | null;
@@ -206,7 +176,7 @@ export type RuleBody = {
 export type AuditFilters = {
   page: number;
   limit: number;
-  entityType?: PolicyAuditEntityType;
+  entityType?: AuditItem["auditType"];
   entityId?: string;
   employeeId?: string;
   policyId?: string;
@@ -297,9 +267,13 @@ export const updatePolicy = (
   body: Partial<PolicyBody>,
 ) => request<Policy>(() => api.patch(policies(businessId, policyId), body));
 export const activatePolicy = (businessId: string, policyId: string) =>
-  request<Policy>(() => api.post(`${policies(businessId, policyId)}/activate`, {}));
+  request<Policy>(() =>
+    api.post(`${policies(businessId, policyId)}/activate`, {}),
+  );
 export const archivePolicy = (businessId: string, policyId: string) =>
-  request<Policy>(() => api.post(`${policies(businessId, policyId)}/archive`, {}));
+  request<Policy>(() =>
+    api.post(`${policies(businessId, policyId)}/archive`, {}),
+  );
 
 export const getPolicyRules = (businessId: string, policyId: string) =>
   request<{ items: PolicyRule[] }>(() =>
@@ -309,7 +283,10 @@ export const createPolicyRule = (
   businessId: string,
   policyId: string,
   body: RuleBody,
-) => request<PolicyRule>(() => api.post(`${policies(businessId, policyId)}/rules`, body));
+) =>
+  request<PolicyRule>(() =>
+    api.post(`${policies(businessId, policyId)}/rules`, body),
+  );
 export const getPolicyRule = (businessId: string, ruleId: string) =>
   request<PolicyRule>(() => api.get(rules(businessId, ruleId)));
 export const updatePolicyRule = (
@@ -323,7 +300,10 @@ export const setPolicyRuleEnabled = (
   enabled: boolean,
 ) =>
   request<PolicyRule>(() =>
-    api.post(`${rules(businessId, ruleId)}/${enabled ? "enable" : "disable"}`, {}),
+    api.post(
+      `${rules(businessId, ruleId)}/${enabled ? "enable" : "disable"}`,
+      {},
+    ),
   );
 
 export const getEmployeePolicies = (
@@ -331,8 +311,14 @@ export const getEmployeePolicies = (
   employeeId: string,
   asOf?: string,
 ) =>
-  request<{ items: EmployeePolicyAssignment[]; asOf: string; intervalSemantics: string }>(
-    () => api.get(employeePolicies(businessId, employeeId), { params: asOf ? { asOf } : {} }),
+  request<{
+    items: EmployeePolicyAssignment[];
+    asOf: string;
+    intervalSemantics: string;
+  }>(() =>
+    api.get(employeePolicies(businessId, employeeId), {
+      params: asOf ? { asOf } : {},
+    }),
   );
 export const explainEmployeePolicies = (
   businessId: string,
@@ -362,9 +348,12 @@ export const endManualPolicyAssignment = (
   effectiveTo?: string,
 ) =>
   request<EmployeePolicyAssignment>(() =>
-    api.post(`${employeePolicies(businessId, employeeId)}/${policyId}/manual/end`, {
-      ...(effectiveTo ? { effectiveTo } : {}),
-    }),
+    api.post(
+      `${employeePolicies(businessId, employeeId)}/${policyId}/manual/end`,
+      {
+        ...(effectiveTo ? { effectiveTo } : {}),
+      },
+    ),
   );
 export const reconcileEmployeePolicies = (
   businessId: string,
@@ -376,7 +365,10 @@ export const reconcileEmployeePolicies = (
       ...(reason?.trim() ? { reason: reason.trim() } : {}),
     }),
   );
-export const reconcileBusinessPolicies = (businessId: string, reason?: string) =>
+export const reconcileBusinessPolicies = (
+  businessId: string,
+  reason?: string,
+) =>
   request<{ jobId: string }>(() =>
     api.post(`${policies(businessId)}/reconcile`, {
       ...(reason?.trim() ? { reason: reason.trim() } : {}),
@@ -384,10 +376,15 @@ export const reconcileBusinessPolicies = (businessId: string, reason?: string) =
   );
 
 export const getPolicyAudit = (businessId: string, filters: AuditFilters) =>
-  request<PolicyPage<PolicyAudit>>(() =>
+  request<PolicyPage<AuditItem>>(() =>
     api.get(`${base(businessId)}/policy-audit`, { params: filters }),
   );
-const historyParams = (page: number, limit: number, from?: string, to?: string) => ({
+const historyParams = (
+  page: number,
+  limit: number,
+  from?: string,
+  to?: string,
+) => ({
   page,
   limit,
   ...(from ? { from } : {}),
@@ -401,7 +398,7 @@ export const getEmployeePolicyHistory = (
   from?: string,
   to?: string,
 ) =>
-  request<PolicyPage<PolicyAudit>>(() =>
+  request<PolicyPage<AuditItem>>(() =>
     api.get(`${base(businessId)}/employees/${employeeId}/policy-history`, {
       params: historyParams(page, limit, from, to),
     }),
@@ -414,7 +411,7 @@ export const getPolicyHistory = (
   from?: string,
   to?: string,
 ) =>
-  request<PolicyPage<PolicyAudit>>(() =>
+  request<PolicyPage<AuditItem>>(() =>
     api.get(`${policies(businessId, policyId)}/history`, {
       params: historyParams(page, limit, from, to),
     }),
@@ -427,7 +424,7 @@ export const getPolicyRuleHistory = (
   from?: string,
   to?: string,
 ) =>
-  request<PolicyPage<PolicyAudit>>(() =>
+  request<PolicyPage<AuditItem>>(() =>
     api.get(`${rules(businessId, ruleId)}/history`, {
       params: historyParams(page, limit, from, to),
     }),

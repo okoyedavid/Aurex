@@ -8,6 +8,8 @@ import { Plus, RefreshCw, Search } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { FeedbackState } from "@/components/ui/feedback-state";
+import { Loading } from "@/components/ui/loading";
 import { businessErrorMessage } from "@/lib/business-api";
 import type { EmployeePolicyAssignment } from "@/lib/policy-api";
 import { useBusinessAccess } from "@/features/business/business-access-context";
@@ -26,13 +28,10 @@ import { ManualAssignmentDialog } from "./components/manual-assignment-dialog";
 import { PolicyExplanationView } from "./components/policy-explanation-view";
 import {
   ConfirmPolicyAction,
-  PolicyAuditTable,
   PolicyBadge,
-  PolicyEmpty,
-  PolicyError,
-  PolicyLoading,
-  PolicyPageFrame,
 } from "./components/policy-ui";
+import { PolicyAuditTable } from "./components/policy-audit-table";
+import { PageFrame } from "@/components/page-frame";
 
 export function EmployeePoliciesPage({
   businessId,
@@ -93,29 +92,27 @@ export function EmployeePoliciesPage({
   );
   if (!access.view)
     return (
-      <PolicyPageFrame>
-        <PolicyError
-          message="You do not have permission to view employee policies."
-          retry={() => undefined}
-        />
-      </PolicyPageFrame>
+      <FeedbackState
+        title="Unable to load policy data"
+        message="You do not have permission to view employee policies."
+        retry={() => undefined}
+      />
     );
   if (assignments.isLoading || categories.isLoading || policies.isLoading)
-    return <PolicyLoading label="Loading employee policies…" />;
+    return <Loading label="Loading employee policies…" />;
   if (assignments.error || categories.error || policies.error)
     return (
-      <PolicyPageFrame>
-        <PolicyError
-          message={businessErrorMessage(
-            assignments.error || categories.error || policies.error,
-          )}
-          retry={() => {
-            void assignments.refetch();
-            void categories.refetch();
-            void policies.refetch();
-          }}
-        />
-      </PolicyPageFrame>
+      <FeedbackState
+        title="Unable to load policy data"
+        message={businessErrorMessage(
+          assignments.error || categories.error || policies.error,
+        )}
+        retry={() => {
+          void assignments.refetch();
+          void categories.refetch();
+          void policies.refetch();
+        }}
+      />
     );
   const refresh = () => {
     void assignments.refetch();
@@ -293,7 +290,11 @@ export function EmployeePoliciesPage({
           </div>
         ) : (
           <div className="mt-4">
-            <PolicyEmpty title="This employee has no policies effective on this date." />
+            <FeedbackState
+              title="This employee has no policies effective on this date."
+              tone="neutral"
+              variant="empty"
+            />
           </div>
         )}
       </section>
@@ -304,7 +305,8 @@ export function EmployeePoliciesPage({
               Loading explanation…
             </p>
           ) : explanation.error ? (
-            <PolicyError
+            <FeedbackState
+              title="Unable to load policy data"
               message={businessErrorMessage(explanation.error)}
               retry={() => void explanation.refetch()}
             />
@@ -322,7 +324,8 @@ export function EmployeePoliciesPage({
           {history.isLoading ? (
             <p className="text-sm text-muted-foreground">Loading history…</p>
           ) : history.error ? (
-            <PolicyError
+            <FeedbackState
+              title="Unable to load policy data"
               message={businessErrorMessage(history.error)}
               retry={() => void history.refetch()}
             />
@@ -382,5 +385,5 @@ export function EmployeePoliciesPage({
       />
     </>
   );
-  return embedded ? body : <PolicyPageFrame>{body}</PolicyPageFrame>;
+  return embedded ? body : <>{body}</>;
 }

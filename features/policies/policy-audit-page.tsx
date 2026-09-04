@@ -8,33 +8,31 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { FeedbackState } from "@/components/ui/feedback-state";
 import { Input } from "@/components/ui/input";
-import { businessErrorMessage } from "@/lib/business-api";
-import type { AuditFilters, PolicyAuditEntityType } from "@/lib/policy-api";
+import { Loading } from "@/components/ui/loading";
 import { useBusinessAccess } from "@/features/business/business-access-context";
 import { Pagination } from "@/features/business/pagination";
+import { businessErrorMessage } from "@/lib/business-api";
+import type { AuditFilters } from "@/lib/policy-api";
 import { policyPermissions } from "./policy-helpers";
 import { usePolicyAuditQuery } from "./policy-hooks";
-import {
-  PolicyAuditTable,
-  PolicyError,
-  PolicyLoading,
-  PolicyPageFrame,
-} from "./components/policy-ui";
+import { PolicyAuditTable } from "./components/policy-audit-table";
+import { AuditType } from "@/lib/audit-api";
 
-const entityTypes: PolicyAuditEntityType[] = [
-  "policy_category",
+const entityTypes: AuditType[] = [
+  "business",
+  "membership",
+  "employee",
   "policy",
-  "policy_rule",
-  "employee_policy_assignment",
-  "manual_assignment",
-  "reconciliation",
+  "personal",
+  "security",
 ];
 
 export function PolicyAuditPage({ businessId }: { businessId: string }) {
   const access = policyPermissions(useBusinessAccess().effectivePermissions);
   const [page, setPage] = useState(1);
-  const [entityType, setEntityType] = useState<PolicyAuditEntityType | "">("");
+  const [entityType, setEntityType] = useState<AuditType | "">("");
   const [action, setAction] = useState("");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
@@ -45,16 +43,15 @@ export function PolicyAuditPage({ businessId }: { businessId: string }) {
   const audit = usePolicyAuditQuery(businessId, filters, access.audit);
   if (!access.audit)
     return (
-      <PolicyPageFrame>
-        <PolicyError
-          message="You do not have permission to view policy audit history."
-          retry={() => undefined}
-        />
-      </PolicyPageFrame>
+      <FeedbackState
+        title="Unable to load policy data"
+        message="You do not have permission to view policy audit history."
+        retry={() => undefined}
+      />
     );
-  if (audit.isLoading) return <PolicyLoading label="Loading policy audit…" />;
+  if (audit.isLoading) return <Loading label="Loading policy audit…" />;
   return (
-    <PolicyPageFrame>
+    <>
       <Link
         href={`/business/${businessId}/policies`}
         className="text-sm font-medium text-primary"
@@ -86,7 +83,7 @@ export function PolicyAuditPage({ businessId }: { businessId: string }) {
             className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
             value={entityType}
             onChange={(event) =>
-              setEntityType(event.target.value as PolicyAuditEntityType | "")
+              setEntityType(event.target.value as AuditType | "")
             }
           >
             <option value="">All entities</option>
@@ -140,7 +137,8 @@ export function PolicyAuditPage({ businessId }: { businessId: string }) {
       </form>
       <div className="mt-5">
         {audit.error ? (
-          <PolicyError
+          <FeedbackState
+            title="Unable to load policy data"
             message={businessErrorMessage(audit.error)}
             retry={() => void audit.refetch()}
           />
@@ -160,6 +158,6 @@ export function PolicyAuditPage({ businessId }: { businessId: string }) {
           </>
         )}
       </div>
-    </PolicyPageFrame>
+    </>
   );
 }

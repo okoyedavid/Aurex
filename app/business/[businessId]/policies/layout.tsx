@@ -1,5 +1,5 @@
 import { BusinessSubnavigation } from "@/components/BusinessSubnavigation";
-import { PolicyPageFrame } from "@/features/policies/components/policy-ui";
+import { PageFrame } from "@/components/page-frame";
 
 export default async function PoliciesLayout({
   children,
@@ -27,12 +27,12 @@ export default async function PoliciesLayout({
   ];
 
   return (
-    <PolicyPageFrame>
+    <PageFrame>
       <BusinessSubnavigation
         ariaLabel="Policy sections"
         items={policyNavigation}
       />
       {children}
-    </PolicyPageFrame>
+    </PageFrame>
   );
 }

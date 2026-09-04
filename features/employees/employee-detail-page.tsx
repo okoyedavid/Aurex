@@ -41,34 +41,26 @@ export function EmployeeDetailPage({
     : undefined;
   if (!canView)
     return (
-      <Frame>
-        <FeedbackState
-          tone="neutral"
-          variant="empty"
-          title="Permission required"
-          message="Business-wide employee details require employees:view."
-        />
-      </Frame>
+      <FeedbackState
+        tone="neutral"
+        variant="empty"
+        title="Permission required"
+        message="Business-wide employee details require employees:view."
+      />
     );
   if (query.isLoading)
-    return (
-      <Frame>
-        <Loading label="Loading employee…" variant="spinner" centered />
-      </Frame>
-    );
+    return <Loading label="Loading employee…" variant="spinner" centered />;
   if (query.error || !query.data)
     return (
-      <Frame>
-        <FeedbackState
-          title="Unable to load employee"
-          message={businessErrorMessage(query.error)}
-          retry={() => void query.refetch()}
-        />
-      </Frame>
+      <FeedbackState
+        title="Unable to load employee"
+        message={businessErrorMessage(query.error)}
+        retry={() => void query.refetch()}
+      />
     );
   const employee = query.data;
   return (
-    <Frame>
+    <>
       <EmployeeProfileHeader
         businessId={businessId}
         employee={employee}
@@ -196,24 +188,10 @@ export function EmployeeDetailPage({
           onOpenChange={setEditOpen}
         />
       ) : null}
-    </Frame>
+    </>
   );
 }
 
-export function EmployeeDetailFrame({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return <Frame>{children}</Frame>;
-}
-function Frame({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="px-4 py-6 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-[1280px]">{children}</div>
-    </div>
-  );
-}
 function Section({
   icon,
   title,

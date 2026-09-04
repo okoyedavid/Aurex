@@ -12,8 +12,8 @@ import {
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -28,7 +28,6 @@ import {
 } from "@/components/ui/dialog";
 import { useBusinessAccess } from "@/features/business/business-access-context";
 import { BusinessPageHeader } from "@/features/business/business-page-header";
-import { MembersPageFrame } from "@/features/business/members-page-frame";
 import { Pagination } from "@/features/business/pagination";
 import type { BusinessRole } from "@/lib/access-api";
 
@@ -40,7 +39,7 @@ const rolesPerPage = 5;
 type RoleTypeFilter = "all" | BusinessRole["type"];
 
 export function BusinessRolesPage({ businessId }: { businessId: string }) {
-  const { business, effectivePermissions } = useBusinessAccess();
+  const { effectivePermissions } = useBusinessAccess();
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -68,7 +67,9 @@ export function BusinessRolesPage({ businessId }: { businessId: string }) {
     params.delete("search");
     params.delete("page");
     const query = params.toString();
-    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+    router.replace(query ? `${pathname}?${query}` : pathname, {
+      scroll: false,
+    });
     setTypeFilter("all");
   };
 
@@ -81,7 +82,10 @@ export function BusinessRolesPage({ businessId }: { businessId: string }) {
           role.name.toLocaleLowerCase().includes(normalizedSearch)),
     );
   }, [query.data, search, typeFilter]);
-  const totalPages = Math.max(1, Math.ceil(filteredRoles.length / rolesPerPage));
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredRoles.length / rolesPerPage),
+  );
   const effectivePage = Math.min(page, totalPages);
   const visibleRoles = filteredRoles.slice(
     (effectivePage - 1) * rolesPerPage,
@@ -90,46 +94,19 @@ export function BusinessRolesPage({ businessId }: { businessId: string }) {
 
   if (!canView) {
     return (
-      <MembersPageFrame>
-        <ErrorState
-          error={new Error("You do not have permission to view roles.")}
-        />
-      </MembersPageFrame>
+      <ErrorState
+        error={new Error("You do not have permission to view roles.")}
+      />
     );
   }
 
   return (
-    <MembersPageFrame>
+    <>
       <BusinessPageHeader
-        eyebrow={business.name}
         title="Roles & permissions"
         description="View and manage system and custom roles for your business."
         actions={
-          canCreate ? (
-            <Button
-              onClick={() => setEditing(null)}
-            >
-              <Plus /> Create custom role
-            </Button>
-          ) : null
-        }
-      />
-
-      <div className="mt-8">
-        <div>
-          <h2 className="text-lg font-semibold tracking-tight">
-            Access profiles
-          </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {query.data
-              ? `${query.data.length} ${query.data.length === 1 ? "role" : "roles"} configured`
-              : "Loading configured roles"}
-          </p>
-        </div>
-
-        <div className="mt-4 flex justify-end rounded-md border border-border bg-card p-3 shadow-sm">
-          <label className="sm:w-48">
-            <span className="sr-only">Filter roles by type</span>
+          <div className="flex gap-2 items-center">
             <SelectControl
               value={typeFilter}
               onChange={(event) => {
@@ -143,7 +120,25 @@ export function BusinessRolesPage({ businessId }: { businessId: string }) {
               <option value="system">System roles</option>
               <option value="custom">Custom roles</option>
             </SelectControl>
-          </label>
+            {canCreate ? (
+              <Button onClick={() => setEditing(null)}>
+                <Plus /> Create custom role
+              </Button>
+            ) : null}
+          </div>
+        }
+      />
+
+      <div className="mt-8">
+        <div>
+          <h2 className="text-lg font-semibold tracking-tight">
+            Access profiles
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {query.data
+              ? `${query.data.length} ${query.data.length === 1 ? "role" : "roles"} configured`
+              : "Loading configured roles"}
+          </p>
         </div>
       </div>
 
@@ -278,7 +273,7 @@ export function BusinessRolesPage({ businessId }: { businessId: string }) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </MembersPageFrame>
+    </>
   );
 }
 
@@ -310,7 +305,9 @@ function RoleRow({
   const detailsId = `role-${role.id}-details`;
 
   return (
-    <article className={`${separated ? "border-t border-border" : ""} ${isActive ? "" : "opacity-75"}`}>
+    <article
+      className={`${separated ? "border-t border-border" : ""} ${isActive ? "" : "opacity-75"}`}
+    >
       <button
         type="button"
         aria-expanded={open}
@@ -318,43 +315,69 @@ function RoleRow({
         onClick={onToggle}
         className="flex w-full items-center gap-3 px-4 py-4 text-left transition hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-inset focus-visible:ring-ring/50 sm:px-5"
       >
-        <span className={`flex size-9 shrink-0 items-center justify-center rounded-md ${isCustom ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
-          {isCustom ? <Sparkles className="size-4" /> : <LockKeyhole className="size-4" />}
+        <span
+          className={`flex size-9 shrink-0 items-center justify-center rounded-md ${isCustom ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}
+        >
+          {isCustom ? (
+            <Sparkles className="size-4" />
+          ) : (
+            <LockKeyhole className="size-4" />
+          )}
         </span>
         <span className="min-w-0 flex-1">
           <span className="flex flex-wrap items-center gap-2">
-            <span className="truncate text-sm font-semibold sm:text-base">{role.name}</span>
+            <span className="truncate text-sm font-semibold sm:text-base">
+              {role.name}
+            </span>
             <Badge tone={isCustom ? "good" : "neutral"}>{role.type}</Badge>
             {!isActive ? <Badge tone="bad">archived</Badge> : null}
           </span>
           <span className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
             <span>{effectiveCount} effective permissions</span>
             {role.deniedPermissions.length ? (
-              <span className="text-destructive">{role.deniedPermissions.length} denied</span>
+              <span className="text-destructive">
+                {role.deniedPermissions.length} denied
+              </span>
             ) : null}
           </span>
         </span>
-        <ChevronDown className={`size-4 shrink-0 text-muted-foreground transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
+        <ChevronDown
+          className={`size-4 shrink-0 text-muted-foreground transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+        />
       </button>
 
       {open ? (
-        <div id={detailsId} className="border-t border-border bg-muted/20 px-4 py-5 sm:px-5">
+        <div
+          id={detailsId}
+          className="border-t border-border bg-muted/20 px-4 py-5 sm:px-5"
+        >
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <code className="rounded-md bg-muted px-2 py-1 font-mono text-xs text-muted-foreground">{role.key}</code>
+            <code className="rounded-md bg-muted px-2 py-1 font-mono text-xs text-muted-foreground">
+              {role.key}
+            </code>
             {isCustom && isActive && (canEdit || canArchive) ? (
               <div className="flex gap-2">
                 {canEdit ? (
-                  <Button size="sm" variant="outline" onClick={onEdit}><Pencil /> Edit role</Button>
+                  <Button size="sm" variant="outline" onClick={onEdit}>
+                    <Pencil /> Edit role
+                  </Button>
                 ) : null}
                 {canArchive ? (
-                  <Button size="sm" variant="destructive" onClick={onArchive}><Archive /> Archive</Button>
+                  <Button size="sm" variant="destructive" onClick={onArchive}>
+                    <Archive /> Archive
+                  </Button>
                 ) : null}
               </div>
             ) : (
-              <span className="text-xs text-muted-foreground">{isCustom ? "Archived" : "Managed by Aurex"}</span>
+              <span className="text-xs text-muted-foreground">
+                {isCustom ? "Archived" : "Managed by Aurex"}
+              </span>
             )}
           </div>
-          <PermissionList permissions={role.permissions} denied={role.deniedPermissions} />
+          <PermissionList
+            permissions={role.permissions}
+            denied={role.deniedPermissions}
+          />
         </div>
       ) : null}
     </article>

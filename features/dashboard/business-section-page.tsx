@@ -102,7 +102,6 @@ export function BusinessSectionPage({
             items={financialNavigation}
           />
         ) : null}
-        <p className="text-sm text-muted-foreground">{business.name}</p>
         <h1 className="mt-1 text-3xl font-bold tracking-tight">
           {content.title}
         </h1>
