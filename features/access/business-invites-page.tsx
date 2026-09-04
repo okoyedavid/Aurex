@@ -8,6 +8,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { Loading } from "@/components/ui/loading";
 import {
   Dialog,
   DialogContent,
@@ -48,7 +49,6 @@ import {
   Badge,
   ErrorState,
   formatDateTime,
-  LoadingState,
   PermissionList,
 } from "./shared";
 
@@ -161,9 +161,12 @@ export function BusinessInvitesPage({ businessId }: { businessId: string }) {
           </div>
           <div className="mt-4 grid gap-4">
             {pending.isLoading ? (
-              <LoadingState />
+              <Loading label="Loading…" variant="spinner" className="py-12" />
             ) : pending.error ? (
-              <ErrorState error={pending.error} onRetry={() => pending.refetch()} />
+              <ErrorState
+                error={pending.error}
+                onRetry={() => pending.refetch()}
+              />
             ) : pending.data?.items.length ? (
               pending.data.items.map((invite) => (
                 <ApprovalCard
@@ -222,7 +225,7 @@ export function BusinessInvitesPage({ businessId }: { businessId: string }) {
           </div>
           <div className="mt-4 grid gap-3">
             {sent.isLoading ? (
-              <LoadingState />
+              <Loading label="Loading…" variant="spinner" className="py-12" />
             ) : sent.error ? (
               <ErrorState error={sent.error} onRetry={() => sent.refetch()} />
             ) : sent.data?.items.length ? (

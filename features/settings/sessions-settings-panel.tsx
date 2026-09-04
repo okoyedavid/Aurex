@@ -7,6 +7,8 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { FeedbackState } from "@/components/ui/feedback-state";
+import { Skeleton } from "@/components/ui/skeleton";
 import { SessionApiError } from "@/lib/session-api";
 import {
   useMySessionsQuery,
@@ -159,29 +161,16 @@ export function SessionsSettingsPanel() {
       {sessionsQuery.isLoading ? (
         <div className="space-y-3 border-y border-border py-5">
           {Array.from({ length: 3 }).map((_, index) => (
-            <div
-              key={index}
-              className="h-20 animate-pulse rounded-md bg-muted"
-            />
+            <Skeleton key={index} className="h-20" />
           ))}
         </div>
       ) : sessionsQuery.isError ? (
-        <div className="border-y border-border py-6">
-          <p className="text-sm font-semibold text-foreground">
-            Unable to load sessions
-          </p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {sessionErrorMessage(sessionsQuery.error)}
-          </p>
-          <Button
-            type="button"
-            variant="outline"
-            className="mt-4 h-9 rounded-md"
-            onClick={() => sessionsQuery.refetch()}
-          >
-            Try again
-          </Button>
-        </div>
+        <FeedbackState
+          variant="inline"
+          title="Unable to load sessions"
+          message={sessionErrorMessage(sessionsQuery.error)}
+          retry={() => void sessionsQuery.refetch()}
+        />
       ) : sessions.length === 0 ? (
         <div className="border-y border-border py-6">
           <p className="text-sm font-semibold text-foreground">

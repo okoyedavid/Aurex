@@ -4,6 +4,8 @@ import { UserPlus, UsersRound } from "lucide-react";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
+import { FeedbackState } from "@/components/ui/feedback-state";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useBusinessAccess } from "@/features/business/business-access-context";
 import { useBusinessMembersQuery } from "@/features/business/business-member-hooks";
 import { MemberAvatar } from "@/features/business/member-avatar";
@@ -46,11 +48,15 @@ export function TeamAccessPanel() {
           You do not have permission to view business members.
         </p>
       ) : membersQuery.isLoading ? (
-        <div className="mt-6 h-24 animate-pulse rounded-md bg-muted" />
+        <Skeleton className="mt-6 h-24" />
       ) : membersQuery.isError ? (
-        <p className="mt-6 rounded-md border border-destructive/20 bg-destructive/5 p-4 text-sm text-destructive">
-          Unable to load business members.
-        </p>
+        <FeedbackState
+          className="mt-6"
+          variant="inline"
+          title="Unable to load business members"
+          message="The workspace member list is temporarily unavailable."
+          retry={() => void membersQuery.refetch()}
+        />
       ) : members.length === 0 ? (
         <p className="mt-6 rounded-md border border-border bg-muted/40 p-4 text-sm text-muted-foreground">
           No business members were returned.

@@ -7,6 +7,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { FeedbackState } from "@/components/ui/feedback-state";
 import {
   Dialog,
   DialogContent,
@@ -16,6 +17,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Loading } from "@/components/ui/loading";
 import { useBusinessAccess } from "@/features/business/business-access-context";
 import {
   useCreateOrResolveEmployeeGroupMutation,
@@ -86,9 +88,11 @@ export function EmployeeClassificationPage({
   if (!canView)
     return (
       <>
-        <State
+        <FeedbackState
+          tone="neutral"
+          variant="empty"
           title="Permission required"
-          detail={`${title} require employees:view.`}
+          message={`${title} require employees:view.`}
         />
       </>
     );
@@ -138,14 +142,15 @@ export function EmployeeClassificationPage({
         </Button>
       </div>
       {query.isLoading ? (
-        <div className="flex min-h-56 items-center justify-center gap-2 text-muted-foreground">
-          <Loader2 className="animate-spin" />
-          Loading {title.toLowerCase()}…
-        </div>
+        <Loading
+          label={`Loading ${title.toLowerCase()}…`}
+          variant="spinner"
+          centered
+        />
       ) : query.error ? (
-        <State
+        <FeedbackState
           title={`Unable to load ${title.toLowerCase()}`}
-          detail={businessErrorMessage(query.error)}
+          message={businessErrorMessage(query.error)}
           retry={() => void query.refetch()}
         />
       ) : query.data?.items.length ? (
@@ -193,9 +198,11 @@ export function EmployeeClassificationPage({
           ))}
         </div>
       ) : (
-        <State
+        <FeedbackState
+          tone="neutral"
+          variant="empty"
           title={`No ${status} ${title.toLowerCase()}`}
-          detail={
+          message={
             status === "active"
               ? "Create a custom record or add a system default."
               : "Archived records will appear here."
@@ -449,27 +456,5 @@ function ClassificationDialog({
         </form>
       </DialogContent>
     </Dialog>
-  );
-}
-
-function State({
-  title,
-  detail,
-  retry,
-}: {
-  title: string;
-  detail: string;
-  retry?: () => void;
-}) {
-  return (
-    <div className="mt-6 rounded-md border border-dashed border-border p-10 text-center">
-      <h2 className="font-semibold">{title}</h2>
-      <p className="mt-2 text-sm text-muted-foreground">{detail}</p>
-      {retry ? (
-        <Button className="mt-5" variant="outline" onClick={retry}>
-          Try again
-        </Button>
-      ) : null}
-    </div>
   );
 }

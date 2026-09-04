@@ -7,6 +7,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { Loading } from "@/components/ui/loading";
 import { Pagination } from "@/features/business/pagination";
 import type { InviteStatus } from "@/lib/access-api";
 
@@ -21,7 +22,6 @@ import {
   Badge,
   ErrorState,
   formatDateTime,
-  LoadingState,
   PermissionList,
 } from "./shared";
 
@@ -84,7 +84,7 @@ export function ReceivedInvitesPage() {
 
         <div className="mt-7 grid gap-4">
           {query.isLoading ? (
-            <LoadingState />
+            <Loading label="Loading…" variant="spinner" className="py-12" />
           ) : query.error ? (
             <ErrorState error={query.error} onRetry={() => query.refetch()} />
           ) : query.data?.items.length ? (

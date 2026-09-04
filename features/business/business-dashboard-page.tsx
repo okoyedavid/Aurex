@@ -5,8 +5,8 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { FeedbackState } from "@/components/ui/feedback-state";
 import { BusinessEmptyState } from "@/features/business/components/business-empty-state";
-import { BusinessErrorState } from "@/features/business/components/business-error-state";
 import { BusinessLogo } from "@/features/business/components/business-logo";
 import { BusinessSkeleton } from "@/features/business/components/business-skeleton";
 import { CreateBusinessDialog } from "@/features/business/components/create-business-dialog";
@@ -49,12 +49,15 @@ export function BusinessDashboardPage() {
           {businessesQuery.isLoading ? (
             <BusinessSkeleton />
           ) : businessesQuery.isError ? (
-            <BusinessErrorState
+            <FeedbackState
+              title="Unable to load businesses"
               message={businessErrorMessage(
                 businessesQuery.error,
                 "Unable to load businesses.",
               )}
-              onRetry={() => businessesQuery.refetch()}
+              retry={() => void businessesQuery.refetch()}
+              retryLabel="Retry"
+              className="shadow-sm"
             />
           ) : businessItems.length === 0 ? (
             <BusinessEmptyState onCreate={() => setCreateOpen(true)} />

@@ -2,11 +2,13 @@
 
 import { SelectControl } from "@/components/ui/select";
 
-import { Loader2, Users } from "lucide-react";
+import { Users } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
+import { FeedbackState } from "@/components/ui/feedback-state";
 import { Input } from "@/components/ui/input";
+import { Loading } from "@/components/ui/loading";
 import { useBusinessAccess } from "@/features/business/business-access-context";
 import {
   useEmployeeGroupsQuery,
@@ -59,9 +61,11 @@ function DirectoryContent({ businessId }: { businessId: string }) {
 
   if (!canView)
     return (
-      <State
+      <FeedbackState
+        tone="neutral"
+        variant="empty"
         title="Permission required"
-        detail="Business-wide employee access requires employees:view."
+        message="Business-wide employee access requires employees:view."
       />
     );
   return (
@@ -118,17 +122,20 @@ function DirectoryContent({ businessId }: { businessId: string }) {
       </div>
       <div className="mt-6">
         {employees.isLoading ? (
-          <Loading />
+          <Loading label="Loading employees…" variant="spinner" centered />
         ) : employees.error ? (
-          <State
+          <FeedbackState
             title="Unable to load employees"
-            detail={businessErrorMessage(employees.error)}
+            message={businessErrorMessage(employees.error)}
             retry={() => void employees.refetch()}
           />
         ) : !employees.data?.items.length ? (
-          <State
+          <FeedbackState
+            tone="neutral"
+            variant="empty"
+            icon={<Users className="mx-auto size-7 text-muted-foreground" />}
             title="No employees found"
-            detail="Try changing the filters or add employees from a department."
+            message="Try changing the filters or add employees from a department."
           />
         ) : (
           <EmployeeDirectoryTable
@@ -182,35 +189,5 @@ function Filter({
         ))}
       </SelectControl>
     </label>
-  );
-}
-function Loading() {
-  return (
-    <div className="flex min-h-56 items-center justify-center gap-2 text-sm text-muted-foreground">
-      <Loader2 className="size-4 animate-spin" />
-      Loading employees…
-    </div>
-  );
-}
-function State({
-  title,
-  detail,
-  retry,
-}: {
-  title: string;
-  detail: string;
-  retry?: () => void;
-}) {
-  return (
-    <div className="rounded-md border border-dashed border-border p-10 text-center">
-      <Users className="mx-auto size-7 text-muted-foreground" />
-      <h2 className="mt-4 font-semibold">{title}</h2>
-      <p className="mt-2 text-sm text-muted-foreground">{detail}</p>
-      {retry ? (
-        <Button className="mt-5" variant="outline" onClick={retry}>
-          Try again
-        </Button>
-      ) : null}
-    </div>
   );
 }

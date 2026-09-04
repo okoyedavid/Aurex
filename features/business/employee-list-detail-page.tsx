@@ -5,10 +5,11 @@ import { SelectControl } from "@/components/ui/select";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { ArrowLeft, Loader2, Pencil, Plus } from "lucide-react";
+import { ArrowLeft, Pencil, Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Loading } from "@/components/ui/loading";
 import { EmployeeDirectoryTable } from "@/features/employees/employee-directory-table";
 import { employeeDirectoryFilters } from "@/features/employees/employee-directory-utils";
 import { EmployeeSubnavigation } from "@/features/employees/employee-subnavigation";
@@ -75,12 +76,7 @@ export function EmployeeListDetailPage({
   const status = error instanceof BusinessApiError ? error.status : 0;
   if (listQuery.isLoading || employees.isLoading)
     return (
-      <>
-        <div className="flex gap-2 text-muted-foreground">
-          <Loader2 className="animate-spin" />
-          Loading department…
-        </div>
-      </>
+      <Loading label="Loading department…" variant="spinner" />
     );
   if (!canViewEmployees || status === 403)
     return (

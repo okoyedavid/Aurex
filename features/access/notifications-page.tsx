@@ -3,13 +3,14 @@ import { useState } from "react";
 import { CheckCheck } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Loading } from "@/components/ui/loading";
 import { Pagination } from "@/features/business/pagination";
 import {
   useMarkAllNotificationsRead,
   useMarkNotificationRead,
   useNotifications,
 } from "./hooks";
-import { Badge, ErrorState, formatDateTime, LoadingState } from "./shared";
+import { Badge, ErrorState, formatDateTime } from "./shared";
 
 export function NotificationsPage() {
   const [page, setPage] = useState(1);
@@ -69,7 +70,7 @@ export function NotificationsPage() {
         <div className="mt-5 overflow-hidden rounded-md border border-border bg-card">
           {query.isLoading ? (
             <div className="p-5">
-              <LoadingState />
+              <Loading label="Loading…" variant="spinner" className="py-12" />
             </div>
           ) : query.error ? (
             <div className="p-5">

@@ -6,8 +6,6 @@ import {
   CalendarDays,
   Copy,
   Landmark,
-  Loader2,
-  MapPin,
   Pencil,
   UserRound,
   UsersRound,
@@ -15,6 +13,8 @@ import {
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { FeedbackState } from "@/components/ui/feedback-state";
+import { Loading } from "@/components/ui/loading";
 import { useBusinessAccess } from "@/features/business/business-access-context";
 import { businessErrorMessage } from "@/lib/business-api";
 import { useBusinessEmployeeQuery } from "./employee-hooks";
@@ -42,27 +42,26 @@ export function EmployeeDetailPage({
   if (!canView)
     return (
       <Frame>
-        <State
+        <FeedbackState
+          tone="neutral"
+          variant="empty"
           title="Permission required"
-          detail="Business-wide employee details require employees:view."
+          message="Business-wide employee details require employees:view."
         />
       </Frame>
     );
   if (query.isLoading)
     return (
       <Frame>
-        <div className="flex min-h-64 items-center justify-center gap-2 text-muted-foreground">
-          <Loader2 className="animate-spin" />
-          Loading employee…
-        </div>
+        <Loading label="Loading employee…" variant="spinner" centered />
       </Frame>
     );
   if (query.error || !query.data)
     return (
       <Frame>
-        <State
+        <FeedbackState
           title="Unable to load employee"
-          detail={businessErrorMessage(query.error)}
+          message={businessErrorMessage(query.error)}
           retry={() => void query.refetch()}
         />
       </Frame>
@@ -244,28 +243,6 @@ function Details({ items }: { items: string[][] }) {
         </div>
       ))}
     </dl>
-  );
-}
-function State({
-  title,
-  detail,
-  retry,
-}: {
-  title: string;
-  detail: string;
-  retry?: () => void;
-}) {
-  return (
-    <div className="rounded-md border border-dashed border-border p-10 text-center">
-      <MapPin className="mx-auto size-6 text-muted-foreground" />
-      <h1 className="mt-4 font-semibold">{title}</h1>
-      <p className="mt-2 text-sm text-muted-foreground">{detail}</p>
-      {retry ? (
-        <Button variant="outline" className="mt-5" onClick={retry}>
-          Try again
-        </Button>
-      ) : null}
-    </div>
   );
 }
 function formatDate(value: string | null) {

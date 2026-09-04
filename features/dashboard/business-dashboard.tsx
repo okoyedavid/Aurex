@@ -15,6 +15,7 @@ import {
   Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useBusinessAccess } from "@/features/business/business-access-context";
 import { useBusinessMembersQuery } from "@/features/business/business-member-hooks";
 import { useEmployeeListsQuery } from "@/features/business/employee-list-hooks";
@@ -24,10 +25,6 @@ import {
   useSentBusinessInvites,
 } from "@/features/access/hooks";
 import { Badge, formatDateTime } from "@/features/access/shared";
-
-function Skeleton({ className = "" }: { className?: string }) {
-  return <div className={`animate-pulse rounded-md bg-muted ${className}`} />;
-}
 
 export function BusinessDashboard({ businessId }: { businessId: string }) {
   const { business, membership, effectivePermissions } = useBusinessAccess();

@@ -17,6 +17,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { Loading } from "@/components/ui/loading";
 import {
   Dialog,
   DialogContent,
@@ -33,7 +34,7 @@ import type { BusinessRole } from "@/lib/access-api";
 
 import { useAllBusinessRoles, useArchiveCustomRole } from "./hooks";
 import { RoleDialog } from "./role-dialog";
-import { Badge, ErrorState, LoadingState, PermissionList } from "./shared";
+import { Badge, ErrorState, PermissionList } from "./shared";
 
 const rolesPerPage = 5;
 type RoleTypeFilter = "all" | BusinessRole["type"];
@@ -149,7 +150,7 @@ export function BusinessRolesPage({ businessId }: { businessId: string }) {
       <div className="mt-4">
         {query.isLoading ? (
           <div className="rounded-md border border-border bg-card px-6">
-            <LoadingState />
+            <Loading label="Loading…" variant="spinner" className="py-12" />
           </div>
         ) : query.error ? (
           <ErrorState error={query.error} onRetry={() => query.refetch()} />
