@@ -1,31 +1,31 @@
 "use client";
 
-import { Loader2, MoreHorizontal, Shield, Trash2, UserCog } from "lucide-react";
+import { MoreHorizontal, Shield, Trash2, UserCog } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
-import { useBusinessAccess } from "./business-access-context";
-import { BusinessPageHeader } from "./business-page-header";
-import { useBusinessMembersQuery } from "./business-member-hooks";
-import { MemberAvatar } from "./member-avatar";
-import { MembersPageFrame } from "./members-page-frame";
-import { MembersState } from "./members-state";
-import { MemberStatusBadge } from "./member-status-badge";
-import { normalizePagination } from "./employee-list-display";
-import { Pagination } from "./pagination";
-import { BusinessApiError } from "@/lib/business-api";
-import type { BusinessMember } from "@/lib/business-members-api";
+import { Loading } from "@/components/ui/loading";
 import { useMeQuery } from "@/features/auth/use-me-query";
-import {
-  canUpdateMemberRole,
-  canUpdateMemberStatus,
-} from "./member-role-options";
-import { ChangeMemberRoleDialog } from "./components/member-management-dialogs";
+import { BusinessApiError, businessErrorMessage } from "@/lib/business-api";
+import type { BusinessMember } from "@/lib/business-members-api";
+import { useBusinessAccess } from "./business-access-context";
+import { useBusinessMembersQuery } from "./business-member-hooks";
+import { BusinessPageHeader } from "./business-page-header";
 import {
   ChangeMemberStatusDialog,
   RemoveMemberDialog,
 } from "./components/change-member-status-dialog";
+import { ChangeMemberRoleDialog } from "./components/member-management-dialogs";
+import { normalizePagination } from "./employee-list-display";
+import { MemberAvatar } from "./member-avatar";
+import {
+  canUpdateMemberRole,
+  canUpdateMemberStatus,
+} from "./member-role-options";
+import { MemberStatusBadge } from "./member-status-badge";
+import { MembersState } from "./members-state";
+import { Pagination } from "./pagination";
 
 export function BusinessMembersPage({ businessId }: { businessId: string }) {
   const access = useBusinessAccess();
@@ -70,42 +70,33 @@ export function BusinessMembersPage({ businessId }: { businessId: string }) {
 
   if (query.isLoading) {
     return (
-      <MembersPageFrame>
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" /> Loading members…
-        </div>
-      </MembersPageFrame>
+      <Loading label="Loading members…" variant="spinner" />
     );
   }
 
   if (query.error instanceof BusinessApiError && query.error.status === 403) {
     return (
-      <MembersPageFrame>
-        <MembersState
-          title="Permission required"
-          detail="The server denied access to this business's members."
-        />
-      </MembersPageFrame>
+      <MembersState
+        title="Permission required"
+        detail="The server denied access to this business's members."
+      />
     );
   }
 
   if (query.isError) {
     return (
-      <MembersPageFrame>
-        <MembersState
-          title="Unable to load members"
-          detail={businessErrorMessage(query.error)}
-          retry={() => query.refetch()}
-        />
-      </MembersPageFrame>
+      <MembersState
+        title="Unable to load members"
+        detail={businessErrorMessage(query.error)}
+        retry={() => query.refetch()}
+      />
     );
   }
 
   const data = query.data!;
   return (
-    <MembersPageFrame>
+    <>
       <BusinessPageHeader
-        eyebrow={access.business.name}
         title="Members"
         description="View people with access to this business and their assigned roles."
       />
@@ -178,7 +169,7 @@ export function BusinessMembersPage({ businessId }: { businessId: string }) {
         onPage={(value) => navigate(value)}
         onLimit={(value) => navigate(1, value)}
       />
-    </MembersPageFrame>
+    </>
   );
 }
 

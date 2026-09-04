@@ -40,11 +40,20 @@ export type BusinessEmployeeDetail = Omit<
   BusinessEmployeeSummary,
   "accountLinked" | "bank"
 > & {
-  employeeType: (EmployeeRelation & { description: string | null; status: string }) | null;
-  groups: Array<EmployeeRelation & { description: string | null; status: string }>;
+  employeeType:
+    | (EmployeeRelation & { description: string | null; status: string })
+    | null;
+  groups: Array<
+    EmployeeRelation & { description: string | null; status: string }
+  >;
   manager: { id: string; fullName: string; jobTitle: string | null } | null;
   employmentStartDate: string | null;
-  account: { linked: boolean; businessMemberId?: string };
+  account: {
+    linked: boolean;
+    businessMemberId?: string;
+    email?: string;
+    avatar?: string;
+  };
   payroll: { payFrequency: string | null; amount: number; currency: string };
   bankAccount: {
     bankName: string | null;
@@ -81,7 +90,12 @@ export type UpdateBusinessEmployeeBody = {
 
 function normalize(error: unknown): never {
   if (error instanceof AxiosError && error.response) {
-    const data = error.response.data as { message?: string; code?: string; errors?: unknown; details?: never };
+    const data = error.response.data as {
+      message?: string;
+      code?: string;
+      errors?: unknown;
+      details?: never;
+    };
     throw new BusinessApiError(error.response.status, {
       message: data.message ?? "The employee request could not be completed.",
       code: data.code,

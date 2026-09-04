@@ -5,6 +5,7 @@ import { SelectControl } from "@/components/ui/select";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Loading } from "@/components/ui/loading";
 import {
   Dialog,
   DialogContent,
@@ -17,7 +18,6 @@ import type { BusinessMember } from "@/lib/business-members-api";
 import { useBusinessRoles } from "@/features/access/hooks";
 import {
   ErrorState,
-  LoadingState,
   PermissionList,
 } from "@/features/access/shared";
 import { useUpdateBusinessMemberRole } from "../business-member-hooks";
@@ -71,7 +71,7 @@ export function ChangeMemberRoleDialog({
           </DialogDescription>
         </DialogHeader>
         {roles.isLoading ? (
-          <LoadingState />
+          <Loading label="Loading…" variant="spinner" className="py-12" />
         ) : roles.error ? (
           <ErrorState error={roles.error} onRetry={() => roles.refetch()} />
         ) : confirming && selected ? (

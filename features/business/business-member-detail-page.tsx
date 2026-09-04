@@ -1,28 +1,30 @@
 "use client";
 
-import { ArrowLeft, Loader2, Shield, Trash2, UserCog } from "lucide-react";
+import { ArrowLeft, Shield, Trash2, UserCog } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { ChangeMemberRoleDialog } from "./components/member-management-dialogs";
-import { ChangeMemberStatusDialog } from "./components/change-member-status-dialog";
-import { RemoveMemberDialog } from "./components/change-member-status-dialog";
+import { Loading } from "@/components/ui/loading";
+import { PermissionList } from "@/features/access/shared";
+import { useMeQuery } from "@/features/auth/use-me-query";
+import { formatDate } from "@/features/dashboard/format";
+import { BusinessApiError } from "@/lib/business-api";
 import { useBusinessAccess } from "./business-access-context";
 import { useBusinessMemberQuery } from "./business-member-hooks";
+import {
+  ChangeMemberStatusDialog,
+  RemoveMemberDialog,
+} from "./components/change-member-status-dialog";
+import { ChangeMemberRoleDialog } from "./components/member-management-dialogs";
 import { MemberAvatar } from "./member-avatar";
-import { MembersPageFrame } from "./members-page-frame";
-import { MembersState } from "./members-state";
-import { MemberStatusBadge } from "./member-status-badge";
-import { BusinessApiError } from "@/lib/business-api";
+import { MemberDetailItem } from "./member-detail-item";
 import {
   canUpdateMemberRole,
   canUpdateMemberStatus,
 } from "./member-role-options";
-import { MemberDetailItem } from "./member-detail-item";
-import { useMeQuery } from "@/features/auth/use-me-query";
-import { PermissionList } from "@/features/access/shared";
-import { formatDate } from "@/features/dashboard/format";
+import { MemberStatusBadge } from "./member-status-badge";
+import { MembersState } from "./members-state";
 
 export function BusinessMemberDetailPage({
   businessId,
@@ -44,45 +46,35 @@ export function BusinessMemberDetailPage({
 
   if (query.isLoading) {
     return (
-      <MembersPageFrame>
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" /> Loading member…
-        </div>
-      </MembersPageFrame>
+      <Loading label="Loading member…" variant="spinner" />
     );
   }
 
   if (query.error instanceof BusinessApiError && query.error.status === 403) {
     return (
-      <MembersPageFrame>
-        <MembersState
-          title="Permission required"
-          detail="The server denied access to this business member."
-        />
-      </MembersPageFrame>
+      <MembersState
+        title="Permission required"
+        detail="The server denied access to this business member."
+      />
     );
   }
 
   if (query.error instanceof BusinessApiError && query.error.status === 404) {
     return (
-      <MembersPageFrame>
-        <MembersState
-          title="Member not found"
-          detail="This membership does not exist in the selected business."
-        />
-      </MembersPageFrame>
+      <MembersState
+        title="Member not found"
+        detail="This membership does not exist in the selected business."
+      />
     );
   }
 
   if (query.isError || !query.data) {
     return (
-      <MembersPageFrame>
-        <MembersState
-          title="Unable to load member"
-          detail={query.error?.message ?? "The request could not be completed."}
-          retry={() => query.refetch()}
-        />
-      </MembersPageFrame>
+      <MembersState
+        title="Unable to load member"
+        detail={query.error?.message ?? "The request could not be completed."}
+        retry={() => query.refetch()}
+      />
     );
   }
 
@@ -92,7 +84,7 @@ export function BusinessMemberDetailPage({
     member.roleId.key === "owner" ||
     me.data?.id === member.userId.id;
   return (
-    <MembersPageFrame>
+    <>
       <Link
         href={`/business/${businessId}/members`}
         className="inline-flex items-center gap-2 text-sm font-medium text-primary"
@@ -198,6 +190,6 @@ export function BusinessMemberDetailPage({
       {removeOpen ? (
         <RemoveMemberDialog member={member} open onOpenChange={setRemoveOpen} />
       ) : null}
-    </MembersPageFrame>
+    </>
   );
 }

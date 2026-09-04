@@ -53,6 +53,7 @@ async function refreshSession() {
 
 api.interceptors.response.use(
   (response) => response,
+
   async (error: AxiosError) => {
     const config = error.config as RefreshableRequestConfig | undefined;
 

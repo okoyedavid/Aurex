@@ -6,6 +6,7 @@ import { Check, Link2, UserRound } from "lucide-react";
 import { useState } from "react";
 
 import { Pagination } from "@/features/business/pagination";
+import { Loading } from "@/components/ui/loading";
 import {
   useEmployeeListsQuery,
   useEmployeesQuery,
@@ -14,7 +15,7 @@ import { friendlyEmployeeStatus } from "@/features/business/employee-list-displa
 import { cn } from "@/lib/utils";
 import type { Employee } from "@/lib/employee-lists-api";
 
-import { ErrorState, LoadingState } from "./shared";
+import { ErrorState } from "./shared";
 import { changeEmployeeList, isEmployeeLinked } from "./invitation-workflow";
 
 const pageLimit = 20;
@@ -58,7 +59,7 @@ export function ExistingEmployeeSelector({
   return (
     <div className="space-y-4">
       {lists.isLoading ? (
-        <LoadingState />
+        <Loading label="Loading…" variant="spinner" className="py-12" />
       ) : lists.error ? (
         <ErrorState error={lists.error} onRetry={() => lists.refetch()} />
       ) : lists.data?.items.length ? (
@@ -100,7 +101,7 @@ export function ExistingEmployeeSelector({
             </p>
           </div>
           {employees.isLoading ? (
-            <LoadingState />
+            <Loading label="Loading…" variant="spinner" className="py-12" />
           ) : employees.error ? (
             <ErrorState
               error={employees.error}

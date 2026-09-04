@@ -13,6 +13,7 @@ import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { Loading } from "@/components/ui/loading";
 import {
   Dialog,
   DialogContent,
@@ -33,7 +34,7 @@ import {
   type EmployeeSource,
 } from "./invitation-workflow";
 import { RoleDialog } from "./role-dialog";
-import { ErrorState, LoadingState, PermissionList } from "./shared";
+import { ErrorState, PermissionList } from "./shared";
 
 export function InviteDialog({
   businessId,
@@ -191,7 +192,7 @@ export function InviteDialog({
                 </label>
 
                 {roles.isLoading ? (
-                  <LoadingState />
+                  <Loading label="Loading…" variant="spinner" className="py-12" />
                 ) : roles.error ? (
                   <ErrorState error={roles.error} onRetry={() => roles.refetch()} />
                 ) : (

@@ -3,11 +3,11 @@
 import { notFound, usePathname } from "next/navigation";
 import { useMemo } from "react";
 
+import { FeedbackState } from "@/components/ui/feedback-state";
 import { BusinessAccessContextProvider } from "@/features/business/business-access-context";
 import { BusinessAccessRedirect } from "@/features/business/business-access-redirect";
 import { BusinessForbiddenState } from "@/features/business/business-forbidden-state";
 import { useBusinessQuery } from "@/features/business/business-hooks";
-import { BusinessLayoutError } from "@/features/business/business-layout-error";
 import { BusinessLayoutSkeleton } from "@/features/business/business-layout-skeleton";
 import { DashboardShell } from "@/features/dashboard/dashboard-shell";
 import {
@@ -105,12 +105,15 @@ export function BusinessAccessBoundary({
   }
   if (!query.data?.membership)
     return (
-      <BusinessLayoutError
+      <FeedbackState
+        className="min-h-screen bg-muted"
+        variant="page"
+        title="Unable to load business"
         message={businessErrorMessage(
           query.error,
           "Unable to load business access.",
         )}
-        onRetry={() => query.refetch()}
+        retry={() => void query.refetch()}
       />
     );
 

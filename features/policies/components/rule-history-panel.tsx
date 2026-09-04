@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { businessErrorMessage } from "@/lib/business-api";
 import { Pagination } from "@/features/business/pagination";
 import { useRuleHistoryQuery } from "@/features/policies/policy-hooks";
-import { PolicyAuditTable, PolicyError } from "./policy-ui";
+import { FeedbackState } from "@/components/ui/feedback-state";
+import { PolicyAuditTable } from "./policy-audit-table";
 
 export function RuleHistoryPanel({
   businessId,
@@ -31,9 +32,12 @@ export function RuleHistoryPanel({
       {open ? (
         <div className="mt-3">
           {history.isLoading ? (
-            <p className="text-sm text-muted-foreground">Loading rule history…</p>
+            <p className="text-sm text-muted-foreground">
+              Loading rule history…
+            </p>
           ) : history.error ? (
-            <PolicyError
+            <FeedbackState
+              title="Unable to load policy data"
               message={businessErrorMessage(history.error)}
               retry={() => void history.refetch()}
             />

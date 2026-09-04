@@ -5,7 +5,9 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { FeedbackState } from "@/components/ui/feedback-state";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import {
   accountErrorMessage,
@@ -78,31 +80,21 @@ export function ProfileSettingsForm() {
     >
       {userQuery.isLoading ? (
         <div className="space-y-5">
-          <div className="h-20 animate-pulse rounded-md bg-muted" />
+          <Skeleton className="h-20" />
           <div className="grid gap-5 sm:grid-cols-2">
-            <div className="h-16 animate-pulse rounded-md bg-muted" />
-            <div className="h-16 animate-pulse rounded-md bg-muted" />
-            <div className="h-16 animate-pulse rounded-md bg-muted" />
-            <div className="h-28 animate-pulse rounded-md bg-muted sm:col-span-2" />
+            <Skeleton className="h-16" />
+            <Skeleton className="h-16" />
+            <Skeleton className="h-16" />
+            <Skeleton className="h-28 sm:col-span-2" />
           </div>
         </div>
       ) : userQuery.isError ? (
-        <div className="rounded-md border border-border bg-background p-4">
-          <p className="text-sm font-semibold text-foreground">
-            Unable to load profile
-          </p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {userQuery.error.message}
-          </p>
-          <Button
-            type="button"
-            variant="outline"
-            className="mt-4 h-9 rounded-md"
-            onClick={() => userQuery.refetch()}
-          >
-            Try again
-          </Button>
-        </div>
+        <FeedbackState
+          variant="inline"
+          title="Unable to load profile"
+          message={userQuery.error.message}
+          retry={() => void userQuery.refetch()}
+        />
       ) : (
         <form
           key={formKey}

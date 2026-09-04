@@ -52,7 +52,10 @@ export function cardinalityDescription(cardinality: PolicyCardinality) {
     : "Multiple distinct qualifying policies can apply to each employee in this category.";
 }
 
-export function validateEffectiveRange(from?: string | null, to?: string | null) {
+export function validateEffectiveRange(
+  from?: string | null,
+  to?: string | null,
+) {
   if (!from || !to) return null;
   return new Date(to).getTime() > new Date(from).getTime()
     ? null
@@ -67,7 +70,9 @@ export function toRuleValue(
   if (field === "tenure") {
     const months = Number(values[0]);
     if (!Number.isFinite(months) || months < 0)
-      throw new Error("Tenure must be a non-negative number of completed months.");
+      throw new Error(
+        "Tenure must be a non-negative number of completed months.",
+      );
     return months;
   }
   if (operator === "in" || operator === "not_in") {
@@ -84,9 +89,4 @@ export function formatPolicyDate(value?: string | null) {
   if (!value) return "No scheduled end";
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
-}
-
-export function auditInitiatingUser(metadata?: Record<string, unknown> | null) {
-  const value = metadata?.triggeredByUserId;
-  return typeof value === "string" ? value : null;
 }

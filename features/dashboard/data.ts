@@ -49,7 +49,9 @@ export const personalNavigation = [
 
 export function getEffectivePermissions(role: BusinessRole) {
   const denied = new Set(role.deniedPermissions);
-  return new Set(role.permissions.filter((permission) => !denied.has(permission)));
+  return new Set(
+    role.permissions.filter((permission) => !denied.has(permission)),
+  );
 }
 export function canAccessBusinessNavigationItem(
   item: BusinessNavigationItem,
@@ -84,19 +86,47 @@ function getBusinessNavigationItems(
         `${base}/providers`,
       ],
     },
-    { name: "Employees", icon: UserRound, href: `${base}/employees`, permission: "employees:view" },
-    { name: "Policies", icon: ScrollText, href: `${base}/policies`, anyPermission: ["policies:view", "policies:view_audit"] },
-    { name: "Members", icon: Users, href: `${base}/members`, permission: "members:view" },
-    { name: "Roles", icon: ShieldCheck, href: `${base}/roles`, permission: "roles:view" },
-    { name: "Invites", icon: UserPlus, href: `${base}/invites`, permission: "members:invite" },
+    {
+      name: "Employees",
+      icon: UserRound,
+      href: `${base}/employees`,
+      permission: "employees:view",
+    },
+    {
+      name: "Policies",
+      icon: ScrollText,
+      href: `${base}/policies`,
+      anyPermission: ["policies:view", "policies:view_audit"],
+    },
+    {
+      name: "Members",
+      icon: Users,
+      href: `${base}/members`,
+      permission: "members:view",
+    },
+    {
+      name: "Roles",
+      icon: ShieldCheck,
+      href: `${base}/roles`,
+      permission: "roles:view",
+    },
+    {
+      name: "Invites",
+      icon: UserPlus,
+      href: `${base}/invites`,
+      permission: "members:invite",
+    },
     { name: "Audit Logs", icon: Activity, href: `${base}/audit-logs` },
-    { name: "Settings", icon: Settings, href: `${base}/settings`, permission: "business:update" },
+    {
+      name: "Settings",
+      icon: Settings,
+      href: `${base}/settings`,
+      permission: "business:update",
+    },
   ];
 }
 
-function getBusinessRouteItems(
-  businessId: string,
-): BusinessNavigationItem[] {
+function getBusinessRouteItems(businessId: string): BusinessNavigationItem[] {
   const base = `/business/${businessId}`;
 
   return [
@@ -129,7 +159,7 @@ function getBusinessRouteItems(
     {
       name: "Departments",
       icon: UserRound,
-      href: `${base}/employee-lists`,
+      href: `${base}/employees/employee-lists`,
       permission: "employee_lists:view",
     },
   ];
@@ -155,9 +185,14 @@ export function getHeaderSearchMetadata(
 
   const base = `/business/${businessId}`;
   const searchableRoutes = [
-    { matches: pathname === `${base}/employees`, placeholder: "Search employees..." },
     {
-      matches: new RegExp(`^${base}/employee-lists/[^/]+$`).test(pathname),
+      matches: pathname === `${base}/employees`,
+      placeholder: "Search employees...",
+    },
+    {
+      matches: new RegExp(`^${base}/employees/employee-lists/[^/]+$`).test(
+        pathname,
+      ),
       placeholder: "Search employees in this department...",
     },
     { matches: pathname === `${base}/roles`, placeholder: "Search roles..." },
@@ -181,20 +216,36 @@ export function getBusinessHeaderCommands(
   businessId: string,
   permissions: ReadonlySet<Permission>,
 ): HeaderCommand[] {
-  const navigation = getBusinessNavigation(businessId, permissions).map((item) => ({
-    label: item.name,
-    description: `Go to ${item.name.toLowerCase()}`,
-    href: item.href,
-    icon: item.icon,
-  }));
+  const navigation = getBusinessNavigation(businessId, permissions).map(
+    (item) => ({
+      label: item.name,
+      description: `Go to ${item.name.toLowerCase()}`,
+      href: item.href,
+      icon: item.icon,
+    }),
+  );
   const base = `/business/${businessId}`;
   return [
     ...navigation,
     ...(permissions.has("members:invite")
-      ? [{ label: "Invite employee", description: "Open employee invitation", href: `${base}/invites?action=invite-employee`, icon: UserPlus }]
+      ? [
+          {
+            label: "Invite employee",
+            description: "Open employee invitation",
+            href: `${base}/invites?action=invite-employee`,
+            icon: UserPlus,
+          },
+        ]
       : []),
     ...(permissions.has("policies:create")
-      ? [{ label: "Create policy", description: "Open policy creation", href: `${base}/policies?action=create-policy`, icon: ScrollText }]
+      ? [
+          {
+            label: "Create policy",
+            description: "Open policy creation",
+            href: `${base}/policies?action=create-policy`,
+            icon: ScrollText,
+          },
+        ]
       : []),
   ];
 }

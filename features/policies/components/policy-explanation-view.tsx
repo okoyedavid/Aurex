@@ -7,7 +7,8 @@ import {
   fieldLabels,
   operatorLabels,
 } from "@/features/policies/policy-helpers";
-import { HistoricalDataWarning, PolicyBadge, PolicyEmpty } from "./policy-ui";
+import { FeedbackState } from "@/components/ui/feedback-state";
+import { HistoricalDataWarning, PolicyBadge } from "./policy-ui";
 
 function valueLabel(value: string | string[] | number | null) {
   if (value === null) return "Not available";
@@ -91,7 +92,11 @@ export function PolicyExplanationView({
             ))}
           </div>
         ) : (
-          <PolicyEmpty title="No winning policies for this evaluation date." />
+          <FeedbackState
+            title="No winning policies for this evaluation date."
+            tone="neutral"
+            variant="empty"
+          />
         )}
       </section>
 
@@ -117,7 +122,11 @@ export function PolicyExplanationView({
             ))}
           </div>
         ) : (
-          <PolicyEmpty title="No rules were evaluated." />
+          <FeedbackState
+            title="No rules were evaluated."
+            tone="neutral"
+            variant="empty"
+          />
         )}
       </section>
 
@@ -146,7 +155,11 @@ export function PolicyExplanationView({
             ))}
           </div>
         ) : (
-          <PolicyEmpty title="No candidates were suppressed." />
+          <FeedbackState
+            title="No candidates were suppressed."
+            tone="neutral"
+            variant="empty"
+          />
         )}
       </section>
 

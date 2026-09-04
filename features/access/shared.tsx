@@ -1,6 +1,6 @@
 "use client";
-import { AlertTriangle, Ban, Check, LoaderCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Ban, Check } from "lucide-react";
+import { FeedbackState } from "@/components/ui/feedback-state";
 import { BusinessApiError, businessErrorMessage } from "@/lib/business-api";
 import { permissionLabels } from "@/features/business/member-role-options";
 import type { Permission } from "@/types/generic";
@@ -19,36 +19,19 @@ export function ErrorState({
 }) {
   const status = errorStatus(error);
   return (
-    <div className="rounded-md border border-destructive/30 bg-destructive/5 p-5">
-      <div className="flex gap-3">
-        <AlertTriangle className="mt-0.5 h-5 w-5 text-destructive" />
-        <div>
-          <p className="font-semibold">
-            {status === 403
-              ? "Access denied"
-              : status === 404
-                ? "Not found"
-                : "Unable to load this content"}
-          </p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {businessErrorMessage(error, "Please try again.")}
-          </p>
-          {onRetry ? (
-            <Button className="mt-3" variant="outline" onClick={onRetry}>
-              Try again
-            </Button>
-          ) : null}
-        </div>
-      </div>
-    </div>
-  );
-}
-export function LoadingState() {
-  return (
-    <div className="flex items-center gap-2 py-12 text-sm text-muted-foreground">
-      <LoaderCircle className="h-4 w-4 animate-spin" />
-      Loading…
-    </div>
+    <FeedbackState
+      variant="inline"
+      centered={false}
+      title={
+        status === 403
+          ? "Access denied"
+          : status === 404
+            ? "Not found"
+            : "Unable to load this content"
+      }
+      message={businessErrorMessage(error, "Please try again.")}
+      retry={onRetry}
+    />
   );
 }
 export function Badge({

@@ -1,23 +1,22 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+import { Loading } from "@/components/ui/loading";
+import { BusinessApiError } from "@/lib/business-api";
+import { getEmployeeLists } from "@/lib/employee-lists-api";
+import { useQueryClient } from "@tanstack/react-query";
+import { Plus } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import { Loader2, Plus } from "lucide-react";
-import { useQueryClient } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { CreateListDialog } from "./components/create-list-dialog";
 import { useBusinessAccess } from "./business-access-context";
-import { employeeListKeys, useEmployeeListsQuery } from "./employee-list-hooks";
+import { CreateListDialog } from "./components/create-list-dialog";
 import {
   friendlyListStatus,
   normalizePagination,
 } from "./employee-list-display";
-import { getEmployeeLists } from "@/lib/employee-lists-api";
-import { BusinessApiError } from "@/lib/business-api";
-import { EmployeeListsPageFrame as PageFrame } from "./employee-lists-page-frame";
+import { employeeListKeys, useEmployeeListsQuery } from "./employee-list-hooks";
 import { EmployeeListsState as State } from "./employee-lists-state";
-import { EmployeeSubnavigation } from "@/features/employees/employee-subnavigation";
 import { Pagination } from "./pagination";
 import { StatusBadge as Badge } from "./status-badge";
 import { TableHeading as Th } from "./table-heading";
@@ -72,25 +71,21 @@ export function EmployeeListsPage({ businessId }: { businessId: string }) {
 
   if (query.isLoading)
     return (
-      <PageFrame>
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <Loader2 className="animate-spin" />
-          Loading employee lists
-        </div>
-      </PageFrame>
+      <Loading label="Loading employee lists…" variant="spinner" />
     );
   if (query.error instanceof BusinessApiError && query.error.status === 403)
     return (
-      <PageFrame>
+      <>
         <State
           title="Permission required"
           detail="You do not have permission to view employee lists for this business."
         />
-      </PageFrame>
+      </>
     );
+
   if (query.isError)
     return (
-      <PageFrame>
+      <>
         <State
           title="Unable to load employee lists"
           detail={
@@ -98,17 +93,13 @@ export function EmployeeListsPage({ businessId }: { businessId: string }) {
           }
           retry={() => query.refetch()}
         />
-      </PageFrame>
+      </>
     );
   const data = query.data!;
   return (
-    <PageFrame>
-      <EmployeeSubnavigation businessId={businessId} current="departments" />
+    <>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-sm text-muted-foreground">
-            {access.business.name}
-          </p>
           <h1 className="mt-1 text-3xl font-bold">Departments</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             Organize employees into departments and manage payroll verification.
@@ -146,7 +137,7 @@ export function EmployeeListsPage({ businessId }: { businessId: string }) {
                   <td className="p-4">
                     <Link
                       className="font-semibold text-primary hover:underline"
-                      href={`/business/${businessId}/employee-lists/${item.id}`}
+                      href={`/business/${businessId}/employees/employee-lists/${item.id}`}
                     >
                       {item.name}
                     </Link>
@@ -195,7 +186,7 @@ export function EmployeeListsPage({ businessId }: { businessId: string }) {
         open={open}
         onOpenChange={setOpen}
       />
-    </PageFrame>
+    </>
   );
 }
 export function labelFrequency(value: string) {

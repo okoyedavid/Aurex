@@ -15,6 +15,7 @@ import {
   Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useBusinessAccess } from "@/features/business/business-access-context";
 import { useBusinessMembersQuery } from "@/features/business/business-member-hooks";
 import { useEmployeeListsQuery } from "@/features/business/employee-list-hooks";
@@ -24,10 +25,6 @@ import {
   useSentBusinessInvites,
 } from "@/features/access/hooks";
 import { Badge, formatDateTime } from "@/features/access/shared";
-
-function Skeleton({ className = "" }: { className?: string }) {
-  return <div className={`animate-pulse rounded-md bg-muted ${className}`} />;
-}
 
 export function BusinessDashboard({ businessId }: { businessId: string }) {
   const { business, membership, effectivePermissions } = useBusinessAccess();
@@ -59,7 +56,7 @@ export function BusinessDashboard({ businessId }: { businessId: string }) {
   const pendingApprovals = approvals.data?.pagination.total ?? 0;
   const primaryAction = canLists
     ? {
-        href: `/business/${businessId}/employee-lists`,
+        href: `/business/${businessId}/employees/employee-lists`,
         label: "Open employee lists",
       }
     : canMembers
@@ -86,7 +83,7 @@ export function BusinessDashboard({ businessId }: { businessId: string }) {
         ? `${employees} employees in loaded lists`
         : "Permission required",
       icon: ListChecks,
-      href: `/business/${businessId}/employee-lists`,
+      href: `/business/${businessId}/employees/employee-lists`,
       visible: canLists,
     },
     {
@@ -310,7 +307,7 @@ export function BusinessDashboard({ businessId }: { businessId: string }) {
                     </p>
                   </div>
                   <Link
-                    href={`/business/${businessId}/employee-lists`}
+                    href={`/business/${businessId}/employees/employee-lists`}
                     className="flex shrink-0 items-center gap-1 text-sm font-semibold text-primary"
                   >
                     View all <ArrowRight className="h-4 w-4" />
@@ -326,7 +323,7 @@ export function BusinessDashboard({ businessId }: { businessId: string }) {
                   ) : listItems.length ? (
                     listItems.map((list) => (
                       <Link
-                        href={`/business/${businessId}/employee-lists/${list.id}`}
+                        href={`/business/${businessId}/employees/employee-lists/${list.id}`}
                         key={list.id}
                         className="min-w-0 rounded-md border border-border p-4 transition hover:bg-muted/50"
                       >
@@ -388,18 +385,18 @@ export function BusinessDashboard({ businessId }: { businessId: string }) {
             ) : null}
           </div>
 
-      <aside className="min-w-0 space-y-5">
-        <section className="min-w-0 rounded-md border border-border bg-card shadow-sm">
-          <div className="flex items-start justify-between gap-3 border-b border-border p-4 sm:items-center sm:p-5">
-            <div className="min-w-0">
+          <aside className="min-w-0 space-y-5">
+            <section className="min-w-0 rounded-md border border-border bg-card shadow-sm">
+              <div className="flex items-start justify-between gap-3 border-b border-border p-4 sm:items-center sm:p-5">
+                <div className="min-w-0">
                   <h2 className="font-bold">Recent notifications</h2>
                   <p className="mt-1 text-xs text-muted-foreground">
                     Your personal Aurex notifications
                   </p>
                 </div>
-            <Link
-              href="/dashboard/notifications"
-              className="shrink-0 text-sm font-semibold text-primary"
+                <Link
+                  href="/dashboard/notifications"
+                  className="shrink-0 text-sm font-semibold text-primary"
                 >
                   View all
                 </Link>
