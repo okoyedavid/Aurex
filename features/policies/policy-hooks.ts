@@ -230,6 +230,10 @@ function useCategoryInvalidation(businessId: string) {
           ]
         : []),
       qc.invalidateQueries({ queryKey: policyKeys.policiesRoot(businessId) }),
+      qc.invalidateQueries({ queryKey: policyKeys.auditRoot(businessId) }),
+      qc.invalidateQueries({
+        queryKey: ["business", businessId, "employees"],
+      }),
     ]);
 }
 export function useCreateCategoryMutation(businessId: string) {

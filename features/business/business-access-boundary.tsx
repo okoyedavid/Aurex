@@ -118,7 +118,11 @@ export function BusinessAccessBoundary({
     );
 
   const navigation = getBusinessNavigation(businessId, effectivePermissions);
-  const headerCommands = getBusinessHeaderCommands(businessId, effectivePermissions);
+  const headerCommands = getBusinessHeaderCommands(
+    businessId,
+    effectivePermissions,
+    navigation,
+  );
   const routeItem = getBusinessNavigationItemForPath(businessId, pathname);
   const routeAllowed =
     !routeItem ||

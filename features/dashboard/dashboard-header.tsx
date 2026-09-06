@@ -2,6 +2,7 @@
 
 import { Menu, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import Image from "next/image";
+import { Suspense } from "react";
 
 import { useMeQuery } from "@/features/auth/use-me-query";
 import { NotificationBell } from "@/features/access/notification-bell";
@@ -69,11 +70,15 @@ export function DashboardHeader({
               <PanelLeftClose className="h-4 w-4" />
             )}
           </button>
-          <DesktopHeaderSearch metadata={searchMetadata} commands={commands} />
+          <Suspense fallback={<div className="h-10 w-full max-w-sm" />}>
+            <DesktopHeaderSearch metadata={searchMetadata} commands={commands} />
+          </Suspense>
         </div>
 
         <div className="ml-auto flex items-center gap-2">
-          <MobileHeaderSearch metadata={searchMetadata} commands={commands} />
+          <Suspense fallback={<div className="size-10 md:hidden" />}>
+            <MobileHeaderSearch metadata={searchMetadata} commands={commands} />
+          </Suspense>
           <NotificationBell />
           <AccountMenu user={user} />
         </div>

@@ -5,6 +5,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { useBusinessAccess } from "@/features/business/business-access-context";
+import {
+  canAccessBusinessNavigationItem,
+  isNavigationItemActive,
+} from "@/features/dashboard/data";
 import { cn } from "@/lib/utils";
 import type { Permission } from "@/types/generic";
 
@@ -12,6 +16,7 @@ export type NavigationItem = {
   label: string;
   href: string;
   icon?: LucideIcon;
+  permission?: Permission;
   anyPermission?: Permission[];
   exact?: boolean;
 };
@@ -26,20 +31,12 @@ export function BusinessSubnavigation({
   const pathname = usePathname();
   const { effectivePermissions } = useBusinessAccess();
 
-  const visibleItems = items.filter(
-    (item) =>
-      !item.anyPermission?.length ||
-      item.anyPermission.some((permission) =>
-        effectivePermissions.has(permission),
-      ),
+  const visibleItems = items.filter((item) =>
+    canAccessBusinessNavigationItem(item, effectivePermissions),
   );
 
-  function matchesRoute(pathname: string, href: string) {
-    return pathname === href || pathname.startsWith(`${href}/`);
-  }
-
-  const activeHref = items
-    .filter((item) => matchesRoute(pathname, item.href))
+  const activeHref = visibleItems
+    .filter((item) => isNavigationItemActive(pathname, item))
     .sort((a, b) => b.href.length - a.href.length)[0]?.href;
 
   return (

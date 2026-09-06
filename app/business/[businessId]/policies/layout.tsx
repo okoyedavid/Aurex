@@ -1,5 +1,6 @@
 import { BusinessSubnavigation } from "@/components/BusinessSubnavigation";
 import { PageFrame } from "@/components/page-frame";
+import { getBusinessSubnavigation } from "@/features/dashboard/data";
 
 export default async function PoliciesLayout({
   children,
@@ -10,21 +11,7 @@ export default async function PoliciesLayout({
 }) {
   const { businessId } = await params;
 
-  const policyNavigation = [
-    {
-      label: "Policies",
-      href: `/business/${businessId}/policies`,
-      exact: true,
-    },
-    {
-      label: "Categories",
-      href: `/business/${businessId}/policies/categories`,
-    },
-    {
-      label: "Audit History",
-      href: `/business/${businessId}/policies/audit`,
-    },
-  ];
+  const policyNavigation = getBusinessSubnavigation(businessId, "policies");
 
   return (
     <PageFrame>

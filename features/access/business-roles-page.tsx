@@ -58,8 +58,11 @@ export function BusinessRolesPage({ businessId }: { businessId: string }) {
   const available = Array.from(effectivePermissions);
 
   useEffect(() => {
-    setPage(1);
-    setExpandedRoleId(null);
+    const frame = requestAnimationFrame(() => {
+      setPage(1);
+      setExpandedRoleId(null);
+    });
+    return () => cancelAnimationFrame(frame);
   }, [search]);
 
   const clearFilters = () => {

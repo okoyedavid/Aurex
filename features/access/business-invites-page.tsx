@@ -86,13 +86,14 @@ export function BusinessInvitesPage({ businessId }: { businessId: string }) {
 
   useEffect(() => {
     if (searchParams.get("action") !== "invite-employee" || !canInvite) return;
-    setInviteType("EMPLOYEE");
+    const frame = requestAnimationFrame(() => setInviteType("EMPLOYEE"));
     const params = new URLSearchParams(searchParams.toString());
     params.delete("action");
     const query = params.toString();
     router.replace(query ? `${pathname}?${query}` : pathname, {
       scroll: false,
     });
+    return () => cancelAnimationFrame(frame);
   }, [canInvite, pathname, router, searchParams]);
 
   if (!canInvite && !canApprove) {

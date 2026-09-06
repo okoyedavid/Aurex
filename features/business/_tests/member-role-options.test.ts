@@ -41,6 +41,18 @@ describe("member management permissions", () => {
     expect(permissionLabels["invoices:create"]).toBe(
       "Allow this person to create invoices",
     );
+    expect(permissionLabels["integrations:view"]).toContain(
+      "view business integrations",
+    );
+    expect(permissionLabels["integrations:manage"]).toContain(
+      "connect and disconnect",
+    );
+  });
+
+  it("gives administrators GitHub integration permissions", () => {
+    const admin = assignableSystemRoles.find((role) => role.key === "admin");
+    expect(admin?.permissions).toContain("integrations:view");
+    expect(admin?.permissions).toContain("integrations:manage");
   });
 });
 

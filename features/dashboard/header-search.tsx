@@ -17,7 +17,10 @@ function useHeaderSearchValue(metadata: HeaderSearchMetadata) {
   const [value, setValue] = useState(urlValue);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
-  useEffect(() => setValue(urlValue), [urlValue]);
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => setValue(urlValue));
+    return () => cancelAnimationFrame(frame);
+  }, [urlValue]);
   useEffect(() => () => {
     if (timer.current) clearTimeout(timer.current);
   }, []);

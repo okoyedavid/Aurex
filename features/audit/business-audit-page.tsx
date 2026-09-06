@@ -4,15 +4,6 @@ import { DateInput } from "@/components/ui/date-input";
 
 import { SelectControl } from "@/components/ui/select";
 
-import {
-  Building2,
-  ChevronDown,
-  FileText,
-  LockKeyhole,
-  ShieldCheck,
-  UserRound,
-  Users,
-} from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 
@@ -25,10 +16,10 @@ import { useBusinessAccess } from "@/features/business/business-access-context";
 import { useBusinessMembersQuery } from "@/features/business/business-member-hooks";
 import { Pagination } from "@/features/business/pagination";
 import { useBusinessEmployeesQuery } from "@/features/employees/employee-hooks";
-import { Badge } from "@/features/access/shared";
 import { BusinessApiError } from "@/lib/business-api";
-import type { AuditDomain, AuditItem, AuditPage } from "@/lib/audit-api";
+import type { AuditDomain, AuditPage } from "@/lib/audit-api";
 
+import { AuditActivityTimeline } from "./audit-activity-timeline";
 import {
   useOrganizationAuditQuery,
   usePersonalAuditQuery,
@@ -36,8 +27,6 @@ import {
 import {
   auditFiltersFromSearch,
   auditQueryAccess,
-  displayAuditValue,
-  humanizeAuditField,
   localDateBoundary,
   resolveAuditScope,
   updateAuditSearch,
@@ -513,7 +502,10 @@ function AuditResults({
   return (
     <section className="mt-6" aria-live="polite">
       {data?.items.length ? (
-        <AuditTimeline items={data.items} />
+        <AuditActivityTimeline
+          items={data.items}
+          scope={scope === "organization" ? "organization" : "personal"}
+        />
       ) : (
         <div className="rounded-md border border-dashed border-border bg-card p-10 text-center text-sm text-muted-foreground">
           {scope === "organization"
@@ -584,142 +576,5 @@ function AuditError({
       }
       retry={status !== 401 && status !== 403 ? onRetry : undefined}
     />
-  );
-}
-
-const domainVisuals = {
-  business: { label: "Business", icon: Building2 },
-  member: { label: "Membership", icon: Users },
-  employee: { label: "Employee", icon: UserRound },
-  policy: { label: "Policy", icon: FileText },
-  security: { label: "Security", icon: LockKeyhole },
-};
-
-export function AuditTimeline({ items }: { items: AuditItem[] }) {
-  return (
-    <ol className="space-y-3">
-      {items.map((item) => (
-        <AuditEventCard key={item.id} item={item} />
-      ))}
-    </ol>
-  );
-}
-
-function AuditEventCard({ item }: { item: AuditItem }) {
-  const [open, setOpen] = useState(false);
-  const visual = domainVisuals[item.domain] ?? {
-    label: "Activity",
-    icon: ShieldCheck,
-  };
-  const Icon = visual.icon;
-  const changesId = `audit-${item.id}-changes`;
-  return (
-    <li>
-      <article className="rounded-md border border-border bg-card p-4 shadow-sm sm:p-5">
-        <div className="flex items-start gap-3">
-          <span className="flex size-10 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
-            <Icon className="size-4" />
-          </span>
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-start justify-between gap-2">
-              <div>
-                <p className="font-semibold">{item.summary}</p>
-                <time
-                  className="mt-1 block text-xs text-muted-foreground"
-                  dateTime={item.occurredAt}
-                >
-                  {new Date(item.occurredAt).toLocaleString(undefined, {
-                    dateStyle: "long",
-                    timeStyle: "short",
-                  })}
-                </time>
-              </div>
-              <Badge>{visual.label}</Badge>
-            </div>
-            {item.actor || item.subject ? (
-              <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
-                {item.actor ? (
-                  <div>
-                    <dt className="text-xs text-muted-foreground">Actor</dt>
-                    <dd className="mt-0.5 font-medium">
-                      {item.actor.displayName}
-                    </dd>
-                  </div>
-                ) : null}
-                {item.subject ? (
-                  <div>
-                    <dt className="text-xs text-muted-foreground">Subject</dt>
-                    <dd className="mt-0.5 font-medium">
-                      {item.subject.displayName}
-                    </dd>
-                  </div>
-                ) : null}
-              </dl>
-            ) : null}
-            {item.reason ? (
-              <p className="mt-3 text-sm text-muted-foreground">
-                Reason: {item.reason}
-              </p>
-            ) : null}
-            {item.changes?.length ? (
-              <div className="mt-4 border-t border-border pt-3">
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  aria-expanded={open}
-                  aria-controls={changesId}
-                  onClick={() => setOpen((value) => !value)}
-                >
-                  <ChevronDown
-                    className={`transition ${open ? "rotate-180" : ""}`}
-                  />
-                  {open ? "Hide changes" : "View changes"}
-                </Button>
-                {open ? (
-                  <div id={changesId} className="mt-3 space-y-2">
-                    <div className="hidden grid-cols-[1fr_1fr_1fr] gap-3 px-3 text-xs font-semibold text-muted-foreground sm:grid">
-                      <span>Field</span>
-                      <span>Before</span>
-                      <span>After</span>
-                    </div>
-                    {item.changes.map((change, index) => (
-                      <div
-                        key={`${change.field}-${index}`}
-                        className="grid gap-2 rounded-md border border-border p-3 text-sm sm:grid-cols-[1fr_1fr_1fr]"
-                      >
-                        <div>
-                          <span className="text-xs text-muted-foreground sm:hidden">
-                            Field
-                          </span>
-                          <p className="font-medium">
-                            {humanizeAuditField(change.field)}
-                          </p>
-                        </div>
-                        <div>
-                          <span className="text-xs text-muted-foreground sm:hidden">
-                            Before
-                          </span>
-                          <p className="text-muted-foreground">
-                            {displayAuditValue(change.before)}
-                          </p>
-                        </div>
-                        <div>
-                          <span className="text-xs text-muted-foreground sm:hidden">
-                            After
-                          </span>
-                          <p className="font-medium text-foreground">
-                            {displayAuditValue(change.after)}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : null}
-              </div>
-            ) : null}
-          </div>
-        </div>
-      </article>
-    </li>
   );
 }

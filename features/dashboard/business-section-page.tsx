@@ -3,11 +3,8 @@
 import { ClipboardList, ReceiptText, WalletCards } from "lucide-react";
 import Link from "next/link";
 
-import {
-  BusinessSubnavigation,
-  NavigationItem,
-} from "@/components/BusinessSubnavigation";
-import { useBusinessAccess } from "@/features/business/business-access-context";
+import { BusinessSubnavigation } from "@/components/BusinessSubnavigation";
+import { getBusinessSubnavigation } from "@/features/dashboard/data";
 
 const sectionContent = {
   payments: {
@@ -39,11 +36,8 @@ export function BusinessSectionPage({
   businessId: string;
   section: keyof typeof sectionContent;
 }) {
-  const { business } = useBusinessAccess();
   const content = sectionContent[section];
   const Icon = content.icon;
-  const isFinancialSection =
-    section === "payments" || section === "invoices" || section === "providers";
 
   const sectionBody = (
     <>
@@ -67,41 +61,18 @@ export function BusinessSectionPage({
     </>
   );
 
-  const financialNavigation = [
-    {
-      label: "Payments",
-      href: `/business/${businessId}/payments`,
-      icon: WalletCards,
-      anyPermission: [
-        "payments:view",
-        "payments:view_own",
-        "invoices:view",
-        "providers:view",
-      ],
-    },
-    {
-      label: "Invoices",
-      href: `/business/${businessId}/invoices`,
-      icon: ReceiptText,
-      anyPermission: ["invoices:view"],
-    },
-    {
-      label: "Providers",
-      href: `/business/${businessId}/providers`,
-      icon: ClipboardList,
-      anyPermission: ["providers:view"],
-    },
-  ] satisfies NavigationItem[];
+  const financialNavigation = getBusinessSubnavigation(
+    businessId,
+    "financial",
+  );
 
   return (
     <div className="px-4 py-5 pb-10 sm:px-6 lg:px-8 lg:py-8">
       <div className="mx-auto max-w-[1280px]">
-        {isFinancialSection ? (
-          <BusinessSubnavigation
-            ariaLabel="Financial sections"
-            items={financialNavigation}
-          />
-        ) : null}
+        <BusinessSubnavigation
+          ariaLabel="Financial sections"
+          items={financialNavigation}
+        />
         <h1 className="mt-1 text-3xl font-bold tracking-tight">
           {content.title}
         </h1>
