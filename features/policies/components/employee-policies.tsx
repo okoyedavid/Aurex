@@ -22,7 +22,7 @@ import { formatPolicyDate, policyPermissions } from "../policy-helpers";
 import {
   useEmployeePoliciesQuery,
   useEmployeePolicyHistoryQuery,
-  usePoliciesQuery,
+  useReferencedPoliciesQueries,
   usePolicyCategoriesQuery,
   usePolicyExplanationQuery,
   useReconcileEmployeeMutation,
@@ -63,7 +63,6 @@ export function EmployeePolicies({
     "active",
     access.view,
   );
-  const policies = usePoliciesQuery(businessId, 1, 100, {}, access.view);
   const history = useEmployeePolicyHistoryQuery(
     businessId,
     employeeId,
@@ -72,12 +71,34 @@ export function EmployeePolicies({
     access.audit,
   );
   const reconcile = useReconcileEmployeeMutation(businessId, employeeId);
-  const policyNames = useMemo(
-    () =>
-      new Map(
-        (policies.data?.items ?? []).map((policy) => [policy.id, policy.name]),
-      ),
-    [policies.data],
+  const referencedPolicyIds = useMemo(
+    () => {
+      const ids = new Set(
+        assignments.data?.items.map((assignment) => assignment.policyId) ?? [],
+      );
+      if (explanation.data) {
+        explanation.data.desiredPolicies.forEach((item) => ids.add(item.policyId));
+        explanation.data.suppressedCandidates.forEach((item) => ids.add(item.policyId));
+        explanation.data.evaluatedRules.forEach((item) => ids.add(item.policyId));
+        explanation.data.categoryDecisions.forEach((item) => {
+          item.winnerPolicyIds.forEach((id) => ids.add(id));
+          item.suppressedPolicyIds.forEach((id) => ids.add(id));
+        });
+      }
+      return [...ids];
+    },
+    [assignments.data, explanation.data],
+  );
+  const policyQueries = useReferencedPoliciesQueries(
+    businessId,
+    referencedPolicyIds,
+    access.view,
+  );
+  const policyNames = new Map(
+    policyQueries
+      .map((item) => item.data)
+      .filter((policy): policy is NonNullable<typeof policy> => Boolean(policy))
+      .map((policy) => [policy.id, policy.name] as const),
   );
   if (!access.view)
     return (
@@ -87,19 +108,19 @@ export function EmployeePolicies({
         retry={() => undefined}
       />
     );
-  if (assignments.isLoading || categories.isLoading || policies.isLoading)
+  if (assignments.isLoading || categories.isLoading)
     return <Loading label="Loading employee policies…" />;
-  if (assignments.error || categories.error || policies.error)
+  if (assignments.error || categories.error)
     return (
       <FeedbackState
         title="Unable to load policy data"
         message={businessErrorMessage(
-          assignments.error || categories.error || policies.error,
+          assignments.error || categories.error,
         )}
         retry={() => {
           void assignments.refetch();
           void categories.refetch();
-          void policies.refetch();
+          policyQueries.forEach((query) => void query.refetch());
         }}
       />
     );
@@ -133,7 +154,8 @@ export function EmployeePolicies({
             Reconciliation queued.
           </summary>
           <p className="mt-2 text-xs text-muted-foreground">
-            Job ID: {jobId}. Use Refresh later to load processed assignments.
+            Aurex is processing the request. Use Refresh later to load updated
+            assignments.
           </p>
         </details>
       ) : null}
@@ -197,7 +219,7 @@ export function EmployeePolicies({
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <h3 className="font-semibold">
                     {policyNames.get(assignment.policyId) ??
-                      assignment.policyId}
+                      "Policy name unavailable"}
                   </h3>
                   <div className="flex gap-2">
                     <PolicyBadge
@@ -243,9 +265,14 @@ export function EmployeePolicies({
                   </div>
                 ) : (
                   <p className="mt-3 text-xs text-muted-foreground">
-                    Winning rule {assignment.winningRuleId || "not available"} ·
-                    matched rules{" "}
-                    {assignment.matchedRuleIds.join(", ") || "none"}
+                    Winning rule: {assignment.winningRule?.name ?? "Unnamed rule"}
+                    {assignment.matchedRules?.length ? (
+                      <>
+                        {" · "}Matched rules: {assignment.matchedRules
+                          .map((rule) => rule.name ?? "Unnamed rule")
+                          .join(", ")}
+                      </>
+                    ) : null}
                   </p>
                 )}
               </article>
@@ -276,7 +303,9 @@ export function EmployeePolicies({
           ) : explanation.data ? (
             <PolicyExplanationView
               explanation={explanation.data}
-              policies={policies.data?.items ?? []}
+              policies={policyQueries
+                .map((query) => query.data)
+                .filter((policy): policy is NonNullable<typeof policy> => Boolean(policy))}
             />
           ) : null}
         </section>
@@ -330,7 +359,7 @@ export function EmployeePolicies({
           businessId={businessId}
           employeeId={employeeId}
           policyId={ending.policyId}
-          policyName={policyNames.get(ending.policyId) ?? ending.policyId}
+          policyName={policyNames.get(ending.policyId) ?? "Policy name unavailable"}
           open
           onOpenChange={(open) => !open && setEnding(undefined)}
         />

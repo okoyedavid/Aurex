@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import type { AuditItem } from "@/lib/audit-api";
 import { AuditActivityTimeline } from "../audit-activity-timeline";
+import { auditFiltersFromSearch, personalAuditClearedFilters, updateAuditSearch } from "../audit-utils";
 
 const event = (values: Partial<AuditItem> = {}): AuditItem => ({
   id: "audit-1",
@@ -18,6 +19,20 @@ const event = (values: Partial<AuditItem> = {}): AuditItem => ({
 });
 
 describe("audit timeline", () => {
+  it("clears both API and visible date filters when entering personal activity", () => {
+    const current = new URLSearchParams(
+      "scope=organization&from=2026-01-01T00:00:00.000Z&to=2026-02-01T00:00:00.000Z&fromDate=2026-01-01&toDate=2026-02-01",
+    );
+    const next = updateAuditSearch(
+      current,
+      { ...personalAuditClearedFilters, scope: "me" },
+    );
+    expect(auditFiltersFromSearch(next).from).toBeUndefined();
+    expect(auditFiltersFromSearch(next).to).toBeUndefined();
+    expect(next.get("fromDate")).toBeNull();
+    expect(next.get("toDate")).toBeNull();
+  });
+
   it("renders a complete business event title with semantic time", () => {
     const markup = renderToStaticMarkup(
       <AuditActivityTimeline items={[event()]} scope="organization" />,

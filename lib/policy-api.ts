@@ -70,6 +70,7 @@ export interface PolicyRuleCondition {
   field: PolicyRuleField;
   operator: PolicyRuleOperator;
   value: string | number | string[];
+  displayValue?: string | string[];
 }
 
 export interface PolicyRule {
@@ -99,6 +100,8 @@ export interface EmployeePolicyAssignment {
   source: PolicyAssignmentSource;
   winningRuleId?: string | null;
   matchedRuleIds: string[];
+  winningRule?: { id: string; name: string | null } | null;
+  matchedRules?: Array<{ id: string; name: string | null }>;
   status: PolicyAssignmentStatus;
   effectiveFrom: string;
   effectiveTo?: string | null;
@@ -111,6 +114,8 @@ export interface EmployeePolicyAssignment {
 export interface ConditionEvaluation {
   condition: PolicyRuleCondition;
   actualValue: string | string[] | number | null;
+  expectedDisplayValue?: string | string[] | number | null;
+  actualDisplayValue?: string | string[] | number | null;
   matched: boolean;
 }
 export interface ResolvedPolicy {
@@ -120,7 +125,9 @@ export interface ResolvedPolicy {
   source: PolicyAssignmentSource;
   priority: number | null;
   winningRuleId: string | null;
+  winningRuleName?: string | null;
   matchedRuleIds: string[];
+  matchedRuleNames?: string[];
   conditionEvaluations: Record<string, ConditionEvaluation[]>;
   manualAssignmentId: string | null;
 }
@@ -129,6 +136,7 @@ export interface SuppressedCandidate extends ResolvedPolicy {
 }
 export interface EvaluatedRule {
   ruleId: string;
+  ruleName?: string | null;
   policyId: string;
   priority: number;
   matched: boolean;

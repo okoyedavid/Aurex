@@ -28,6 +28,7 @@ import {
   auditFiltersFromSearch,
   auditQueryAccess,
   localDateBoundary,
+  personalAuditClearedFilters,
   resolveAuditScope,
   updateAuditSearch,
   visibleAuditDomains,
@@ -87,18 +88,7 @@ export function BusinessAuditPage({ businessId }: { businessId: string }) {
   const selectScope = (nextScope: "organization" | "me") => {
     const clear =
       nextScope === "me"
-        ? Object.fromEntries(
-            [
-              "domain",
-              "action",
-              "actorId",
-              "actorName",
-              "employeeId",
-              "employeeName",
-              "from",
-              "to",
-            ].map((key) => [key, undefined]),
-          )
+        ? personalAuditClearedFilters
         : {};
     updateUrl({ ...clear, scope: nextScope }, true);
   };

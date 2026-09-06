@@ -7,14 +7,15 @@ import { ArrowRight, CodeXml } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { LiveDemo } from "./live-demo";
-import { WarpArchitecture, WarpNarrative } from "./warp-narrative";
+import { WarpArchitecture, WarpEnforcementProof, WarpNarrative } from "./warp-narrative";
 import { useScrollReveal } from "./use-scroll-reveal";
 
 const links = [
   ["Problem", "#problem"],
   ["Resolution", "#resolution"],
+  ["Reconciliation", "#reconciliation"],
   ["Live demo", "#demo"],
-  ["Audit", "#audit"],
+  ["Enforcement", "#enforcement"],
   ["Architecture", "#architecture"],
 ] as const;
 
@@ -155,6 +156,7 @@ export function WarpDemoPage() {
 
       <WarpNarrative />
       <LiveDemo />
+      <WarpEnforcementProof />
       <WarpArchitecture />
 
       <section
@@ -170,8 +172,8 @@ export function WarpDemoPage() {
               Inspect the product behind the resolver.
             </h2>
             <p className="mt-5 max-w-xl leading-7 text-inverse-foreground/65">
-              The demo is public and read-only. The authenticated workspace
-              exposes the broader employee, role, and policy-management flows.
+              The public sandbox is intentionally constrained. The authenticated
+              workspace exposes the broader employee, role, and policy-management flows.
             </p>
           </div>
           <Button
@@ -190,7 +192,7 @@ export function WarpDemoPage() {
         <div className="mx-auto flex max-w-7xl flex-col justify-between gap-3 text-xs text-muted-foreground sm:flex-row">
           <span>Built as an explainable systems case study for Aurex.</span>
           <span className="font-mono">
-            WARP / v1 / read-only public surface
+            WARP / v1 / controlled public sandbox
           </span>
         </div>
       </footer>

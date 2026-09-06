@@ -1,6 +1,7 @@
 "use client";
 
 import { PageFrame } from "@/components/page-frame";
+import { usePathname } from "next/navigation";
 import { useBusinessAccess } from "@/features/business/business-access-context";
 import { GitHubConnectionPanel } from "@/features/integrations/github-connection-panel";
 import { BusinessSettingsForm } from "./business-settings-form";
@@ -14,6 +15,27 @@ export function BusinessSettingsPageContent({
   githubCallback?: { result?: string; reason?: string };
 }) {
   const { business } = useBusinessAccess();
+  const pathname = usePathname();
+  const integrationsOnly = pathname.endsWith("/settings/integrations");
+
+  if (integrationsOnly) {
+    return (
+      <PageFrame>
+        <h1 className="mt-1 text-3xl font-bold tracking-tight">
+          GitHub integration
+        </h1>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
+          Connect GitHub for Aurex-managed application access.
+        </p>
+        <div className="mt-7">
+          <GitHubConnectionPanel
+            callbackResult={githubCallback?.result}
+            callbackReason={githubCallback?.reason}
+          />
+        </div>
+      </PageFrame>
+    );
+  }
 
   return (
     <PageFrame>

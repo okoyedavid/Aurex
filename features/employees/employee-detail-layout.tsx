@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { FeedbackState } from "@/components/ui/feedback-state";
 import { Loading } from "@/components/ui/loading";
 import { useBusinessAccess } from "@/features/business/business-access-context";
+import { BusinessPageHeader } from "@/features/business/business-page-header";
 import { businessErrorMessage } from "@/lib/business-api";
 import type { BusinessEmployeeDetail } from "@/lib/employees-api";
 import { cn } from "@/lib/utils";
@@ -92,6 +93,7 @@ export function EmployeeDetailLayout({
         businessId={businessId}
         employee={employee}
         active={active}
+        canViewPolicies={access.effectivePermissions.has("policies:view")}
         returnTo={returnTo}
         action={
           permissions.update ? (
@@ -120,6 +122,7 @@ export function EmployeeProfileShell({
   businessId,
   employee,
   active,
+  canViewPolicies = true,
   returnTo,
   action,
   children,
@@ -127,6 +130,7 @@ export function EmployeeProfileShell({
   businessId: string;
   employee: BusinessEmployeeDetail;
   active: "overview" | "policies";
+  canViewPolicies?: boolean;
   returnTo?: string;
   action?: React.ReactNode;
   children: React.ReactNode;
@@ -138,21 +142,28 @@ export function EmployeeProfileShell({
 
   return (
     <>
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <nav aria-label="Breadcrumb" className="text-sm text-muted-foreground">
-          <Link
-            href={returnTo || `/business/${businessId}/employees`}
-            className="transition-colors hover:text-foreground"
-          >
-            Employees
-          </Link>
-          <span className="px-2">/</span>
-          <span className="text-foreground">{employee.fullName}</span>
-        </nav>
-        {action}
+      <nav aria-label="Breadcrumb" className="text-sm text-muted-foreground">
+        <Link
+          href={returnTo || `/business/${businessId}/employees`}
+          className="transition-colors hover:text-foreground"
+        >
+          Employees
+        </Link>
+        <span className="px-2">/</span>
+        <span className="text-foreground">{employee.fullName}</span>
+      </nav>
+
+      <div className="mt-4">
+        <BusinessPageHeader
+          eyebrow="Employee profile"
+          title={employee.fullName}
+          description={`${employee.jobTitle || "No job title"} · ${formatLabel(employee.status)}`}
+          actions={action}
+        />
       </div>
 
-      <div className="mt-8 grid gap-10 md:grid-cols-[220px_minmax(0,1fr)] md:gap-8 xl:grid-cols-[260px_minmax(0,1fr)] xl:gap-12">
+      {/* The profile rail stays as persistent context while the main content follows the card convention. */}
+      <div className="mt-7 grid gap-10 md:grid-cols-[220px_minmax(0,1fr)] md:gap-8 xl:grid-cols-[260px_minmax(0,1fr)] xl:gap-12">
         <EmployeeProfileRail employee={employee} />
         <main className="min-w-0">
           <nav
@@ -165,12 +176,14 @@ export function EmployeeProfileShell({
             >
               Overview
             </EmployeeTab>
-            <EmployeeTab
-              href={`${base}/policies${returnSuffix}`}
-              active={active === "policies"}
-            >
-              Policies
-            </EmployeeTab>
+            {canViewPolicies ? (
+              <EmployeeTab
+                href={`${base}/policies${returnSuffix}`}
+                active={active === "policies"}
+              >
+                Policies
+              </EmployeeTab>
+            ) : null}
           </nav>
           {children}
         </main>
@@ -206,14 +219,8 @@ function EmployeeProfileRail({ employee }: { employee: BusinessEmployeeDetail })
         </div>
 
         <div className="mt-5">
-          <h1 className="text-2xl font-bold tracking-tight">
-            {employee.fullName}
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {employee.jobTitle || "No job title"}
-          </p>
-          <div className="mt-3 inline-flex items-center gap-2 text-xs font-medium">
-            <span className="size-1.5 rounded-full bg-primary" />
+          <div className="inline-flex items-center gap-2 text-xs font-medium">
+            <span className="size-1.5 rounded-full bg-muted-foreground" />
             <span>{formatLabel(employee.status)}</span>
           </div>
         </div>

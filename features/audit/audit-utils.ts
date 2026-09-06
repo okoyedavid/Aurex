@@ -40,6 +40,19 @@ export function updateAuditSearch(
   return next;
 }
 
+export const personalAuditClearedFilters = {
+  domain: undefined,
+  action: undefined,
+  actorId: undefined,
+  actorName: undefined,
+  employeeId: undefined,
+  employeeName: undefined,
+  from: undefined,
+  to: undefined,
+  fromDate: undefined,
+  toDate: undefined,
+} satisfies Record<string, undefined>;
+
 export function auditFiltersFromSearch(search: URLSearchParams): OrganizationAuditFilters {
   return {
     page: positive(search.get("page"), 1, Number.MAX_SAFE_INTEGER),

@@ -14,13 +14,14 @@ export interface DemoOverview {
 }
 
 export interface DemoEmployee {
-  id: string;
+  alias?: "maya";
+  id?: string;
   name: string;
-  jobTitle: string;
+  jobTitle: string | null;
   department: string;
-  employeeType: string;
-  state: string;
-  employmentStartDate: string;
+  employeeType: string | null;
+  state: string | null;
+  employmentStartDate: string | null;
   tenureMonths: number;
   groups: string[];
   resolvedPolicyCount?: number;
@@ -115,4 +116,46 @@ export interface AuditEvent {
   actor: { type: string; displayName: string };
   summary: string;
   reason?: string;
+}
+
+export type WarpDemoMutation =
+  | { employee: "maya"; field: "department"; value: "engineering" | "finance" }
+  | { employee: "maya"; field: "employeeType"; value: "full_time" | "contractor" }
+  | { employee: "maya"; field: "state"; value: "california" | "new_york" }
+  | { employee: "maya"; field: "remoteGroup"; value: "member" | "not_member" };
+
+export type RunStatus = "queued" | "running" | "completed" | "completed_with_warnings" | "failed";
+export interface ReconciliationRun {
+  id: string;
+  status: RunStatus;
+  createdAt: string;
+  startedAt: string | null;
+  completedAt: string | null;
+  durationMs: number | null;
+  updatedAt: string;
+  pollAfterMs: number;
+  changedResources: Array<"employee" | "assignments" | "audit" | "externalAccess">;
+  events: Array<{
+    id: string;
+    stage: "employee_update" | "queued" | "policy_resolution" | "assignment_reconciliation" | "external_access" | "audit" | "complete";
+    status: "pending" | "running" | "success" | "warning" | "failed";
+    title: string;
+    description: string;
+    occurredAt: string;
+  }>;
+}
+
+export interface WarpDemoControls {
+  department: Array<"engineering" | "finance">;
+  employeeType: Array<"full_time" | "contractor">;
+  state: Array<"california" | "new_york">;
+  remoteGroup: Array<"member" | "not_member">;
+}
+
+export interface WarpDemoSession {
+  sessionId: string;
+  expiresAt: string;
+  employee: DemoEmployee;
+  initialization: { runId: string; status: "queued" };
+  controls: WarpDemoControls;
 }

@@ -53,7 +53,7 @@ export function GitHubConnectionPanel({
     } else {
       toast.error(githubCallbackMessage(callbackReason ?? null));
     }
-    router.replace(`/business/${business.id}/settings#integrations`);
+    router.replace(`/business/${business.id}/settings/integrations`);
   }, [business.id, callbackReason, callbackResult, connection, router]);
 
   const connect = () => {

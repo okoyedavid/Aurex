@@ -2,6 +2,7 @@
 
 import {
   keepPreviousData,
+  useQueries,
   useMutation,
   useQuery,
   useQueryClient,
@@ -119,6 +120,21 @@ export function usePolicyQuery(
     queryKey: policyKeys.policy(businessId, policyId),
     queryFn: () => service.getPolicy(businessId, policyId),
     enabled: Boolean(businessId && policyId) && enabled,
+  });
+}
+
+export function useReferencedPoliciesQueries(
+  businessId: string,
+  policyIds: string[],
+  enabled = true,
+) {
+  const uniqueIds = [...new Set(policyIds.filter(Boolean))];
+  return useQueries({
+    queries: uniqueIds.map((policyId) => ({
+      queryKey: policyKeys.policy(businessId, policyId),
+      queryFn: () => service.getPolicy(businessId, policyId),
+      enabled: Boolean(businessId) && enabled,
+    })),
   });
 }
 export function usePolicyRulesQuery(
