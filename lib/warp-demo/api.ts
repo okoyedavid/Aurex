@@ -9,6 +9,9 @@ import type {
   PolicyDetail,
   PolicySummary,
   ResolvedPolicy,
+  ReconciliationRun,
+  WarpDemoMutation,
+  WarpDemoSession,
 } from "./types";
 
 const configuredApiUrl =
@@ -42,6 +45,32 @@ async function get<T>(path: string, params?: object) {
   }
 }
 
+export class WarpDemoError extends Error {
+  constructor(public status: number | undefined, message: string) {
+    super(message);
+    this.name = "WarpDemoError";
+  }
+}
+
+async function request<T>(method: "post" | "get", path: string, body?: unknown) {
+  try {
+    const response = await warpDemoClient.request<ApiEnvelope<T>>({ method, url: path, data: body });
+    return response.data.data;
+  } catch (error) {
+    const apiError = error as AxiosError<{ message?: string }>;
+    const status = apiError.response?.status;
+    const messages: Record<number, string> = {
+      400: "That change is not supported by the live demo.",
+      409: "A reconciliation is already in progress.",
+      410: "Your demo session expired.",
+      423: "Live demo currently in use. Another visitor is changing the demo scenario. Try again shortly.",
+      429: "Demo limit reached. This temporary sandbox has reached its mutation limit.",
+      503: "Live reconciliation is temporarily unavailable.",
+    };
+    throw new WarpDemoError(status, messages[status ?? 0] ?? "The live Warp demo is unavailable. Please try again.");
+  }
+}
+
 const root = "/api/demo/warp";
 
 export interface WarpPolicyFilters {
@@ -57,6 +86,10 @@ export interface WarpAuditFilters {
 }
 
 export const warpDemoApi = {
+  createSession: () => request<WarpDemoSession>("post", `${root}/session`, {}),
+  mutate: (sessionId: string, mutation: WarpDemoMutation) => request<{ runId: string; status: "queued" }>("post", `${root}/session/${encodeURIComponent(sessionId)}/mutations`, mutation),
+  reset: (sessionId: string) => request<{ runId: string; status: "queued"; employee: DemoEmployee }>("post", `${root}/session/${encodeURIComponent(sessionId)}/reset`, {}),
+  reconciliationRun: (sessionId: string, runId: string) => request<ReconciliationRun>("get", `${root}/session/${encodeURIComponent(sessionId)}/reconciliation/${encodeURIComponent(runId)}`),
   overview: () => get<DemoOverview>(`${root}/overview`),
   employees: () => get<{ employees: DemoEmployee[] }>(`${root}/employees`),
   employee: (employeeId: string) =>

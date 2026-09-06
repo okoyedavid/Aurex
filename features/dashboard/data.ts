@@ -153,7 +153,7 @@ function getBusinessRouteItems(
       name: "Policies",
       icon: ScrollText,
       href: `${base}/policies`,
-      anyPermission: ["policies:view", "policies:view_audit"],
+      permission: "policies:view",
       sidebar: true,
       section: "policies",
     },
@@ -169,6 +169,7 @@ function getBusinessRouteItems(
       icon: Activity,
       href: `${base}/policies/audit`,
       permission: "policies:view_audit",
+      sidebar: true,
       section: "policies",
       sectionLabel: "Audit History",
     },
@@ -190,7 +191,7 @@ function getBusinessRouteItems(
       name: "Invites",
       icon: UserPlus,
       href: `${base}/invites`,
-      permission: "members:invite",
+      anyPermission: ["members:invite", "roles:assign"],
       sidebar: true,
     },
     {
@@ -318,6 +319,122 @@ export function getBusinessNavigationItemForPath(
   return getBusinessRouteItems(businessId)
     .filter((item) => isDirectRouteMatch(pathname, item))
     .sort((a, b) => b.href.length - a.href.length)[0];
+}
+
+type BusinessRouteAuthorization = Pick<
+  BusinessNavigationItem,
+  "permission" | "anyPermission"
+>;
+
+/**
+ * Route authorization is intentionally separate from sidebar metadata. A
+ * navigation group can be visible for several reasons while a child route
+ * still needs its own capability.
+ */
+export function getBusinessRouteAuthorization(
+  businessId: string,
+  pathname: string,
+): BusinessRouteAuthorization | null {
+  const base = `/business/${businessId}`;
+  const rules: Array<{
+    match: (value: string) => boolean;
+    authorization: BusinessRouteAuthorization;
+  }> = [
+    { match: (value) => value === base, authorization: {} },
+    {
+      match: (value) => value === `${base}/invites`,
+      authorization: { anyPermission: ["members:invite", "roles:assign"] },
+    },
+    {
+      match: (value) => value === `${base}/settings/integrations`,
+      authorization: {
+        anyPermission: ["integrations:view", "integrations:manage"],
+      },
+    },
+    {
+      match: (value) => value === `${base}/settings`,
+      authorization: { permission: "business:update" },
+    },
+    {
+      match: (value) => value === `${base}/policies/audit`,
+      authorization: { permission: "policies:view_audit" },
+    },
+    {
+      match: (value) => value === `${base}/policies`,
+      authorization: { permission: "policies:view" },
+    },
+    {
+      match: (value) => value === `${base}/policies/categories` ||
+        new RegExp(`^${escapeRegExp(base)}/policies/categories/[^/]+$`).test(value),
+      authorization: { permission: "policies:view" },
+    },
+    {
+      match: (value) => new RegExp(`^${escapeRegExp(base)}/policies/[^/]+$`).test(value),
+      authorization: { permission: "policies:view" },
+    },
+    {
+      match: (value) => new RegExp(`^${escapeRegExp(base)}/employees/[^/]+/policies$`).test(value),
+      authorization: { permission: "policies:view" },
+    },
+    {
+      match: (value) => value === `${base}/employees/types` || value === `${base}/employees/groups`,
+      authorization: { permission: "employees:view" },
+    },
+    {
+      match: (value) => new RegExp(
+        `^${escapeRegExp(base)}/employees/employee-lists/[^/]+/employees/[^/]+/policies$`,
+      ).test(value),
+      authorization: { permission: "policies:view" },
+    },
+    {
+      match: (value) => value === `${base}/employees/employee-lists` ||
+        new RegExp(`^${escapeRegExp(base)}/employees/employee-lists/[^/]+$`).test(value),
+      authorization: { permission: "employee_lists:view" },
+    },
+    {
+      match: (value) => value === `${base}/employees` ||
+        new RegExp(`^${escapeRegExp(base)}/employees/[^/]+$`).test(value),
+      authorization: { permission: "employees:view" },
+    },
+    {
+      match: (value) => value === `${base}/members` ||
+        new RegExp(`^${escapeRegExp(base)}/members/[^/]+$`).test(value),
+      authorization: { permission: "members:view" },
+    },
+    {
+      match: (value) => value === `${base}/roles`,
+      authorization: { permission: "roles:view" },
+    },
+    {
+      match: (value) => value === `${base}/audit-logs`,
+      authorization: {},
+    },
+    {
+      match: (value) => value === `${base}/payments`,
+      authorization: {
+        anyPermission: [
+          "payments:view",
+          "payments:view_own",
+          "invoices:view",
+          "providers:view",
+        ],
+      },
+    },
+    {
+      match: (value) => value === `${base}/invoices`,
+      authorization: { permission: "invoices:view" },
+    },
+    {
+      match: (value) => value === `${base}/providers`,
+      authorization: { permission: "providers:view" },
+    },
+  ];
+
+  return rules.find((rule) => rule.match(pathname))?.authorization ?? null;
+}
+
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 function isDirectRouteMatch(

@@ -275,11 +275,19 @@ export function PolicyDetailPage({
                       <span className="font-medium">
                         {fieldLabels[condition.field]}
                       </span>{" "}
-                      {operatorLabels[condition.operator].toLowerCase()}{" "}
+                      {(operatorLabels[condition.operator]?.toLowerCase() ?? "matches")}{" "}
                       <code className="rounded bg-background px-1.5 py-0.5 text-xs">
-                        {Array.isArray(condition.value)
-                          ? condition.value.join(", ")
-                          : condition.value}
+                        {condition.displayValue
+                          ? Array.isArray(condition.displayValue)
+                            ? condition.displayValue.join(", ")
+                            : condition.displayValue
+                          : condition.field === "department" ||
+                              condition.field === "employeeType" ||
+                              condition.field === "group"
+                            ? "Reference unavailable"
+                            : Array.isArray(condition.value)
+                              ? condition.value.join(", ")
+                              : condition.value}
                       </code>
                     </div>
                   ))}

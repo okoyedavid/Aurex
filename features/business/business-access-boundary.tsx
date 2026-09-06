@@ -14,7 +14,7 @@ import {
   canAccessBusinessNavigationItem,
   getBusinessNavigation,
   getBusinessHeaderCommands,
-  getBusinessNavigationItemForPath,
+  getBusinessRouteAuthorization,
   getEffectivePermissions,
 } from "@/features/dashboard/data";
 import { BusinessApiError, businessErrorMessage } from "@/lib/business-api";
@@ -123,10 +123,10 @@ export function BusinessAccessBoundary({
     effectivePermissions,
     navigation,
   );
-  const routeItem = getBusinessNavigationItemForPath(businessId, pathname);
+  const routeAuthorization = getBusinessRouteAuthorization(businessId, pathname);
   const routeAllowed =
-    !routeItem ||
-    canAccessBusinessNavigationItem(routeItem, effectivePermissions);
+    routeAuthorization !== null &&
+    canAccessBusinessNavigationItem(routeAuthorization, effectivePermissions);
   const accessValue = {
     ...query.data,
     membership: query.data.membership,

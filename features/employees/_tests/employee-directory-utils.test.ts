@@ -9,6 +9,11 @@ describe("employee directory contracts", () => {
     expect(filters).toMatchObject({ page: 2, search: "maya", status: "active", employeeListId: "list-1" });
   });
 
+  it("preserves spaces in a state filter until the URL value is normalized", () => {
+    expect(employeeDirectoryFilters(new URLSearchParams("state=New%20York")).state).toBe("New York");
+    expect(employeeDirectoryFilters(new URLSearchParams("state=")).state).toBeUndefined();
+  });
+
   it("builds canonical employee and policy links while preserving return context", () => {
     expect(employeeDetailHref("business-1", "employee-1", "/business/business-1/employees?page=2")).toBe("/business/business-1/employees/employee-1?returnTo=%2Fbusiness%2Fbusiness-1%2Femployees%3Fpage%3D2");
     expect(canonicalEmployeePoliciesHref("business-1", "employee-1")).toBe("/business/business-1/employees/employee-1/policies");

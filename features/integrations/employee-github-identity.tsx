@@ -65,6 +65,17 @@ export function EmployeeGitHubIdentity({
   const [confirmRemove, setConfirmRemove] = useState(false);
   const [username, setUsername] = useState("");
   const [validation, setValidation] = useState("");
+  const canInspectAccess = effectivePermissions.has("policies:view");
+  const managedAccessActive = Boolean(
+    access.data?.items.some(
+      (item) =>
+        item.managedByAurex &&
+        item.desiredState === "granted" &&
+        item.actualState !== "revoked",
+    ),
+  );
+  const removalBlocked =
+    !canInspectAccess || access.isLoading || Boolean(access.error) || managedAccessActive;
 
   const submit = (event: FormEvent) => {
     event.preventDefault();
@@ -142,6 +153,12 @@ export function EmployeeGitHubIdentity({
               <Button
                 variant="destructive"
                 onClick={() => setConfirmRemove(true)}
+                disabled={removalBlocked}
+                title={
+                  removalBlocked
+                    ? "Revoke Aurex-managed GitHub access before removing this identity."
+                    : undefined
+                }
               >
                 <Trash2 /> Remove
               </Button>
@@ -169,6 +186,11 @@ export function EmployeeGitHubIdentity({
           }
         />
       )}
+      {identity.data && removalBlocked ? (
+        <p className="mt-3 text-sm text-muted-foreground">
+          Revoke Aurex-managed GitHub access before removing this identity.
+        </p>
+      ) : null}
 
       <Dialog
         open={editing}
@@ -234,7 +256,7 @@ export function EmployeeGitHubIdentity({
           removeIdentity.mutate(undefined, {
             onSuccess: () => {
               setConfirmRemove(false);
-              toast.success("GitHub identity removed.");
+              toast.success("GitHub identity removal confirmed by Aurex.");
             },
             onError: (error) => toast.error(businessErrorMessage(error)),
           })

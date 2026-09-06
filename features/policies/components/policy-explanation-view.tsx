@@ -15,6 +15,22 @@ function valueLabel(value: string | string[] | number | null) {
   return Array.isArray(value) ? value.join(", ") : String(value);
 }
 
+function displayValue(
+  field: string,
+  fallback: string | string[] | number | null,
+  display: string | string[] | number | null | undefined,
+) {
+  if (
+    display === undefined &&
+    ["department", "employeeType", "group"].includes(field)
+  ) {
+    return Array.isArray(fallback)
+      ? fallback.map(() => "Reference unavailable").join(", ")
+      : "Reference unavailable";
+  }
+  return valueLabel(display ?? fallback);
+}
+
 function ConditionRows({ evaluations }: { evaluations: ConditionEvaluation[] }) {
   return (
     <div className="mt-3 space-y-1">
@@ -28,8 +44,16 @@ function ConditionRows({ evaluations }: { evaluations: ConditionEvaluation[] }) 
           </span>{" "}
           · {fieldLabels[evaluation.condition.field]}{" "}
           {operatorLabels[evaluation.condition.operator].toLowerCase()} {" "}
-          {valueLabel(evaluation.condition.value)}; actual:{" "}
-          {valueLabel(evaluation.actualValue)}
+          {displayValue(
+            evaluation.condition.field,
+            evaluation.condition.value,
+            evaluation.expectedDisplayValue,
+          )}; actual:{" "}
+          {displayValue(
+            evaluation.condition.field,
+            evaluation.actualValue,
+            evaluation.actualDisplayValue,
+          )}
         </div>
       ))}
     </div>
@@ -44,7 +68,7 @@ export function PolicyExplanationView({
   policies: Policy[];
 }) {
   const policyName = (id: string) =>
-    policies.find((policy) => policy.id === id)?.name ?? id;
+    policies.find((policy) => policy.id === id)?.name ?? "Policy name unavailable";
 
   return (
     <div className="space-y-5">
@@ -77,13 +101,14 @@ export function PolicyExplanationView({
                 </div>
                 <div className="mt-3 text-xs text-muted-foreground">
                   <p>Priority: {resolved.priority ?? "Manual"}</p>
-                  <p>Winning rule: {resolved.winningRuleId ?? "None"}</p>
-                  <p>Matched rules: {resolved.matchedRuleIds.join(", ") || "None"}</p>
+                  <p>
+                    Winning rule: {resolved.winningRuleName ?? "Unnamed rule"}
+                  </p>
                 </div>
                 {Object.entries(resolved.conditionEvaluations).map(
                   ([ruleId, evaluations]) => (
                     <div key={ruleId} className="mt-3">
-                      <p className="text-xs font-semibold">Rule {ruleId}</p>
+                      <p className="text-xs font-semibold">Rule evaluation</p>
                       <ConditionRows evaluations={evaluations} />
                     </div>
                   ),
@@ -110,7 +135,7 @@ export function PolicyExplanationView({
                   <div>
                     <p className="font-semibold">{policyName(rule.policyId)}</p>
                     <p className="text-xs text-muted-foreground">
-                      Rule {rule.ruleId} · priority {rule.priority}
+                      {rule.ruleName ?? "Unnamed rule"} · Priority {rule.priority}
                     </p>
                   </div>
                   <PolicyBadge tone={rule.matched ? "success" : "danger"}>
@@ -142,8 +167,7 @@ export function PolicyExplanationView({
                 <div>
                   <p className="font-medium">{policyName(candidate.policyId)}</p>
                   <p className="text-xs text-muted-foreground">
-                    Priority {candidate.priority ?? "Manual"} · matched rules{" "}
-                    {candidate.matchedRuleIds.join(", ") || "none"}
+                  Priority {candidate.priority ?? "Manual"} · evaluated against employee attributes
                   </p>
                 </div>
                 <PolicyBadge tone="warning">

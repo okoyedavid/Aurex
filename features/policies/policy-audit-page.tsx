@@ -53,10 +53,10 @@ export function PolicyAuditPage({ businessId }: { businessId: string }) {
   return (
     <>
       <Link
-        href={`/business/${businessId}/policies`}
+        href={`/business/${businessId}`}
         className="text-sm font-medium text-primary"
       >
-        ← Policies
+        ← Business overview
       </Link>
       <div className="mt-4">
         <h1 className="text-3xl font-bold">Policy audit</h1>

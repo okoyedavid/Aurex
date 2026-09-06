@@ -14,7 +14,7 @@ export function EmployeeDetailPage() {
   const { businessId, employee } = useEmployeeDetail();
 
   return (
-    <div className="divide-y divide-border">
+    <div className="space-y-6">
       <ContentSection
         icon={<CalendarDays />}
         title="Employment"
@@ -165,8 +165,8 @@ function ContentSection({
   children: React.ReactNode;
 }) {
   return (
-    <section className="py-8 first:pt-8">
-      <div className="mb-7">
+    <section className="rounded-md border border-border bg-card p-6 shadow-sm sm:p-7">
+      <div className="mb-6">
         <div className="flex items-center gap-2">
           <span className="text-primary [&>svg]:size-4">{icon}</span>
           <h2 className="text-base font-semibold">{title}</h2>

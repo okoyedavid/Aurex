@@ -84,7 +84,7 @@ export function PolicyOverviewPage({ businessId }: { businessId: string }) {
         </div>
       </div>
 
-      {jobId ? <ReconciliationQueued jobId={jobId} /> : null}
+      {jobId ? <ReconciliationQueued /> : null}
 
       <PolicyCollection businessId={businessId} canView={access.view} />
 
@@ -118,15 +118,15 @@ export function PolicyOverviewPage({ businessId }: { businessId: string }) {
   );
 }
 
-function ReconciliationQueued({ jobId }: { jobId: string }) {
+function ReconciliationQueued() {
   return (
     <details className="mt-4 rounded-md border border-primary/20 bg-primary/5 p-4">
       <summary className="cursor-pointer font-medium">
         Reconciliation queued.
       </summary>
       <p className="mt-2 text-xs text-muted-foreground">
-        Job ID: {jobId}. Refresh employee assignments after processing has had
-        time to complete.
+        Aurex is processing the request. Refresh employee assignments after
+        processing has had time to complete.
       </p>
     </details>
   );

@@ -1,20 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo } from "react";
-import { useQueryClient } from "@tanstack/react-query";
 
 import { GitHubIcon } from "@/components/icons/github-icon";
 import { FeedbackState } from "@/components/ui/feedback-state";
 import { Loading } from "@/components/ui/loading";
 import { useBusinessAccess } from "@/features/business/business-access-context";
 import { PolicyBadge } from "@/features/policies/components/policy-ui";
-import { policyKeys } from "@/features/policies/policy-hooks";
 import { businessErrorMessage } from "@/lib/business-api";
 import type { ExternalAccessActualState } from "@/lib/github-integration-api";
-import type { Policy, PolicyPage } from "@/lib/policy-api";
 
-import { useEmployeeExternalAccessQuery } from "./github-hooks";
+import {
+  useEmployeeExternalAccessQuery,
+} from "./github-hooks";
+import { useReferencedPoliciesQueries } from "@/features/policies/policy-hooks";
 
 const stateCopy: Record<
   ExternalAccessActualState,
@@ -90,19 +89,16 @@ export function EmployeeExternalAccess({
   const { effectivePermissions } = useBusinessAccess();
   const canView = effectivePermissions.has("policies:view");
   const query = useEmployeeExternalAccessQuery(businessId, employeeId, canView);
-  const queryClient = useQueryClient();
-  const policyNames = useMemo(
-    () => {
-      const cachedPages = queryClient.getQueriesData<PolicyPage<Policy>>({
-        queryKey: policyKeys.policiesRoot(businessId),
-      });
-      return new Map(
-        cachedPages.flatMap(([, page]) =>
-          (page?.items ?? []).map((policy) => [policy.id, policy.name] as const),
-        ),
-      );
-    },
-    [businessId, queryClient],
+  const policyQueries = useReferencedPoliciesQueries(
+    businessId,
+    query.data?.items.map((grant) => grant.policyId) ?? [],
+    canView,
+  );
+  const policyNames = new Map(
+    policyQueries
+      .map((item) => item.data)
+      .filter((policy): policy is NonNullable<typeof policy> => Boolean(policy))
+      .map((policy) => [policy.id, policy.name] as const),
   );
 
   if (!canView)
@@ -161,15 +157,15 @@ export function EmployeeExternalAccess({
                   <PolicyBadge tone={state.tone}>{state.label}</PolicyBadge>
                 </div>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  {policyNames.get(grant.policyId) ?? "Policy"} ·{" "}
+                  {policyNames.get(grant.policyId) ?? "Policy name unavailable"} ·{" "}
                   {grant.assignmentSource === "manual" ? "Manual" : "Automatic"}
                 </p>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {state.detail}
                 </p>
-                {grant.lastErrorMessage ? (
+                {grant.lastErrorCode ? (
                   <p className="mt-2 text-sm text-destructive">
-                    {grant.lastErrorMessage}
+                    GitHub enforcement reported an error. Aurex will retry automatically.
                   </p>
                 ) : null}
               </div>
@@ -186,7 +182,7 @@ export function EmployeeExternalAccess({
             {grant.actualState === "needs_configuration" ? (
               <Link
                 className="mt-3 inline-block text-sm font-medium text-primary"
-                href={`/business/${businessId}/settings#integrations`}
+                href={`/business/${businessId}/settings/integrations`}
               >
                 Open GitHub integration settings
               </Link>

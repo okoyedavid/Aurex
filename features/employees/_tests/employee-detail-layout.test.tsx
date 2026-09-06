@@ -87,4 +87,19 @@ describe("employee detail layout", () => {
       /aria-current="page"[^>]+href="[^"]+\/policies[^"]*"/,
     );
   });
+
+  it("hides the policies tab when policy viewing is not allowed", () => {
+    const html = renderToStaticMarkup(
+      <EmployeeProfileShell
+        businessId="business-1"
+        employee={employee}
+        active="overview"
+        canViewPolicies={false}
+      >
+        <section>Overview content</section>
+      </EmployeeProfileShell>,
+    );
+
+    expect(html).not.toContain(">Policies<");
+  });
 });

@@ -246,7 +246,7 @@ export function WarpNarrative() {
         </div>
       </section>
 
-      <section className="px-5 py-24 sm:px-8 sm:py-32">
+      <section id="reconciliation" className="scroll-mt-20 px-5 py-24 sm:px-8 sm:py-32">
         <div className="mx-auto max-w-7xl">
           <SectionLead
             eyebrow="03 · Reconciliation"
@@ -266,7 +266,7 @@ export function WarpNarrative() {
               <FlowArrow />
               <FlowNode
                 icon={<RefreshCcw />}
-                title="BullMQ worker"
+                title="Reconciliation job"
                 copy="Retryable reconciliation job"
               />
               <FlowArrow />
@@ -297,6 +297,30 @@ export function WarpNarrative() {
   );
 }
 
+export function WarpEnforcementProof() {
+  return (
+    <section id="enforcement" className="scroll-mt-20 border-y border-border bg-inverse px-5 py-24 text-inverse-foreground sm:px-8 sm:py-32">
+      <div className="mx-auto max-w-7xl">
+        <SectionLead eyebrow="05 · Enforcement proof" title="Desired state can become actual state." description="The public sandbox intentionally stops before privileged external mutation. Aurex also includes a GitHub App connector that compares desired access with GitHub, applies the difference and verifies the result." />
+        <div className="mt-12 grid gap-5 lg:grid-cols-[1.1fr_.9fr]">
+          <div className="rounded-md border border-inverse-foreground/15 bg-inverse-foreground/5 p-6 sm:p-8">
+            <ol className="grid gap-4 text-sm sm:grid-cols-2">
+              {[["01", "Policy no longer applies"], ["02", "Desired GitHub state changes"], ["03", "Connector applies the difference"], ["04", "GitHub state is verified"], ["05", "Evidence is recorded"]].map(([number, label]) => <li key={number} className="rounded-md border border-inverse-foreground/10 p-4"><span className="font-mono text-xs text-primary">{number}</span><p className="mt-3 font-medium">{label}</p></li>)}
+            </ol>
+          </div>
+          <div className="rounded-md border border-inverse-foreground/15 p-6 sm:p-8">
+            <p className="font-mono text-xs uppercase tracking-[.18em] text-primary">Recorded private demo</p>
+            <div className="mt-8 grid min-h-48 place-items-center rounded-md border border-dashed border-inverse-foreground/20 bg-inverse-foreground/5 text-center">
+              <p className="max-w-xs text-sm text-inverse-foreground/65">Enforcement evidence can be attached here when the recording is available.</p>
+            </div>
+            <p className="mt-5 text-xs leading-5 text-inverse-foreground/55">Recorded against a private GitHub test organization. Privileged external mutations are disabled in the public demo.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export function WarpArchitecture() {
   return (
     <section
@@ -305,9 +329,9 @@ export function WarpArchitecture() {
     >
       <div className="mx-auto max-w-7xl">
         <SectionLead
-          eyebrow="05 · Architecture"
+          eyebrow="06 · Architecture"
           title="A narrow public window into the real system."
-          description="The demo uses read-only routes and the same resolver outputs the authenticated product consumes"
+          description="The constrained public sandbox sends approved employee changes through the same resolver and reconciliation pipeline used by Aurex."
         />
         <div
           data-reveal
@@ -340,7 +364,7 @@ export function WarpArchitecture() {
             <ArchitectureNode
               icon={<Braces />}
               title="Demo API"
-              copy="Read-only DTOs"
+              copy="Constrained session API"
             />
             <ArchitectureNode
               icon={<UserRoundCheck />}
@@ -362,7 +386,7 @@ export function WarpArchitecture() {
         <div className="mt-8 grid gap-5 lg:grid-cols-3">
           <Decision
             title="Why a dedicated demo API"
-            copy="It keeps the public contract small, strips mutation capability, and prevents the case study from depending on an authenticated session."
+          copy="It keeps the public contract small while allowing only the four controlled Maya scenario changes."
           />
           <Decision
             title="Why explanations are first-class"
@@ -370,7 +394,7 @@ export function WarpArchitecture() {
           />
           <Decision
             title="What v1 does not claim"
-            copy="It is a seeded, read-only scenario. The shipped cardinality model is ONE or MANY; configurable numeric caps remain a possible extension."
+          copy="The public sandbox stops before privileged external execution. The shipped cardinality model is ONE or MANY."
           />
         </div>
       </div>

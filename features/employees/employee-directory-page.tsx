@@ -4,6 +4,7 @@ import { SelectControl } from "@/components/ui/select";
 
 import { Users } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { FeedbackState } from "@/components/ui/feedback-state";
@@ -46,6 +47,7 @@ function DirectoryContent({ businessId }: { businessId: string }) {
   );
   const types = useEmployeeTypesQuery(businessId, "active", canView);
   const groups = useEmployeeGroupsQuery(businessId, "active", canView);
+  const [stateInput, setStateInput] = useState(filters.state ?? "");
 
   const update = (
     patch: Record<string, string | undefined>,
@@ -57,6 +59,12 @@ function DirectoryContent({ businessId }: { businessId: string }) {
     );
     if (resetPage) params.set("page", "1");
     router.replace(`${pathname}?${params.toString()}`);
+  };
+
+  const applyState = () => {
+    const nextState = stateInput.trim() || undefined;
+    if (nextState === filters.state) return;
+    update({ state: nextState });
   };
 
   if (!canView)
@@ -110,10 +118,12 @@ function DirectoryContent({ businessId }: { businessId: string }) {
         />
         <Input
           aria-label="Filter by state"
-          value={filters.state ?? ""}
-          onChange={(event) =>
-            update({ state: event.target.value.trim() || undefined })
-          }
+          value={stateInput}
+          onChange={(event) => setStateInput(event.target.value)}
+          onBlur={applyState}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") applyState();
+          }}
           placeholder="State"
         />
         <Button variant="ghost" onClick={() => router.replace(pathname)}>
