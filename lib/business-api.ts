@@ -109,7 +109,7 @@ export function businessErrorMessage(
 
   return fallback;
 }
-function toBusinessApiError(error: unknown): BusinessApiError {
+export function toBusinessApiError(error: unknown): BusinessApiError {
   if (error instanceof AxiosError && error.response) {
     const status = error.response.status;
     const data = error.response.data as Partial<ApiErrorResponse>;

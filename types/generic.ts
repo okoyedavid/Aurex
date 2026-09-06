@@ -27,6 +27,8 @@ export type Permission =
   | "invoices:view"
   | "reports:view"
   | "audit_logs:view"
+  | "integrations:view"
+  | "integrations:manage"
   | "roles:view"
   | "roles:create"
   | "roles:update"

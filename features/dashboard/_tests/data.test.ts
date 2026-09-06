@@ -5,6 +5,7 @@ import {
   getEffectivePermissions,
   getBusinessNavigation,
   getBusinessNavigationItemForPath,
+  getBusinessSubnavigation,
   isNavigationItemActive,
 } from "../data";
 import type { Permission } from "@/types/generic";
@@ -135,7 +136,7 @@ describe("dashboard navigation matching", () => {
 
     const departmentRoute = getBusinessNavigationItemForPath(
       "business-1",
-      "/business/business-1/employee-lists",
+      "/business/business-1/employees/employee-lists",
     )!;
     expect(
       canAccessBusinessNavigationItem(departmentRoute, new Set()),
@@ -146,6 +147,37 @@ describe("dashboard navigation matching", () => {
         new Set(["employee_lists:view"]),
       ),
     ).toBe(true);
+  });
+
+  it("derives section navigation and direct access from the same routes", () => {
+    const financial = getBusinessSubnavigation("business-1", "financial");
+    expect(financial.map((item) => item.label)).toEqual([
+      "Payments",
+      "Invoices",
+      "Providers",
+    ]);
+
+    const invoice = getBusinessNavigationItemForPath(
+      "business-1",
+      "/business/business-1/invoices",
+    );
+    expect(invoice?.href).toBe(financial[1].href);
+    expect(invoice?.permission).toBe(financial[1].permission);
+  });
+
+  it("selects the most specific nested business route", () => {
+    expect(
+      getBusinessNavigationItemForPath(
+        "business-1",
+        "/business/business-1/policies/categories/category-1",
+      )?.name,
+    ).toBe("Categories");
+    expect(
+      getBusinessNavigationItemForPath(
+        "business-1",
+        "/business/business-1/employees/types",
+      )?.name,
+    ).toBe("Employee types");
   });
 
   it("shows Members only with members:view", () => {

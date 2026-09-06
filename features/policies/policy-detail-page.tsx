@@ -11,6 +11,11 @@ import { Loading } from "@/components/ui/loading";
 import { useBusinessAccess } from "@/features/business/business-access-context";
 import { Pagination } from "@/features/business/pagination";
 import { businessErrorMessage } from "@/lib/business-api";
+import { GitHubIcon } from "@/components/icons/github-icon";
+import {
+  isGitHubTarget,
+  type GitHubTarget,
+} from "@/lib/github-integration-api";
 import type { PolicyRule } from "@/lib/policy-api";
 import { PolicyDialog } from "./components/policy-dialog";
 import {
@@ -174,8 +179,14 @@ export function PolicyDetailPage({
           </p>
         </div>
         <div className="rounded-md border border-border bg-card p-4">
-          <p className="text-xs text-muted-foreground">Configuration</p>
-          {item.configuration ? (
+          <p className="text-xs text-muted-foreground">
+            {isGitHubTarget(item.configuration)
+              ? "External enforcement"
+              : "Configuration"}
+          </p>
+          {isGitHubTarget(item.configuration) ? (
+            <GitHubTargetSummary target={item.configuration} />
+          ) : item.configuration && Object.keys(item.configuration).length ? (
             <details className="mt-1">
               <summary className="cursor-pointer font-medium">
                 View configuration
@@ -405,5 +416,33 @@ export function PolicyDetailPage({
         }
       />
     </>
+  );
+}
+
+export function GitHubTargetSummary({ target }: { target: GitHubTarget }) {
+  const isTeam = target.resourceType === "team";
+  const resource = isTeam
+    ? `${target.organizationLogin}/${target.teamSlug}`
+    : `${target.owner}/${target.repo}`;
+  const access = isTeam
+    ? "Member"
+    : target.permission.charAt(0).toUpperCase() + target.permission.slice(1);
+
+  return (
+    <div className="mt-1 min-w-0">
+      <p className="flex items-center gap-2 font-medium">
+        <GitHubIcon />
+        <span className="break-words">
+          GitHub {isTeam ? "team" : "repository"} · {resource}
+        </span>
+      </p>
+      <p className="mt-2 text-sm text-muted-foreground">
+        {isTeam ? "Role" : "Permission"}: {access}
+      </p>
+      <p className="mt-2 text-xs leading-5 text-muted-foreground">
+        Policy assignment creates the desired access. Employee access status
+        shows whether GitHub has verified it.
+      </p>
+    </div>
   );
 }

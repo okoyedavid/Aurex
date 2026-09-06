@@ -2,12 +2,17 @@
 
 import { PageFrame } from "@/components/page-frame";
 import { useBusinessAccess } from "@/features/business/business-access-context";
+import { GitHubConnectionPanel } from "@/features/integrations/github-connection-panel";
 import { BusinessSettingsForm } from "./business-settings-form";
 import { PreferencesSettingsPanel } from "./preferences-settings-panel";
 import SettingsNavigation from "./settings-navigation";
 import { TeamAccessPanel } from "./team-access-panel";
 
-export function BusinessSettingsPageContent() {
+export function BusinessSettingsPageContent({
+  githubCallback,
+}: {
+  githubCallback?: { result?: string; reason?: string };
+}) {
   const { business } = useBusinessAccess();
 
   return (
@@ -24,6 +29,10 @@ export function BusinessSettingsPageContent() {
         <div className="min-w-0 space-y-6">
           <BusinessSettingsForm business={business} />
           <TeamAccessPanel />
+          <GitHubConnectionPanel
+            callbackResult={githubCallback?.result}
+            callbackReason={githubCallback?.reason}
+          />
           <PreferencesSettingsPanel />
         </div>
       </div>

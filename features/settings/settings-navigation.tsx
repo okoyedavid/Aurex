@@ -6,6 +6,7 @@ import {
   KeyRound,
   Mail,
   MonitorSmartphone,
+  Plug,
   UserRound,
   UsersRound,
 } from "lucide-react";
@@ -32,6 +33,12 @@ const businessSettingsNavigation = [
   { label: "Business", id: "business", href: "#business", icon: Building2 },
   { label: "Team access", id: "team", href: "#team", icon: UsersRound },
   {
+    label: "Integrations",
+    id: "integrations",
+    href: "#integrations",
+    icon: Plug,
+  },
+  {
     label: "Preferences",
     id: "preferences",
     href: "#preferences",
@@ -48,9 +55,7 @@ export default function SettingsNavigation({
     scope === "business"
       ? businessSettingsNavigation
       : personalSettingsNavigation;
-  const [activeSection, setActiveSection] = useState(
-    settingsNavigation[0].id,
-  );
+  const [activeSection, setActiveSection] = useState(settingsNavigation[0].id);
 
   useEffect(() => {
     const sections = settingsNavigation
@@ -83,31 +88,31 @@ export default function SettingsNavigation({
 
   return (
     <nav
-        aria-label="Settings sections"
-        className="flex gap-2 overflow-x-auto pb-2 xl:sticky xl:top-24 xl:block xl:self-start xl:overflow-visible xl:pb-0"
-      >
-        {settingsNavigation.map((item) => {
-          const Icon = item.icon;
-          const isActive = activeSection === item.id;
+      aria-label="Settings sections"
+      className="flex gap-2 overflow-x-auto pb-2 xl:sticky xl:top-24 xl:block xl:self-start xl:overflow-visible xl:pb-0"
+    >
+      {settingsNavigation.map((item) => {
+        const Icon = item.icon;
+        const isActive = activeSection === item.id;
 
-          return (
-            <a
-              key={item.href}
-              href={item.href}
-              aria-current={isActive ? "true" : undefined}
-              onClick={() => setActiveSection(item.id)}
-              className={[
-                "flex shrink-0 items-center gap-2 rounded-md border px-3 py-2.5 text-sm font-medium transition xl:mb-1 xl:w-full",
-                isActive
-                  ? "border-primary/20 bg-primary/10 text-primary"
-                  : "border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground xl:border-transparent xl:bg-transparent",
-              ].join(" ")}
-            >
-              <Icon className="h-4 w-4" />
-              {item.label}
-            </a>
-          );
-        })}
+        return (
+          <a
+            key={item.href}
+            href={item.href}
+            aria-current={isActive ? "true" : undefined}
+            onClick={() => setActiveSection(item.id)}
+            className={[
+              "flex shrink-0 items-center gap-2 rounded-md border px-3 py-2.5 text-sm font-medium transition xl:mb-1 xl:w-full",
+              isActive
+                ? "border-primary/20 bg-primary/10 text-primary"
+                : "border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground xl:border-transparent xl:bg-transparent",
+            ].join(" ")}
+          >
+            <Icon className="h-4 w-4" />
+            {item.label}
+          </a>
+        );
+      })}
     </nav>
   );
 }

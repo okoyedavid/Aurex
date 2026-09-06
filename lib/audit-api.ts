@@ -11,6 +11,32 @@ export type AuditDomain =
   | "security";
 export type AuditPrimitive = string | number | boolean | null;
 
+export type AuditActor = {
+  id?: string | null;
+  type: string;
+  displayName: string;
+};
+
+export type AuditSubject = {
+  id?: string | null;
+  type: string;
+  displayName: string;
+};
+
+export type AuditPolicySnapshot = {
+  id: string;
+  version: number | null;
+  displayName: string;
+  description: string | null;
+};
+
+export type AuditCategorySnapshot = {
+  id: string;
+  displayName: string;
+  description: string | null;
+  cardinality: "ONE" | "MANY" | null;
+};
+
 export type AuditItem = {
   id: string;
   occurredAt: string;
@@ -23,8 +49,11 @@ export type AuditItem = {
     | "personal"
     | "security";
   action: string;
-  actor: { type: string; displayName: string } | null;
-  subject: { type: string; displayName: string } | null;
+  actor: AuditActor | null;
+  subject: AuditSubject | null;
+  policy?: AuditPolicySnapshot | null;
+  category?: AuditCategorySnapshot | null;
+  historicalSnapshotAvailable?: boolean;
   summary: string;
   changes?: Array<{
     field: string;

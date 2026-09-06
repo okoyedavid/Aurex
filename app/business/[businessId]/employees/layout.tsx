@@ -1,5 +1,6 @@
 import { BusinessSubnavigation } from "@/components/BusinessSubnavigation";
 import { PageFrame } from "@/components/page-frame";
+import { getBusinessSubnavigation } from "@/features/dashboard/data";
 
 export default async function EmployeesLayout({
   children,
@@ -10,25 +11,10 @@ export default async function EmployeesLayout({
 }) {
   const { businessId } = await params;
 
-  const employeeNavigation = [
-    {
-      label: "Directory",
-      href: `/business/${businessId}/employees`,
-      exact: true,
-    },
-    {
-      label: "Departments",
-      href: `/business/${businessId}/employees/employee-lists`,
-    },
-    {
-      label: "Employee types",
-      href: `/business/${businessId}/employees/types`,
-    },
-    {
-      label: "Employee groups",
-      href: `/business/${businessId}/employees/groups`,
-    },
-  ];
+  const employeeNavigation = getBusinessSubnavigation(
+    businessId,
+    "employees",
+  );
   return (
     <PageFrame>
       <BusinessSubnavigation

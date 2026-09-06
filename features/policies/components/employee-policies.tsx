@@ -2,19 +2,23 @@
 
 import { DateInput } from "@/components/ui/date-input";
 
-import Link from "next/link";
-import { useMemo, useState } from "react";
 import { Plus, RefreshCw, Search } from "lucide-react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { FeedbackState } from "@/components/ui/feedback-state";
 import { Loading } from "@/components/ui/loading";
-import { businessErrorMessage } from "@/lib/business-api";
-import type { EmployeePolicyAssignment } from "@/lib/policy-api";
 import { useBusinessAccess } from "@/features/business/business-access-context";
 import { Pagination } from "@/features/business/pagination";
-import { formatPolicyDate, policyPermissions } from "./policy-helpers";
+import { AuditActivityTimeline } from "@/features/audit/audit-activity-timeline";
+import { businessErrorMessage } from "@/lib/business-api";
+import type { EmployeePolicyAssignment } from "@/lib/policy-api";
+import { EndManualAssignmentDialog } from "./end-manual-assignment-dialog";
+import { ManualAssignmentDialog } from "./manual-assignment-dialog";
+import { PolicyExplanationView } from "./policy-explanation-view";
+import { ConfirmPolicyAction, PolicyBadge } from "./policy-ui";
+import { formatPolicyDate, policyPermissions } from "../policy-helpers";
 import {
   useEmployeePoliciesQuery,
   useEmployeePolicyHistoryQuery,
@@ -22,29 +26,14 @@ import {
   usePolicyCategoriesQuery,
   usePolicyExplanationQuery,
   useReconcileEmployeeMutation,
-} from "./policy-hooks";
-import { EndManualAssignmentDialog } from "./components/end-manual-assignment-dialog";
-import { ManualAssignmentDialog } from "./components/manual-assignment-dialog";
-import { PolicyExplanationView } from "./components/policy-explanation-view";
-import {
-  ConfirmPolicyAction,
-  PolicyBadge,
-} from "./components/policy-ui";
-import { PolicyAuditTable } from "./components/policy-audit-table";
-import { PageFrame } from "@/components/page-frame";
+} from "../policy-hooks";
 
-export function EmployeePoliciesPage({
+export function EmployeePolicies({
   businessId,
   employeeId,
-  employeeName,
-  jobTitle,
-  embedded = false,
 }: {
   businessId: string;
   employeeId: string;
-  employeeName?: string;
-  jobTitle?: string | null;
-  embedded?: boolean;
 }) {
   const access = policyPermissions(useBusinessAccess().effectivePermissions);
   const [asOfInput, setAsOfInput] = useState("");
@@ -118,51 +107,25 @@ export function EmployeePoliciesPage({
     void assignments.refetch();
     if (explain) void explanation.refetch();
   };
-  const body = (
+  return (
     <>
-      {!embedded ? (
-        <Link
-          href={`/business/${businessId}/employees/${employeeId}`}
-          className="text-sm font-medium text-primary"
-        >
-          ← {employeeName ?? "Employee"}
-        </Link>
-      ) : null}
-      <div
-        className={
-          embedded
-            ? "flex flex-wrap items-start justify-between gap-4"
-            : "mt-4 flex flex-wrap items-start justify-between gap-4"
-        }
-      >
-        <div>
-          <h1 className={embedded ? "text-xl font-bold" : "text-3xl font-bold"}>
-            Employee policies
-          </h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {employeeName
-              ? `${employeeName}${jobTitle ? ` · ${jobTitle}` : ""}`
-              : "Assigned policies and resolution history"}
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Button variant="outline" onClick={refresh}>
+      <div className="flex flex-wrap justify-end gap-2 pt-6">
+        <Button variant="outline" onClick={refresh}>
+          <RefreshCw />
+          Refresh
+        </Button>
+        {access.reconcile ? (
+          <Button variant="outline" onClick={() => setReconcileOpen(true)}>
             <RefreshCw />
-            Refresh
+            Reconcile
           </Button>
-          {access.reconcile ? (
-            <Button variant="outline" onClick={() => setReconcileOpen(true)}>
-              <RefreshCw />
-              Reconcile
-            </Button>
-          ) : null}
-          {access.assign ? (
-            <Button onClick={() => setManualOpen(true)}>
-              <Plus />
-              Manual assignment
-            </Button>
-          ) : null}
-        </div>
+        ) : null}
+        {access.assign ? (
+          <Button onClick={() => setManualOpen(true)}>
+            <Plus />
+            Manual assignment
+          </Button>
+        ) : null}
       </div>
       {jobId ? (
         <details className="mt-4 rounded-md border border-primary/20 bg-primary/5 p-4">
@@ -320,9 +283,11 @@ export function EmployeePoliciesPage({
       ) : null}
       {access.audit ? (
         <section className="mt-8">
-          <h2 className="mb-4 text-xl font-bold">Employee policy history</h2>
+          <h2 className="mb-4 text-xl font-bold">Policy activity</h2>
           {history.isLoading ? (
-            <p className="text-sm text-muted-foreground">Loading history…</p>
+            <p className="text-sm text-muted-foreground">
+              Loading policy activity…
+            </p>
           ) : history.error ? (
             <FeedbackState
               title="Unable to load policy data"
@@ -331,7 +296,12 @@ export function EmployeePoliciesPage({
             />
           ) : (
             <>
-              <PolicyAuditTable items={history.data?.items ?? []} />
+              <AuditActivityTimeline
+                items={history.data?.items ?? []}
+                scope="employee-policy"
+                emptyTitle="No policy activity yet."
+                emptyDescription="Changes to this employee's policy assignments will appear here."
+              />
               <Pagination
                 page={history.data?.pagination.page ?? 1}
                 totalPages={history.data?.pagination.totalPages ?? 0}
@@ -385,5 +355,4 @@ export function EmployeePoliciesPage({
       />
     </>
   );
-  return embedded ? body : <>{body}</>;
 }

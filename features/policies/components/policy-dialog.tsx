@@ -20,6 +20,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { businessErrorMessage } from "@/lib/business-api";
+import { GitHubPolicyTargetFields } from "@/features/integrations/github-policy-target-fields";
+import { isGitHubTarget, type GitHubTarget } from "@/lib/github-integration-api";
 import type { Policy, PolicyCategory } from "@/lib/policy-api";
 import { validateEffectiveRange } from "@/features/policies/policy-helpers";
 import {
@@ -53,6 +55,10 @@ export function PolicyDialog({
   const [effectiveTo, setEffectiveTo] = useState(
     policy?.effectiveTo?.slice(0, 16) ?? "",
   );
+  const existingTarget = isGitHubTarget(policy?.configuration) ? policy.configuration : null;
+  const [githubEnabled, setGitHubEnabled] = useState(Boolean(existingTarget));
+  const [target, setTarget] = useState<GitHubTarget | null>(existingTarget);
+  const [configurationTouched, setConfigurationTouched] = useState(false);
   const create = useCreatePolicyMutation(businessId);
   const update = useUpdatePolicyMutation(businessId, policy?.id ?? "");
   const pending = create.isPending || update.isPending;
@@ -62,6 +68,8 @@ export function PolicyDialog({
       return toast.error("Choose a category and enter a policy name.");
     const rangeError = validateEffectiveRange(effectiveFrom, effectiveTo);
     if (rangeError) return toast.error(rangeError);
+    if (githubEnabled && !target)
+      return toast.error("Choose a GitHub team or repository.");
     const body = {
       categoryId,
       name: name.trim(),
@@ -70,11 +78,22 @@ export function PolicyDialog({
         ? new Date(effectiveFrom).toISOString()
         : null,
       effectiveTo: effectiveTo ? new Date(effectiveTo).toISOString() : null,
+      ...(configurationTouched
+        ? { configuration: target ?? {} }
+        : target
+          ? { configuration: target }
+          : {}),
     };
     const mutation = policy ? update : create;
     mutation.mutate(body, {
       onSuccess: () => {
-        toast.success(policy ? "Policy updated." : "Draft policy created.");
+        toast.success(
+          policy?.status === "active" && configurationTouched
+            ? "Policy saved. GitHub reconciliation has been queued."
+            : policy
+              ? "Policy updated."
+              : "Draft policy created.",
+        );
         onOpenChange(false);
       },
       onError: (error) => toast.error(businessErrorMessage(error)),
@@ -146,6 +165,21 @@ export function PolicyDialog({
               />
             </label>
           </div>
+
+          <GitHubPolicyTargetFields
+            businessId={businessId}
+            value={target}
+            enabled={githubEnabled}
+            disabled={pending}
+            onEnabledChange={(enabled) => {
+              setGitHubEnabled(enabled);
+              setConfigurationTouched(true);
+            }}
+            onChange={(next) => {
+              setTarget(next);
+              setConfigurationTouched(true);
+            }}
+          />
 
           <DialogFooter>
             <Button

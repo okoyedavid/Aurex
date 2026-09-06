@@ -2,7 +2,9 @@ import {
   Activity,
   Bell,
   Building2,
+  ClipboardList,
   LayoutDashboard,
+  ReceiptText,
   ScrollText,
   Settings,
   ShieldCheck,
@@ -24,7 +26,13 @@ export type BusinessNavigationItem = {
   permission?: Permission;
   anyPermission?: Permission[];
   activeHrefs?: string[];
+  sidebar?: boolean;
+  section?: BusinessNavigationSection;
+  sectionLabel?: string;
+  sectionIcon?: LucideIcon;
 };
+
+export type BusinessNavigationSection = "financial" | "employees" | "policies";
 
 export type HeaderCommand = {
   label: string;
@@ -54,7 +62,7 @@ export function getEffectivePermissions(role: BusinessRole) {
   );
 }
 export function canAccessBusinessNavigationItem(
-  item: BusinessNavigationItem,
+  item: Pick<BusinessNavigationItem, "permission" | "anyPermission">,
   permissions: ReadonlySet<Permission>,
 ) {
   if (item.permission) return permissions.has(item.permission);
@@ -63,13 +71,19 @@ export function canAccessBusinessNavigationItem(
   }
   return true;
 }
-function getBusinessNavigationItems(
+function getBusinessRouteItems(
   businessId: string,
 ): BusinessNavigationItem[] {
   const base = `/business/${businessId}`;
 
   return [
-    { name: "Overview", icon: LayoutDashboard, href: base, exact: true },
+    {
+      name: "Overview",
+      icon: LayoutDashboard,
+      href: base,
+      exact: true,
+      sidebar: true,
+    },
     {
       name: "Payments",
       icon: WalletCards,
@@ -85,82 +99,112 @@ function getBusinessNavigationItems(
         `${base}/invoices`,
         `${base}/providers`,
       ],
+      sidebar: true,
+      section: "financial",
+      sectionIcon: WalletCards,
+    },
+    {
+      name: "Invoices",
+      icon: ReceiptText,
+      href: `${base}/invoices`,
+      permission: "invoices:view",
+      section: "financial",
+      sectionIcon: ReceiptText,
+    },
+    {
+      name: "Providers",
+      icon: ClipboardList,
+      href: `${base}/providers`,
+      permission: "providers:view",
+      section: "financial",
+      sectionIcon: ClipboardList,
     },
     {
       name: "Employees",
       icon: UserRound,
       href: `${base}/employees`,
       permission: "employees:view",
-    },
-    {
-      name: "Policies",
-      icon: ScrollText,
-      href: `${base}/policies`,
-      anyPermission: ["policies:view", "policies:view_audit"],
-    },
-    {
-      name: "Members",
-      icon: Users,
-      href: `${base}/members`,
-      permission: "members:view",
-    },
-    {
-      name: "Roles",
-      icon: ShieldCheck,
-      href: `${base}/roles`,
-      permission: "roles:view",
-    },
-    {
-      name: "Invites",
-      icon: UserPlus,
-      href: `${base}/invites`,
-      permission: "members:invite",
-    },
-    { name: "Audit Logs", icon: Activity, href: `${base}/audit-logs` },
-    {
-      name: "Settings",
-      icon: Settings,
-      href: `${base}/settings`,
-      permission: "business:update",
-    },
-  ];
-}
-
-function getBusinessRouteItems(businessId: string): BusinessNavigationItem[] {
-  const base = `/business/${businessId}`;
-
-  return [
-    ...getBusinessNavigationItems(businessId).filter(
-      (item) => item.name !== "Payments",
-    ),
-    {
-      name: "Payments",
-      icon: WalletCards,
-      href: `${base}/payments`,
-      anyPermission: [
-        "payments:view",
-        "payments:view_own",
-        "invoices:view",
-        "providers:view",
-      ],
-    },
-    {
-      name: "Invoices",
-      icon: WalletCards,
-      href: `${base}/invoices`,
-      permission: "invoices:view",
-    },
-    {
-      name: "Providers",
-      icon: WalletCards,
-      href: `${base}/providers`,
-      permission: "providers:view",
+      sidebar: true,
+      section: "employees",
+      sectionLabel: "Directory",
     },
     {
       name: "Departments",
       icon: UserRound,
       href: `${base}/employees/employee-lists`,
       permission: "employee_lists:view",
+      section: "employees",
+    },
+    {
+      name: "Employee types",
+      icon: UserRound,
+      href: `${base}/employees/types`,
+      permission: "employees:view",
+      section: "employees",
+    },
+    {
+      name: "Employee groups",
+      icon: UserRound,
+      href: `${base}/employees/groups`,
+      permission: "employees:view",
+      section: "employees",
+    },
+    {
+      name: "Policies",
+      icon: ScrollText,
+      href: `${base}/policies`,
+      anyPermission: ["policies:view", "policies:view_audit"],
+      sidebar: true,
+      section: "policies",
+    },
+    {
+      name: "Categories",
+      icon: ScrollText,
+      href: `${base}/policies/categories`,
+      permission: "policies:view",
+      section: "policies",
+    },
+    {
+      name: "Policy audit",
+      icon: Activity,
+      href: `${base}/policies/audit`,
+      permission: "policies:view_audit",
+      section: "policies",
+      sectionLabel: "Audit History",
+    },
+    {
+      name: "Members",
+      icon: Users,
+      href: `${base}/members`,
+      permission: "members:view",
+      sidebar: true,
+    },
+    {
+      name: "Roles",
+      icon: ShieldCheck,
+      href: `${base}/roles`,
+      permission: "roles:view",
+      sidebar: true,
+    },
+    {
+      name: "Invites",
+      icon: UserPlus,
+      href: `${base}/invites`,
+      permission: "members:invite",
+      sidebar: true,
+    },
+    {
+      name: "Audit Logs",
+      icon: Activity,
+      href: `${base}/audit-logs`,
+      sidebar: true,
+    },
+    {
+      name: "Settings",
+      icon: Settings,
+      href: `${base}/settings`,
+      permission: "business:update",
+      sidebar: true,
     },
   ];
 }
@@ -169,9 +213,26 @@ export function getBusinessNavigation(
   businessId: string,
   permissions: ReadonlySet<Permission>,
 ) {
-  return getBusinessNavigationItems(businessId).filter((item) =>
-    canAccessBusinessNavigationItem(item, permissions),
+  return getBusinessRouteItems(businessId).filter(
+    (item) =>
+      item.sidebar && canAccessBusinessNavigationItem(item, permissions),
   );
+}
+
+export function getBusinessSubnavigation(
+  businessId: string,
+  section: BusinessNavigationSection,
+) {
+  return getBusinessRouteItems(businessId)
+    .filter((item) => item.section === section)
+    .map((item) => ({
+      label: item.sectionLabel ?? item.name,
+      href: item.href,
+      icon: item.sectionIcon,
+      permission: item.permission,
+      anyPermission: item.anyPermission,
+      exact: item.exact,
+    }));
 }
 
 export function getHeaderSearchMetadata(
@@ -215,8 +276,9 @@ export function getPersonalHeaderCommands(): HeaderCommand[] {
 export function getBusinessHeaderCommands(
   businessId: string,
   permissions: ReadonlySet<Permission>,
+  businessNavigation = getBusinessNavigation(businessId, permissions),
 ): HeaderCommand[] {
-  const navigation = getBusinessNavigation(businessId, permissions).map(
+  const navigation = businessNavigation.map(
     (item) => ({
       label: item.name,
       description: `Go to ${item.name.toLowerCase()}`,
@@ -253,8 +315,18 @@ export function getBusinessNavigationItemForPath(
   businessId: string,
   pathname: string,
 ) {
-  return getBusinessRouteItems(businessId).find((item) =>
-    isNavigationItemActive(pathname, item),
+  return getBusinessRouteItems(businessId)
+    .filter((item) => isDirectRouteMatch(pathname, item))
+    .sort((a, b) => b.href.length - a.href.length)[0];
+}
+
+function isDirectRouteMatch(
+  pathname: string,
+  item: { href: string; exact?: boolean },
+) {
+  return (
+    pathname === item.href ||
+    (!item.exact && pathname.startsWith(`${item.href}/`))
   );
 }
 
@@ -270,8 +342,5 @@ export function isNavigationItemActive(
     return true;
   }
 
-  return (
-    pathname === item.href ||
-    (!item.exact && pathname.startsWith(`${item.href}/`))
-  );
+  return isDirectRouteMatch(pathname, item);
 }
