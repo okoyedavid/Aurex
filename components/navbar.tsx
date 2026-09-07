@@ -6,6 +6,8 @@ import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { useMeQuery } from "@/features/auth/use-me-query";
+import { AccountMenu } from "@/features/dashboard/account-menu";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
@@ -18,6 +20,7 @@ const navLinks = [
 
 export default function NavBar() {
   const pathname = usePathname();
+  const { data: user } = useMeQuery();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -70,24 +73,32 @@ export default function NavBar() {
         </ul>
 
         <div className="hidden items-center gap-1 lg:flex">
-          <Button asChild size="lg" variant="ghost">
-            <Link href="/login">Sign In</Link>
-          </Button>
-          <Button asChild size="lg" className="rounded-full px-5">
-            <Link href="/register">Start Free</Link>
-          </Button>
+          {user ? <AccountMenu user={user} detailsAtDesktop /> : null}
+          {!user ? (
+            <>
+              <Button asChild size="lg" variant="ghost">
+                <Link href="/login">Sign In</Link>
+              </Button>
+              <Button asChild size="lg" className="rounded-full px-5">
+                <Link href="/register">Start Free</Link>
+              </Button>
+            </>
+          ) : null}
         </div>
 
-        <button
-          type="button"
-          onClick={() => setIsOpen((open) => !open)}
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md text-foreground transition hover:bg-muted lg:hidden"
-          aria-expanded={isOpen}
-          aria-controls="mobile-navigation"
-          aria-label={isOpen ? "Close navigation" : "Open navigation"}
-        >
-          {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </button>
+        <div className="flex items-center gap-2 lg:hidden">
+          <button
+            type="button"
+            onClick={() => setIsOpen((open) => !open)}
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md text-foreground transition hover:bg-muted"
+            aria-expanded={isOpen}
+            aria-controls="mobile-navigation"
+            aria-label={isOpen ? "Close navigation" : "Open navigation"}
+          >
+            {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
+          {user ? <AccountMenu user={user} detailsAtDesktop /> : null}
+        </div>
       </nav>
 
       {isOpen && (
@@ -111,22 +122,24 @@ export default function NavBar() {
               </li>
             ))}
           </ul>
-          <div className="mx-auto mt-4 grid max-w-6xl grid-cols-2 gap-3">
-            <Button asChild variant="outline" className="h-11">
-              <Link href="/login" onClick={() => setIsOpen(false)}>
-                Sign In
-              </Link>
-            </Button>
-            <Button asChild className="h-11">
-              <Link
-                href="/register"
-                className="text-white"
-                onClick={() => setIsOpen(false)}
-              >
-                Start Free
-              </Link>
-            </Button>
-          </div>
+          {!user ? (
+            <div className="mx-auto mt-4 grid max-w-6xl grid-cols-2 gap-3">
+              <Button asChild variant="outline" className="h-11">
+                <Link href="/login" onClick={() => setIsOpen(false)}>
+                  Sign In
+                </Link>
+              </Button>
+              <Button asChild className="h-11">
+                <Link
+                  href="/register"
+                  className="text-white"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Start Free
+                </Link>
+              </Button>
+            </div>
+          ) : null}
         </div>
       )}
     </header>

@@ -51,9 +51,9 @@ export interface PolicySummary {
 export interface PolicyRule {
   id: string;
   name: string;
-  priority: number;
+  priority: number | null;
   status: string;
-  conditions: Array<{ field: string; operator: string; value: unknown }>;
+  conditions: Array<{ field: string; operator?: string; value: unknown; displayValue?: unknown }>;
 }
 
 export interface PolicyDetail extends PolicySummary {
@@ -68,7 +68,7 @@ export interface ResolvedPolicy {
   priority: number;
   effectiveFrom: string | null;
   effectiveTo: string | null;
-  winningRuleName: string;
+  winningRuleName: string | null;
 }
 
 export interface ConditionEvaluation {
@@ -102,6 +102,21 @@ export interface ExplanationCategory {
 export interface EmployeeExplanation {
   employee: DemoEmployee;
   evaluationDate: string;
+  evaluatedRules?: Array<{
+    ruleId: string;
+    ruleName: string | null;
+    policyId: string;
+    priority: number;
+    matched: boolean;
+    conditions: Array<{
+      condition: { field: string; operator?: string; value: unknown };
+      expectedDisplayValue?: unknown;
+      actualDisplayValue?: unknown;
+      expectedValue?: unknown;
+      actualValue?: unknown;
+      matched: boolean;
+    }>;
+  }>;
   categories: ExplanationCategory[];
 }
 
@@ -134,7 +149,7 @@ export interface ReconciliationRun {
   durationMs: number | null;
   updatedAt: string;
   pollAfterMs: number;
-  changedResources: Array<"employee" | "assignments" | "audit" | "externalAccess">;
+  changedResources: Array<"employee" | "assignments" | "audit">;
   events: Array<{
     id: string;
     stage: "employee_update" | "queued" | "policy_resolution" | "assignment_reconciliation" | "external_access" | "audit" | "complete";

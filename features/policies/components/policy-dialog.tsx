@@ -20,7 +20,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { businessErrorMessage } from "@/lib/business-api";
-import { GitHubPolicyTargetFields } from "@/features/integrations/github-policy-target-fields";
+import { GitHubPolicyTargetFields } from "@/features/integrations/components/github-policy-target-fields";
 import { isGitHubTarget, type GitHubTarget } from "@/lib/github-integration-api";
 import type { Policy, PolicyCategory } from "@/lib/policy-api";
 import { validateEffectiveRange } from "@/features/policies/policy-helpers";

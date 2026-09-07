@@ -60,7 +60,7 @@ export type User = {
   email: string;
   emailVerifiedAt: ISODateString | null;
   status: UserStatus;
-  preferences: {
+  preferences?: {
     twoFactorEnabled: boolean;
   };
   createdAt: ISODateString;

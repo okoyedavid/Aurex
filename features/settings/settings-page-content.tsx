@@ -1,9 +1,9 @@
-import { EmailSettingsPanel } from "@/features/settings/email-settings-panel";
-import { PreferencesSettingsPanel } from "@/features/settings/preferences-settings-panel";
-import { ProfileSettingsForm } from "@/features/settings/profile-settings-form";
-import { SecuritySettingsPanel } from "@/features/settings/security-settings-panel";
-import { SessionsSettingsPanel } from "@/features/settings/sessions-settings-panel";
-import SettingsNavigation from "./settings-navigation";
+import { EmailSettingsPanel } from "@/features/settings/components/email-settings-panel";
+import { PreferencesSettingsPanel } from "@/features/settings/components/preferences-settings-panel";
+import { ProfileSettingsForm } from "@/features/settings/components/profile-settings-form";
+import { SecuritySettingsPanel } from "@/features/settings/components/security-settings-panel";
+import { SessionsSettingsPanel } from "@/features/settings/components/sessions-settings-panel";
+import SettingsNavigation from "./components/settings-navigation";
 
 export function SettingsPageContent() {
   return (

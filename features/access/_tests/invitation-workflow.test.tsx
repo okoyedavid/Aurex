@@ -11,9 +11,9 @@ import type {
 import type { Permission } from "@/types/generic";
 import { BusinessApiError } from "@/lib/business-api";
 
-import { InviteEmployeeSummary } from "../invite-employee-summary";
-import { SentInviteCard } from "../business-invites-page";
-import { MembershipOutcome } from "../membership-outcome";
+import { InviteEmployeeSummary } from "../components/invite-employee-summary";
+import { SentInviteCard } from "../components/sent-invite-card";
+import { MembershipOutcome } from "../components/membership-outcome";
 import { ErrorState } from "../shared";
 import {
   approvalPermissionGate,

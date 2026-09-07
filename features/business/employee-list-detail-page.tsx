@@ -10,7 +10,7 @@ import { ArrowLeft, Pencil, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loading } from "@/components/ui/loading";
-import { EmployeeDirectoryTable } from "@/features/employees/employee-directory-table";
+import { EmployeeDirectoryTable } from "@/features/employees/components/employee-directory-table";
 import { employeeDirectoryFilters } from "@/features/employees/employee-directory-utils";
 import { useBusinessEmployeesQuery } from "@/features/employees/employee-hooks";
 import { BusinessApiError } from "@/lib/business-api";

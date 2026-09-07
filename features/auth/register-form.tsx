@@ -12,7 +12,7 @@ import { register } from "@/lib/auth-api";
 import type { RegisterBody } from "@/frontend.types";
 import { AuthDivider } from "@/features/auth/auth-divider";
 import { AuthMutationError, authErrorMessage, fieldError } from "@/features/auth/errors";
-import { GoogleAuthButton } from "@/features/auth/google-auth-button";
+import { GoogleAuthButton } from "@/features/auth/components/google-auth-button";
 
 export function RegisterForm() {
   const router = useRouter();
@@ -55,7 +55,7 @@ export function RegisterForm() {
         mutation.mutate(form);
       }}
     >
-      <GoogleAuthButton>Sign up with Google</GoogleAuthButton>
+      <GoogleAuthButton>Continue with Google</GoogleAuthButton>
       <AuthDivider />
       <label className="block text-sm font-medium text-foreground">
         Full name

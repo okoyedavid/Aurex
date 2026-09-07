@@ -1,7 +1,5 @@
 "use client";
 
-import { SelectControl } from "@/components/ui/select";
-
 import { Users } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
@@ -18,7 +16,8 @@ import {
 import { useEmployeeListsQuery } from "@/features/business/employee-list-hooks";
 import { Pagination } from "@/features/business/pagination";
 import { businessErrorMessage } from "@/lib/business-api";
-import { EmployeeDirectoryTable } from "./employee-directory-table";
+import { EmployeeDirectoryTable } from "./components/employee-directory-table";
+import { EmployeeDirectoryFilter } from "./components/employee-directory-filter";
 import { employeeDirectoryFilters } from "./employee-directory-utils";
 import { useBusinessEmployeesQuery } from "./employee-hooks";
 
@@ -28,7 +27,6 @@ export function EmployeeDirectoryPage({ businessId }: { businessId: string }) {
     <DirectoryContent key={searchParams.toString()} businessId={businessId} />
   );
 }
-
 function DirectoryContent({ businessId }: { businessId: string }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -87,25 +85,25 @@ function DirectoryContent({ businessId }: { businessId: string }) {
         </div>
       </div>
       <div className="mt-6 grid gap-3 rounded-md border border-border bg-card p-4 sm:grid-cols-2 xl:grid-cols-6">
-        <Filter
+        <EmployeeDirectoryFilter
           label="All departments"
           value={filters.employeeListId}
           onChange={(value) => update({ employeeListId: value })}
           items={lists.data?.items.map((item) => [item.id, item.name]) ?? []}
         />
-        <Filter
+        <EmployeeDirectoryFilter
           label="All types"
           value={filters.employeeTypeId}
           onChange={(value) => update({ employeeTypeId: value })}
           items={types.data?.items.map((item) => [item.id, item.name]) ?? []}
         />
-        <Filter
+        <EmployeeDirectoryFilter
           label="All groups"
           value={filters.groupId}
           onChange={(value) => update({ groupId: value })}
           items={groups.data?.items.map((item) => [item.id, item.name]) ?? []}
         />
-        <Filter
+        <EmployeeDirectoryFilter
           label="All statuses"
           value={filters.status}
           onChange={(value) => update({ status: value })}
@@ -169,35 +167,5 @@ function DirectoryContent({ businessId }: { businessId: string }) {
         />
       ) : null}
     </div>
-  );
-}
-
-function Filter({
-  label,
-  value,
-  onChange,
-  items,
-}: {
-  label: string;
-  value?: string;
-  onChange: (value?: string) => void;
-  items: string[][];
-}) {
-  return (
-    <label>
-      <span className="sr-only">{label}</span>
-      <SelectControl
-        className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
-        value={value ?? ""}
-        onChange={(event) => onChange(event.target.value || undefined)}
-      >
-        <option value="">{label}</option>
-        {items.map(([id, name]) => (
-          <option key={id} value={id}>
-            {name}
-          </option>
-        ))}
-      </SelectControl>
-    </label>
   );
 }

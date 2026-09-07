@@ -18,7 +18,13 @@ function getInitials(name?: string | null, email?: string | null) {
   return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
 }
 
-export function AccountMenu({ user }: { user?: User }) {
+export function AccountMenu({
+  user,
+  detailsAtDesktop = false,
+}: {
+  user?: User;
+  detailsAtDesktop?: boolean;
+}) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const menuRef = useRef<HTMLDivElement>(null);
@@ -63,7 +69,7 @@ export function AccountMenu({ user }: { user?: User }) {
         onClick={() => setOpen((current) => !current)}
         className="flex items-center gap-3 rounded-md p-1 text-left transition hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
-        {user?.avatar ? (
+        {user?.avatar?.trim() ? (
           <span
             aria-hidden="true"
             className="h-9 w-9 shrink-0 rounded-full bg-cover bg-center"
@@ -74,7 +80,7 @@ export function AccountMenu({ user }: { user?: User }) {
             {initials}
           </span>
         )}
-        <span className="hidden sm:block">
+        <span className={detailsAtDesktop ? "hidden lg:block" : "hidden sm:block"}>
           <span className="block max-w-36 truncate text-sm font-semibold">
             {displayName}
           </span>
@@ -82,7 +88,13 @@ export function AccountMenu({ user }: { user?: User }) {
             {displayDetail}
           </span>
         </span>
-        <ChevronDown className="hidden size-4 text-muted-foreground sm:block" />
+        <ChevronDown
+          className={
+            detailsAtDesktop
+              ? "hidden size-4 text-muted-foreground lg:block"
+              : "hidden size-4 text-muted-foreground sm:block"
+          }
+        />
       </button>
 
       {open ? (

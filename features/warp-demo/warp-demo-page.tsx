@@ -1,12 +1,15 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, CodeXml } from "lucide-react";
+import { ArrowRight, CodeXml, Menu, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { useMeQuery } from "@/features/auth/use-me-query";
+import { AccountMenu } from "@/features/dashboard/account-menu";
 import { LiveDemo } from "./live-demo";
+import { WarpEvolution } from "./warp-evolution";
 import { WarpArchitecture, WarpEnforcementProof, WarpNarrative } from "./warp-narrative";
 import { useScrollReveal } from "./use-scroll-reveal";
 
@@ -15,12 +18,15 @@ const links = [
   ["Resolution", "#resolution"],
   ["Reconciliation", "#reconciliation"],
   ["Live demo", "#demo"],
+  ["Evolution", "#evolution"],
   ["Enforcement", "#enforcement"],
   ["Architecture", "#architecture"],
 ] as const;
 
 export function WarpDemoPage() {
   const root = useRef<HTMLElement>(null);
+  const [isNavigationOpen, setIsNavigationOpen] = useState(false);
+  const { data: user } = useMeQuery();
   useScrollReveal(root);
 
   return (
@@ -31,8 +37,10 @@ export function WarpDemoPage() {
       <header className="sticky top-0 z-40 border-b border-border/90 bg-background/90 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 sm:px-8">
           <Link
-            href="/warp-demo"
+            href="/"
+            onClick={() => setIsNavigationOpen(false)}
             className="flex items-center gap-2.5 font-semibold tracking-tight"
+            aria-label="Aurex home"
           >
             <Image
               src="/icon.png"
@@ -63,12 +71,61 @@ export function WarpDemoPage() {
               </a>
             ))}
           </nav>
-          <Button asChild size="sm" className="rounded-full px-4">
-            <a href="#demo">
-              Open explorer <ArrowRight className="size-3.5" />
-            </a>
-          </Button>
+          {!user ? (
+            <Button asChild size="sm" className="hidden rounded-full px-4 sm:inline-flex">
+              <a href="#demo">
+                Try the demo <ArrowRight className="size-3.5" />
+              </a>
+            </Button>
+          ) : null}
+          <div className="flex items-center gap-2 lg:hidden">
+            <button
+              type="button"
+              onClick={() => setIsNavigationOpen((open) => !open)}
+              className="flex size-10 items-center justify-center rounded-md border border-border text-foreground transition hover:bg-muted"
+              aria-expanded={isNavigationOpen}
+              aria-controls="warp-mobile-navigation"
+              aria-label={isNavigationOpen ? "Close navigation" : "Open navigation"}
+            >
+              {isNavigationOpen ? <X className="size-5" /> : <Menu className="size-5" />}
+            </button>
+            {user ? <AccountMenu user={user} detailsAtDesktop /> : null}
+          </div>
+          {user ? (
+            <div className="hidden lg:block">
+              <AccountMenu user={user} detailsAtDesktop />
+            </div>
+          ) : null}
         </div>
+        {isNavigationOpen && (
+          <div
+            id="warp-mobile-navigation"
+            className="border-t border-border/90 px-5 pb-5 pt-3 lg:hidden sm:px-8"
+          >
+            <nav aria-label="Mobile case study sections">
+              <ul className="space-y-1">
+                {links.map(([label, href]) => (
+                  <li key={href}>
+                    <a
+                      href={href}
+                      onClick={() => setIsNavigationOpen(false)}
+                      className="block rounded-md px-3 py-3 text-sm font-medium text-muted-foreground transition hover:bg-muted hover:text-primary"
+                    >
+                      {label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+              {!user ? (
+                <Button asChild className="mt-3 w-full rounded-full">
+                  <a href="#demo" onClick={() => setIsNavigationOpen(false)}>
+                    Try the demo <ArrowRight className="size-3.5" />
+                  </a>
+                </Button>
+              ) : null}
+            </nav>
+          </div>
+        )}
       </header>
 
       <section className="relative isolate overflow-hidden border-b border-border px-5 pb-20 pt-20 sm:px-8 sm:pb-28 sm:pt-28">
@@ -76,7 +133,7 @@ export function WarpDemoPage() {
         <div className="mx-auto grid max-w-7xl gap-14 lg:grid-cols-[1.15fr_.85fr] lg:items-end">
           <div data-reveal>
             <p className="mb-6 font-mono text-xs uppercase tracking-[.2em] text-primary">
-              AUREX ENGINEERING CASE STUDY · WARP POLICY ASSIGNMENT
+              AUREX · POLICY ASSIGNMENT
             </p>
             <h1 className="max-w-5xl text-balance text-4xl font-semibold leading-[.98] tracking-[-.055em] sm:text-6xl lg:text-[5rem]">
               Policy assignment, implemented in Aurex.
@@ -156,6 +213,7 @@ export function WarpDemoPage() {
 
       <WarpNarrative />
       <LiveDemo />
+      <WarpEvolution />
       <WarpEnforcementProof />
       <WarpArchitecture />
 
@@ -166,14 +224,14 @@ export function WarpDemoPage() {
         <div className="mx-auto flex max-w-5xl flex-col items-start justify-between gap-10 md:flex-row md:items-end">
           <div>
             <p className="font-mono text-xs uppercase tracking-[.2em] text-primary">
-              Reviewer workspace
+              Full Aurex workspace
             </p>
             <h2 className="mt-5 max-w-2xl text-4xl font-semibold tracking-[-.04em] sm:text-5xl">
-              Inspect the product behind the resolver.
+              Try the full Aurex workspace.
             </h2>
             <p className="mt-5 max-w-xl leading-7 text-inverse-foreground/65">
-              The public sandbox is intentionally constrained. The authenticated
-              workspace exposes the broader employee, role, and policy-management flows.
+              The demo lets you try the policy engine without an account. Sign up to use
+              the wider Aurex workspace, including employees, roles and policies.
             </p>
           </div>
           <Button
@@ -181,8 +239,8 @@ export function WarpDemoPage() {
             size="lg"
             className="rounded-full px-6"
           >
-            <Link href="/login">
-              Open reviewer login <ArrowRight />
+            <Link href="/register">
+              Sign up <ArrowRight />
             </Link>
           </Button>
         </div>
@@ -190,9 +248,9 @@ export function WarpDemoPage() {
 
       <footer className="border-t border-border px-5 py-8 sm:px-8">
         <div className="mx-auto flex max-w-7xl flex-col justify-between gap-3 text-xs text-muted-foreground sm:flex-row">
-          <span>Built as an explainable systems case study for Aurex.</span>
+          <span>Aurex policy and access management.</span>
           <span className="font-mono">
-            WARP / v1 / controlled public sandbox
+            Try the demo · Sign up for the full workspace
           </span>
         </div>
       </footer>

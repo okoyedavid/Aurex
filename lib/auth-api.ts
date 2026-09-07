@@ -20,6 +20,16 @@ type AuthRequestConfig = AxiosRequestConfig & {
 
 const authBasePath = "/auth";
 
+export function getGoogleAuthUrl(
+  apiBaseUrl = process.env.NEXT_PUBLIC_BACKEND_URL,
+) {
+  if (!apiBaseUrl) {
+    throw new Error("NEXT_PUBLIC_BACKEND_URL is not configured.");
+  }
+
+  return new URL("auth/google", `${apiBaseUrl.replace(/\/+$/, "")}/`).toString();
+}
+
 function toAuthRouteError(error: unknown): AuthRouteError {
   if (error instanceof AxiosError && error.response) {
     const status = error.response.status as AuthRouteError["status"];
@@ -80,7 +90,7 @@ export async function login(body: LoginBody): Promise<LoginResult> {
 }
 
 export async function logout(): Promise<void> {
-  await api.post(`${authBasePath}/logout`, undefined, authRequestConfig);
+  await api.post(`${authBasePath}/logout`, {}, authRequestConfig);
 }
 
 export async function register(body: RegisterBody): Promise<RegisterResult> {

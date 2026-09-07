@@ -25,6 +25,23 @@ const refreshPath = "/auth/refresh";
 
 let refreshPromise: Promise<void> | null = null;
 let refreshBlockedUntil = 0;
+let authFailureHandler: (() => void) | null = null;
+let authFailureHandled = false;
+
+export function registerAuthFailureHandler(handler: () => void) {
+  authFailureHandler = handler;
+  authFailureHandled = false;
+
+  return () => {
+    if (authFailureHandler === handler) authFailureHandler = null;
+  };
+}
+
+function handleAuthFailure() {
+  if (authFailureHandled) return;
+  authFailureHandled = true;
+  authFailureHandler?.();
+}
 
 function isRefreshRequest(config?: AxiosRequestConfig) {
   const normalizedUrl = config?.url?.replace(/^\/+/, "");
@@ -38,13 +55,18 @@ async function refreshSession() {
 
   const now = Date.now();
   if (now < refreshBlockedUntil) {
-    throw new Error("Refresh request is temporarily blocked.");
+    return;
   }
 
   refreshBlockedUntil = now + REFRESH_BLOCK_MS;
   refreshPromise = (async (): Promise<void> => {
-    await refreshClient.post(refreshPath);
-  })().finally(() => {
+    await refreshClient.post(refreshPath, {}, {
+      headers: { "Content-Type": "application/json" },
+    });
+  })().catch((error) => {
+    handleAuthFailure();
+    throw error;
+  }).finally(() => {
     refreshPromise = null;
   });
 
@@ -67,6 +89,7 @@ api.interceptors.response.use(
     }
 
     if (config._hasRetriedAfterRefresh) {
+      handleAuthFailure();
       throw error;
     }
 

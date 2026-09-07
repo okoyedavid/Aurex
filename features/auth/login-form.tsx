@@ -15,7 +15,7 @@ import {
   authErrorMessage,
   fieldError,
 } from "@/features/auth/errors";
-import { GoogleAuthButton } from "@/features/auth/google-auth-button";
+import { GoogleAuthButton } from "@/features/auth/components/google-auth-button";
 import type { LoginBody } from "@/frontend.types";
 import { login } from "@/lib/auth-api";
 import { useAuthHandoff } from "@/components/auth-handoff-provider";
@@ -63,7 +63,7 @@ export function LoginForm() {
         mutation.mutate(form);
       }}
     >
-      <GoogleAuthButton>Sign in with Google</GoogleAuthButton>
+      <GoogleAuthButton>Continue with Google</GoogleAuthButton>
       <AuthDivider />
       <label className="block text-sm font-medium text-foreground">
         Email address

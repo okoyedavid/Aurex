@@ -71,9 +71,7 @@ export function canAccessBusinessNavigationItem(
   }
   return true;
 }
-function getBusinessRouteItems(
-  businessId: string,
-): BusinessNavigationItem[] {
+function getBusinessRouteItems(businessId: string): BusinessNavigationItem[] {
   const base = `/business/${businessId}`;
 
   return [
@@ -169,7 +167,7 @@ function getBusinessRouteItems(
       icon: Activity,
       href: `${base}/policies/audit`,
       permission: "policies:view_audit",
-      sidebar: true,
+      sidebar: false,
       section: "policies",
       sectionLabel: "Audit History",
     },
@@ -279,14 +277,12 @@ export function getBusinessHeaderCommands(
   permissions: ReadonlySet<Permission>,
   businessNavigation = getBusinessNavigation(businessId, permissions),
 ): HeaderCommand[] {
-  const navigation = businessNavigation.map(
-    (item) => ({
-      label: item.name,
-      description: `Go to ${item.name.toLowerCase()}`,
-      href: item.href,
-      icon: item.icon,
-    }),
-  );
+  const navigation = businessNavigation.map((item) => ({
+    label: item.name,
+    description: `Go to ${item.name.toLowerCase()}`,
+    href: item.href,
+    icon: item.icon,
+  }));
   const base = `/business/${businessId}`;
   return [
     ...navigation,
@@ -364,40 +360,55 @@ export function getBusinessRouteAuthorization(
       authorization: { permission: "policies:view" },
     },
     {
-      match: (value) => value === `${base}/policies/categories` ||
-        new RegExp(`^${escapeRegExp(base)}/policies/categories/[^/]+$`).test(value),
+      match: (value) =>
+        value === `${base}/policies/categories` ||
+        new RegExp(`^${escapeRegExp(base)}/policies/categories/[^/]+$`).test(
+          value,
+        ),
       authorization: { permission: "policies:view" },
     },
     {
-      match: (value) => new RegExp(`^${escapeRegExp(base)}/policies/[^/]+$`).test(value),
+      match: (value) =>
+        new RegExp(`^${escapeRegExp(base)}/policies/[^/]+$`).test(value),
       authorization: { permission: "policies:view" },
     },
     {
-      match: (value) => new RegExp(`^${escapeRegExp(base)}/employees/[^/]+/policies$`).test(value),
+      match: (value) =>
+        new RegExp(`^${escapeRegExp(base)}/employees/[^/]+/policies$`).test(
+          value,
+        ),
       authorization: { permission: "policies:view" },
     },
     {
-      match: (value) => value === `${base}/employees/types` || value === `${base}/employees/groups`,
+      match: (value) =>
+        value === `${base}/employees/types` ||
+        value === `${base}/employees/groups`,
       authorization: { permission: "employees:view" },
     },
     {
-      match: (value) => new RegExp(
-        `^${escapeRegExp(base)}/employees/employee-lists/[^/]+/employees/[^/]+/policies$`,
-      ).test(value),
+      match: (value) =>
+        new RegExp(
+          `^${escapeRegExp(base)}/employees/employee-lists/[^/]+/employees/[^/]+/policies$`,
+        ).test(value),
       authorization: { permission: "policies:view" },
     },
     {
-      match: (value) => value === `${base}/employees/employee-lists` ||
-        new RegExp(`^${escapeRegExp(base)}/employees/employee-lists/[^/]+$`).test(value),
+      match: (value) =>
+        value === `${base}/employees/employee-lists` ||
+        new RegExp(
+          `^${escapeRegExp(base)}/employees/employee-lists/[^/]+$`,
+        ).test(value),
       authorization: { permission: "employee_lists:view" },
     },
     {
-      match: (value) => value === `${base}/employees` ||
+      match: (value) =>
+        value === `${base}/employees` ||
         new RegExp(`^${escapeRegExp(base)}/employees/[^/]+$`).test(value),
       authorization: { permission: "employees:view" },
     },
     {
-      match: (value) => value === `${base}/members` ||
+      match: (value) =>
+        value === `${base}/members` ||
         new RegExp(`^${escapeRegExp(base)}/members/[^/]+$`).test(value),
       authorization: { permission: "members:view" },
     },

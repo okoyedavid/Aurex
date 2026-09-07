@@ -2,11 +2,11 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
 import type { GitHubTarget } from "@/lib/github-integration-api";
-import { GitHubTargetSummary } from "@/features/policies/policy-detail-page";
+import { GitHubTargetSummary } from "@/features/policies/components/github-target-summary";
 
 import { githubCallbackMessage } from "../github-callback-result";
-import { isValidGitHubUsername } from "../employee-github-identity";
-import { externalAccessStateCopy } from "../employee-external-access";
+import { isValidGitHubUsername } from "../components/employee-github-identity";
+import { externalAccessStateCopy } from "../components/employee-external-access";
 
 describe("GitHub integration presentation", () => {
   it.each([

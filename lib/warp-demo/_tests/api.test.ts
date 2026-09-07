@@ -49,6 +49,20 @@ describe("Warp public demo API", () => {
     expect(get).toHaveBeenNthCalledWith(2, "/api/demo/warp/audit", { params: { limit: 50, employeeId: "employee-1", policyId: "policy-1", action: "ASSIGNMENT_CREATED" } });
   });
 
+  it("uses session-scoped endpoints for interactive reads", async () => {
+    const request = vi.spyOn(warpDemoClient, "request").mockResolvedValue({ data: { success: true, data: {} } } as AxiosResponse);
+
+    await warpDemoApi.sessionEmployee("session/1");
+    await warpDemoApi.sessionEmployeePolicies("session/1");
+    await warpDemoApi.sessionExplainEmployee("session/1");
+    await warpDemoApi.sessionAudit("session/1");
+
+    expect(request).toHaveBeenNthCalledWith(1, { method: "get", url: "/api/demo/warp/session/session%2F1/employee", data: undefined });
+    expect(request).toHaveBeenNthCalledWith(2, { method: "get", url: "/api/demo/warp/session/session%2F1/employee/policies", data: undefined });
+    expect(request).toHaveBeenNthCalledWith(3, { method: "get", url: "/api/demo/warp/session/session%2F1/employee/explain", data: undefined });
+    expect(request).toHaveBeenNthCalledWith(4, { method: "get", url: "/api/demo/warp/session/session%2F1/audit", data: undefined });
+  });
+
   it("preserves backend messages and supplies an offline fallback", async () => {
     const backendError = new AxiosError("failed");
     backendError.response = { data: { message: "Demo business was not seeded" } } as AxiosResponse;

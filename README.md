@@ -90,7 +90,7 @@ npm install
 Copy `.env.example` to `.env.local` and configure the backend URL:
 
 ```bash
-NEXT_PUBLIC_BACKEND_URL=https://api.example.com
+NEXT_PUBLIC_BACKEND_URL=https://api.example.com/api
 ```
 
 Business profile-image uploads also require the Cloudinary cloud name and an

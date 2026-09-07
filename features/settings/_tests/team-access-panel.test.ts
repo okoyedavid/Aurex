@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { canInviteBusinessMembers } from "../team-access-panel";
+import { canInviteBusinessMembers } from "../components/team-access-panel";
 
 describe("Team Access invite permission", () => {
   it("shows the invite action with members:invite", () => {

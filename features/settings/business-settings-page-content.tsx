@@ -3,11 +3,11 @@
 import { PageFrame } from "@/components/page-frame";
 import { usePathname } from "next/navigation";
 import { useBusinessAccess } from "@/features/business/business-access-context";
-import { GitHubConnectionPanel } from "@/features/integrations/github-connection-panel";
-import { BusinessSettingsForm } from "./business-settings-form";
-import { PreferencesSettingsPanel } from "./preferences-settings-panel";
-import SettingsNavigation from "./settings-navigation";
-import { TeamAccessPanel } from "./team-access-panel";
+import { GitHubConnectionPanel } from "@/features/integrations/components/github-connection-panel";
+import { BusinessSettingsForm } from "./components/business-settings-form";
+import { PreferencesSettingsPanel } from "./components/preferences-settings-panel";
+import SettingsNavigation from "./components/settings-navigation";
+import { TeamAccessPanel } from "./components/team-access-panel";
 
 export function BusinessSettingsPageContent({
   githubCallback,

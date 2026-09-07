@@ -30,7 +30,8 @@ export function normalizeSingleSelectValue(value: string | number | readonly str
 }
 
 export function SelectField({ value, defaultValue, onValueChange, options, placeholder = "Select an option", className, disabled, required, name, ariaLabel }: { value?: string; defaultValue?: string; onValueChange: (value: string) => void; options: SelectFieldOption[]; placeholder?: string; className?: string; disabled?: boolean; required?: boolean; name?: string; ariaLabel?: string }) {
-  return <Select value={value || undefined} defaultValue={defaultValue || undefined} onValueChange={(next) => onValueChange(next === emptyValue ? "" : next)} disabled={disabled} required={required} name={name}><SelectTrigger className={className} aria-label={ariaLabel}><SelectValue placeholder={placeholder} /></SelectTrigger><SelectContent><SelectItem value={emptyValue}>{placeholder}</SelectItem>{options.map((option) => <SelectItem key={option.value} value={option.value} disabled={option.disabled}>{option.label}</SelectItem>)}</SelectContent></Select>;
+  const controlledValue = value === undefined ? undefined : value || emptyValue;
+  return <Select value={controlledValue} defaultValue={defaultValue || undefined} onValueChange={(next) => onValueChange(next === emptyValue ? "" : next)} disabled={disabled} required={required} name={name}><SelectTrigger className={className} aria-label={ariaLabel}><SelectValue placeholder={placeholder} /></SelectTrigger><SelectContent><SelectItem value={emptyValue}>{placeholder}</SelectItem>{options.map((option) => <SelectItem key={option.value} value={option.value} disabled={option.disabled}>{option.label}</SelectItem>)}</SelectContent></Select>;
 }
 
 export function SelectControl({ children, value, defaultValue, onChange, className, disabled, required, name, multiple, ...props }: Omit<React.ComponentProps<"select">, "ref">) {

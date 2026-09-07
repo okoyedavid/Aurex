@@ -8,13 +8,15 @@ describe("Warp case-study narrative", () => {
     const html = renderToStaticMarkup(<WarpNarrative />);
     expect(html).toContain("RBAC grants capability");
     expect(html).toContain("ABAC resolves entitlement");
-    expect(html).toContain("Why did Priya not receive the benefit?");
+    expect(html).toContain("How resolution stays deterministic");
+    expect(html).toContain("Rules are stored as business data");
   });
 
-  it("does not misrepresent capped cardinality as shipped behavior", () => {
+  it("keeps the shipped cardinality model concise", () => {
     const html = renderToStaticMarkup(<WarpNarrative />);
-    expect(html).toContain("Design-space example");
-    expect(html).toContain("current API intentionally ships ONE/MANY");
-    expect(html).toContain("deterministic tie-breaks");
+    expect(html).toContain("Several policies may match, but only one effective policy survives resolution.");
+    expect(html).toContain("Multiple eligible policies may remain effective together.");
+    expect(html).not.toContain("capped set");
+    expect(html).not.toContain("Policies cannot be activated until they contain a rule.");
   });
 });

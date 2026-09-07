@@ -20,7 +20,28 @@ import { useCreateRuleMutation, useUpdateRuleMutation } from "@/features/policie
 
 type ConditionDraft = { field: PolicyRuleField; operator: PolicyRuleOperator; values: string[] };
 const newCondition = (): ConditionDraft => ({ field: "department", operator: "equals", values: [""] });
-const asDraft = (rule?: PolicyRule): ConditionDraft[] => rule?.conditions.map((condition) => ({ field: condition.field, operator: condition.operator, values: Array.isArray(condition.value) ? condition.value.map(String) : [String(condition.value)] })) ?? [newCondition()];
+const policyFields = new Set<PolicyRuleField>(Object.keys(fieldLabels) as PolicyRuleField[]);
+const normalizeField = (field: unknown): PolicyRuleField => {
+  if (field === "employee_type") return "employeeType";
+  return typeof field === "string" && policyFields.has(field as PolicyRuleField)
+    ? (field as PolicyRuleField)
+    : "department";
+};
+const asDraft = (rule?: PolicyRule): ConditionDraft[] => rule?.conditions?.map((condition) => {
+  const field = normalizeField(condition.field);
+  const availableOperators = operatorsByField[field];
+  const operator = availableOperators.includes(condition.operator)
+    ? condition.operator
+    : availableOperators[0];
+
+  return {
+    field,
+    operator,
+    values: Array.isArray(condition.value)
+      ? condition.value.map(String)
+      : [String(condition.value)],
+  };
+}) ?? [newCondition()];
 
 function ReferenceValue({ multiple, values, options, disabled, onChange }: { multiple: boolean; values: string[]; options: { id: string; name: string }[]; disabled: boolean; onChange: (values: string[]) => void }) {
   return <SelectControl multiple={multiple} value={multiple ? values : values[0] ?? ""} disabled={disabled} className="min-h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" onChange={(event) => onChange(multiple ? Array.from(event.target.selectedOptions, (option) => option.value) : [event.target.value])}><option value="" disabled={multiple}>Select value</option>{options.map((option) => <option key={option.id} value={option.id}>{option.name}</option>)}</SelectControl>;

@@ -16,7 +16,7 @@ import {
   useReceivedBusinessInvites,
   useRejectBusinessInvite,
 } from "./hooks";
-import { InviteEmployeeSummary } from "./invite-employee-summary";
+import { InviteEmployeeSummary } from "./components/invite-employee-summary";
 import { invitationAcceptanceMessage } from "./invitation-workflow";
 import {
   Badge,

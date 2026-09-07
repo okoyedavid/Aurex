@@ -28,4 +28,24 @@ describe("getMe", () => {
 
     await expect(getMe()).resolves.toEqual(user);
   });
+
+  it("accepts the safe Google profile shape without browser tokens", async () => {
+    const user = {
+      id: "google-user-1",
+      name: "Maya Patel",
+      email: "maya@example.com",
+      avatar: "https://example.com/maya.jpg",
+      emailVerifiedAt: "2026-09-06T12:00:00.000Z",
+      status: "active" as const,
+      username: null,
+      bio: null,
+      createdAt: "2026-09-06T12:00:00.000Z",
+      updatedAt: "2026-09-06T12:00:00.000Z",
+    };
+    vi.spyOn(api, "get").mockResolvedValueOnce({
+      data: { success: true, message: "user successfully retrieved", data: user },
+    });
+
+    await expect(getMe()).resolves.toEqual(user);
+  });
 });

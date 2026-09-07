@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import type { BusinessEmployeeDetail } from "@/lib/employees-api";
 
-import { EmployeeProfileShell } from "../employee-detail-layout";
+import { EmployeeProfileShell } from "../components/employee-profile-shell";
 
 const employee: BusinessEmployeeDetail = {
   id: "opaque-employee-id",

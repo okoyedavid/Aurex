@@ -6,6 +6,7 @@ import Footer from "@/components/footer";
 import { QueryProvider } from "@/components/query-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthHandoffProvider } from "@/components/auth-handoff-provider";
+import { GoogleAuthCallback } from "@/features/auth/components/google-auth-callback";
 
 const manrope = Manrope({
   variable: "--font-manrope",
@@ -40,6 +41,7 @@ export default function RootLayout({
       <body className="flex min-h-full min-w-0 flex-col overflow-x-hidden">
         <QueryProvider>
           <AuthHandoffProvider>
+            <GoogleAuthCallback />
             <NavBar />
             {children}
             <Footer />
