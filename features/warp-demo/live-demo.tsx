@@ -30,7 +30,7 @@ export function LiveDemo() {
           <div>
             <p className="font-mono text-xs uppercase tracking-[.2em] text-primary">04 · Live demo</p>
             <h2 className="mt-5 max-w-3xl text-balance text-4xl font-semibold tracking-[-.045em] sm:text-6xl">
-              Change an employee. Watch policy follow.
+              Change an employee attribute. Watch policies follow.
             </h2>
             <p className="mt-5 max-w-2xl text-lg leading-8 text-muted-foreground">
               Change one employee attribute and watch the resolver, assignments and audit trail update.
