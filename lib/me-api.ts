@@ -1,4 +1,4 @@
-import { AxiosError } from "axios";
+import { AxiosError, type AxiosRequestConfig } from "axios";
 
 import { api } from "@/lib/api";
 import type { ApiErrorResponse, User } from "@/types/generic";
@@ -31,9 +31,11 @@ const authMePath = "/auth/me";
 // An anonymous visitor is expected to receive 401 from /auth/me. This request
 // is only a session probe, so it must not trigger the global expired-session
 // refresh/redirect flow used by authenticated API requests.
-const authMeRequestConfig = {
+const authMeRequestConfig: AxiosRequestConfig & {
+  _skipAuthRefresh: boolean;
+} = {
   _skipAuthRefresh: true,
-} as const;
+};
 
 function toMeApiError(error: unknown): MeApiError {
   if (error instanceof AxiosError && error.response) {
