@@ -28,6 +28,13 @@ export const authKeys = {
 
 const authMePath = "/auth/me";
 
+// An anonymous visitor is expected to receive 401 from /auth/me. This request
+// is only a session probe, so it must not trigger the global expired-session
+// refresh/redirect flow used by authenticated API requests.
+const authMeRequestConfig = {
+  _skipAuthRefresh: true,
+} as const;
+
 function toMeApiError(error: unknown): MeApiError {
   if (error instanceof AxiosError && error.response) {
     const status = error.response.status;
@@ -48,7 +55,7 @@ function toMeApiError(error: unknown): MeApiError {
 
 export async function getMe(): Promise<User> {
   try {
-    const response = await api.get<MeResponse>(authMePath);
+    const response = await api.get<MeResponse>(authMePath, authMeRequestConfig);
 
     return response.data.data;
   } catch (error) {
